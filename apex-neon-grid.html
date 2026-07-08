@@ -254,7 +254,7 @@ footer a{color:var(--cyan);text-decoration:none}
   偏差値は分布を正規分布に写像した理論値（50=中央値、+10=1σ）。ティア内は各Div均等・Div内LP均等と仮定した推定値です。<br>
   分布出典: apexlegendsstatus.com（2026/07/07時点・S29 Split 2）。※印のダイヤ/マスター/プレデターは「ダイヤ以上合計19.235%」の内訳推定値。<br>
   <a href="https://apex.tracker.gg/apex/leaderboards/stats/all/RankScore" target="_blank" rel="noopener">Tracker Network</a> 等でも分布を確認可。非公式ファンツール / EA・Respawnとは無関係です。<br>
-  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v1.3 // 2026-07-08</span>
+  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v1.4 // 2026-07-08</span>
 </footer>
 </div>
 
@@ -478,13 +478,19 @@ async function makeCard(){
   g.textAlign='left';
 
   // distribution strip with YOU marker (bottom, thicker)
+  // Apex公式ランクカラー準拠の明るめパレット（画像専用）
+  const BRIGHT={rookie:'#BCC5D2',bronze:'#E89B52',silver:'#EAEFF6',gold:'#FFD94E',
+                plat:'#4CF0D5',dia:'#63B4FF',master:'#C97DFF',pred:'#FF4655'};
   const dx=64, dy=520, dw=W-128, dh=48;
   let ax=dx;
   [...TIERS].reverse().forEach(tt=>{ // rookie -> pred, left to right
     const w=dw*tt.pct/100;
-    g.fillStyle=tt.c; g.globalAlpha = tt.id===tier?1:.4;
+    const col=BRIGHT[tt.id]||tt.c;
+    if(tt.id===tier){ g.shadowColor=col; g.shadowBlur=18; g.globalAlpha=1; }
+    else{ g.shadowBlur=0; g.globalAlpha=.72; }
+    g.fillStyle=col;
     g.fillRect(ax,dy,Math.max(w,2),dh);
-    g.globalAlpha=1;
+    g.shadowBlur=0; g.globalAlpha=1;
     ax+=w;
   });
   g.strokeStyle='#1c2a4d'; g.lineWidth=1.5; g.strokeRect(dx,dy,dw,dh);
