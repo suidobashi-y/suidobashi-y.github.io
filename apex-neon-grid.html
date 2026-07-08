@@ -254,7 +254,7 @@ footer a{color:var(--cyan);text-decoration:none}
   偏差値は分布を正規分布に写像した理論値（50=中央値、+10=1σ）。ティア内は各Div均等・Div内LP均等と仮定した推定値です。<br>
   分布出典: apexlegendsstatus.com（2026/07/07時点・S29 Split 2）。※印のダイヤ/マスター/プレデターは「ダイヤ以上合計19.235%」の内訳推定値。<br>
   <a href="https://apex.tracker.gg/apex/leaderboards/stats/all/RankScore" target="_blank" rel="noopener">Tracker Network</a> 等でも分布を確認可。非公式ファンツール / EA・Respawnとは無関係です。<br>
-  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v1.2 // 2026-07-08</span>
+  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v1.3 // 2026-07-08</span>
 </footer>
 </div>
 
@@ -423,14 +423,18 @@ async function makeCard(){
 
   // header
   g.fillStyle='#00e5ff'; g.font=CP('600 20px'); g.textBaseline='alphabetic';
-  g.fillText('N E O N   G R I D   / /   R A N K   A N A L Y Z E R', 64, 86);
+  g.fillText('N E O N   G R I D   / /   R A N K   A N A L Y Z E R', 64, 80);
+  g.fillStyle='#ff2e7e'; g.font=CP('700 22px'); g.textAlign='right';
+  g.shadowColor='rgba(255,46,126,.55)'; g.shadowBlur=12;
+  g.fillText('SEASON 29 // SPLIT 2', W-64, 80);
+  g.shadowBlur=0; g.textAlign='left';
   g.fillStyle='#ffffff'; g.font=CP('700 54px');
   g.shadowColor='rgba(0,229,255,.7)'; g.shadowBlur=22;
-  g.fillText('APEX 偏差値', 62, 148);
+  g.fillText('APEX 偏差値', 62, 144);
   g.shadowBlur=0;
 
   // tier badge (left column)
-  const bx=64, by=210;
+  const bx=64, by=192;
   g.fillStyle=t.c; g.shadowColor=t.c; g.shadowBlur=26;
   g.beginPath();
   g.moveTo(bx,by); g.lineTo(bx+330,by); g.lineTo(bx+352,by+22); g.lineTo(bx+352,by+86); g.lineTo(bx+22,by+86); g.lineTo(bx,by+64); g.closePath(); g.fill();
@@ -438,44 +442,43 @@ async function makeCard(){
   g.fillStyle='#050810'; g.font=CP('700 42px');
   g.fillText(t.en + divLabel(t), bx+26, by+58);
   g.fillStyle='#7387b3'; g.font=NJ('500 22px');
-  g.fillText('現在ランク：'+t.jp+(t.divs?divLabel(t):''), bx, by+128);
+  g.fillText('現在ランク：'+t.jp+(t.divs?divLabel(t):''), bx, by+122);
 
-  // stats (left column)
+  // stats (horizontal row, clear of the bottom strip)
   const stats=[
-    ['TOP', (topP<1?topP.toFixed(2):topP.toFixed(1))+' %'],
-    ['PERCENTILE', (p*100).toFixed(1)+' %tile'],
-    ['RARITY', peer.toLocaleString()+'人に1人'],
+    ['TOP', (topP<1?topP.toFixed(2):topP.toFixed(1))+' %', 64],
+    ['PERCENTILE', (p*100).toFixed(1)+' %tile', 268],
+    ['RARITY', peer.toLocaleString()+'人に1人', 500],
   ];
-  let sy=by+180;
-  stats.forEach(([k,v])=>{
-    g.fillStyle='#7387b3'; g.font=CP('600 18px'); g.fillText(k, bx, sy);
+  stats.forEach(([k,v,sx])=>{
+    g.fillStyle='#7387b3'; g.font=CP('600 18px'); g.fillText(k, sx, 386);
     g.fillStyle=k==='TOP'?'#ff2e7e':'#d7e4ff';
     if(k==='TOP'){g.shadowColor='rgba(255,46,126,.6)';g.shadowBlur=14;}
-    g.font=CP('700 40px'); g.fillText(v, bx, sy+44);
-    g.shadowBlur=0; sy+=96;
+    g.font=CP('700 40px'); g.fillText(v, sx, 430);
+    g.shadowBlur=0;
   });
 
-  // giant hensachi gauge (right)
-  const cx=W-330, cy=300;
+  // giant hensachi gauge (right, enlarged)
+  const cx=W-320, cy=278, R=190;
   const f=Math.min(1,Math.max(0,(dev-30)/60));
-  g.lineWidth=14; g.lineCap='round';
+  g.lineWidth=16; g.lineCap='round';
   g.strokeStyle='#1c2a4d';
-  g.beginPath(); g.arc(cx,cy,170,Math.PI*0.75,Math.PI*2.25); g.stroke();
-  const lg=g.createLinearGradient(cx-170,cy,cx+170,cy);
+  g.beginPath(); g.arc(cx,cy,R,Math.PI*0.75,Math.PI*2.25); g.stroke();
+  const lg=g.createLinearGradient(cx-R,cy,cx+R,cy);
   lg.addColorStop(0,'#ff2e7e'); lg.addColorStop(.55,'#7b5cff'); lg.addColorStop(1,'#00e5ff');
   g.strokeStyle=lg; g.shadowColor='rgba(0,229,255,.55)'; g.shadowBlur=20;
-  g.beginPath(); g.arc(cx,cy,170,Math.PI*0.75,Math.PI*(0.75+1.5*f)); g.stroke();
+  g.beginPath(); g.arc(cx,cy,R,Math.PI*0.75,Math.PI*(0.75+1.5*f)); g.stroke();
   g.shadowBlur=0;
   g.fillStyle='#ffffff'; g.textAlign='center';
-  g.shadowColor='rgba(0,229,255,.8)'; g.shadowBlur=30;
-  g.font=CP('700 120px'); g.fillText(dev.toFixed(1), cx, cy+30);
+  g.shadowColor='rgba(0,229,255,.8)'; g.shadowBlur=34;
+  g.font=CP('700 150px'); g.fillText(dev.toFixed(1), cx, cy+50);
   g.shadowBlur=0;
   g.fillStyle='#00e5ff'; g.font=CP('600 24px');
-  g.fillText('H E N S A C H I', cx, cy+80);
+  g.fillText('H E N S A C H I', cx, cy+108);
   g.textAlign='left';
 
-  // distribution strip with YOU marker (bottom)
-  const dx=64, dy=560, dw=W-128, dh=30;
+  // distribution strip with YOU marker (bottom, thicker)
+  const dx=64, dy=520, dw=W-128, dh=48;
   let ax=dx;
   [...TIERS].reverse().forEach(tt=>{ // rookie -> pred, left to right
     const w=dw*tt.pct/100;
@@ -487,19 +490,19 @@ async function makeCard(){
   g.strokeStyle='#1c2a4d'; g.lineWidth=1.5; g.strokeRect(dx,dy,dw,dh);
   const mx=dx+dw*p;
   g.fillStyle='#ff2e7e'; g.shadowColor='#ff2e7e'; g.shadowBlur=16;
-  g.beginPath(); g.moveTo(mx,dy-14); g.lineTo(mx-11,dy-30); g.lineTo(mx+11,dy-30); g.closePath(); g.fill();
-  g.fillRect(mx-1.5,dy-14,3,dh+14);
+  g.beginPath(); g.moveTo(mx,dy-12); g.lineTo(mx-12,dy-30); g.lineTo(mx+12,dy-30); g.closePath(); g.fill();
+  g.fillRect(mx-2,dy-12,4,dh+12);
   g.shadowBlur=0;
-  g.font=CP('700 20px'); g.textAlign=mx>W-160?'right':'left';
-  g.fillText('YOU', mx>W-160?mx-16:mx+14, dy-16);
+  g.font=CP('700 22px'); g.textAlign=mx>W-170?'right':'left';
+  g.fillText('YOU', mx>W-170?mx-18:mx+16, dy-14);
   g.textAlign='left';
-  g.fillStyle='#7387b3'; g.font=CP('600 15px');
-  g.fillText('◀ 下位', dx, dy+dh+26);
-  g.textAlign='right'; g.fillText('上位 ▶', dx+dw, dy+dh+26); g.textAlign='left';
+  g.fillStyle='#7387b3'; g.font=CP('600 16px');
+  g.fillText('◀ 下位', dx, dy+dh+30);
+  g.textAlign='right'; g.fillText('上位 ▶', dx+dw, dy+dh+30); g.textAlign='left';
 
   // footer
   g.fillStyle='#7387b3'; g.font=NJ('400 15px');
-  g.fillText('S29 Split 2 分布 / apexlegendsstatus.com（2026-07-07時点・全機種合算）/ 偏差値=正規分布写像の理論値', 64, H-40);
+  g.fillText('Apex Legends Season 29 Split 2 ランク分布 / apexlegendsstatus.com（2026-07-07時点・全機種合算）/ 偏差値=正規分布写像の理論値', 64, H-40);
   return cv;
 }
 
