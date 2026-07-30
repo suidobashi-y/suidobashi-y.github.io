@@ -203,7 +203,7 @@ footer a{color:var(--cyan);text-decoration:none}
 <header>
   <div class="eyebrow">Neon Grid // Rank Analyzer</div>
   <h1 class="glitch" data-text="APEX 偏差値">APEX <span class="jp">偏差値</span></h1>
-  <div class="sub">ランクを選ぶだけで、全プレイヤー分布の中でのあなたの偏差値と上位%を即時算出。<br>DATA: Season 29 Split 2 / apexlegendsstatus.com（2026/07/07時点・全機種合算）</div>
+  <div class="sub">ランクを選ぶだけで、全プレイヤー分布の中でのあなたの偏差値と上位%を即時算出。<br>DATA: Season 29 Split 2 / apexlegendsstatus.com（2026/07/27時点・全機種合算）</div>
 </header>
 
 <section class="panel">
@@ -252,26 +252,24 @@ footer a{color:var(--cyan);text-decoration:none}
 
 <footer>
   偏差値は分布を正規分布に写像した理論値（50=中央値、+10=1σ）。ティア内は各Div均等・Div内LP均等と仮定した推定値です。<br>
-  分布出典: apexlegendsstatus.com（2026/07/07時点・S29 Split 2）。※印のダイヤ/マスター/プレデターは「ダイヤ以上合計19.235%」の内訳推定値。<br>
+  分布出典: apexlegendsstatus.com 全プラットフォーム合算（2026/07/27時点・S29 Split 2）。全ティア実測値。<br>
   <a href="https://apex.tracker.gg/apex/leaderboards/stats/all/RankScore" target="_blank" rel="noopener">Tracker Network</a> 等でも分布を確認可。非公式ファンツール / EA・Respawnとは無関係です。<br>
-  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v1.5 // 2026-07-08</span>
+  <span style="font-family:'Chakra Petch';letter-spacing:.12em">BUILD v2.3 // 2026-07-08</span>
 </footer>
 </div>
 
 <script>
-// ---- Season 29 Split 2 distribution (all platforms, apexlegendsstatus.com, as of 2026-07-07)
-// Rookie〜Platinum は公表値。Diamond/Master/Predator は「ダイヤ以上=19.235%」の残余を
-// 直近実測（6/26時点: Pred 0.226% / Master ≈0%）を基準に推定配分した値（※印）。
-const POP = 630000; // 推定サンプル規模（apexlegendsstatus.com集計ベース）
-const TIERS = [ // top -> bottom
-  {id:'pred',   en:'PRED',   jp:'プレデター', pct:0.22,   est:true,  col:'var(--pred)',   c:'#ff3b5c', divs:false},
-  {id:'master', en:'MASTER', jp:'マスター',   pct:0.15,   est:true,  col:'var(--master)', c:'#b36bff', divs:false, lp:true},
-  {id:'dia',    en:'DIA',    jp:'ダイヤ',     pct:18.865, est:true,  col:'var(--dia)',    c:'#6fa8ff', divs:true},
-  {id:'plat',   en:'PLAT',   jp:'プラチナ',   pct:39.262, col:'var(--plat)',   c:'#4fe3c9', divs:true},
-  {id:'gold',   en:'GOLD',   jp:'ゴールド',   pct:20.313, col:'var(--gold)',   c:'#f5c542', divs:true},
-  {id:'silver', en:'SILVER', jp:'シルバー',   pct:12.918, col:'var(--silver)', c:'#cfd6e2', divs:true},
-  {id:'bronze', en:'BRONZE', jp:'ブロンズ',   pct:7.377,  col:'var(--bronze)', c:'#c08a4e', divs:true},
-  {id:'rookie', en:'ROOKIE', jp:'ルーキー',   pct:0.895,  col:'var(--rookie)', c:'#8a93a6', divs:false, lp:true},
+// ---- Season 29 Split 2 distribution (all platforms, apexlegendsstatus.com, as of 2026-07-27)
+const POP = 616135; // 推定サンプル規模（直近公表値ベース）
+const TIERS = [ // top -> bottom（全ティア実測値）
+  {id:'pred',   en:'PRED',   jp:'プレデター', pct:0.5,    col:'var(--pred)',   c:'#ff3b5c', divs:false},
+  {id:'master', en:'MASTER', jp:'マスター',   pct:2.008,  col:'var(--master)', c:'#b36bff', divs:false, lp:true},
+  {id:'dia',    en:'DIA',    jp:'ダイヤ',     pct:34.288, col:'var(--dia)',    c:'#6fa8ff', divs:true},
+  {id:'plat',   en:'PLAT',   jp:'プラチナ',   pct:27.295, col:'var(--plat)',   c:'#4fe3c9', divs:true},
+  {id:'gold',   en:'GOLD',   jp:'ゴールド',   pct:16.68,  col:'var(--gold)',   c:'#f5c542', divs:true},
+  {id:'silver', en:'SILVER', jp:'シルバー',   pct:11.442, col:'var(--silver)', c:'#cfd6e2', divs:true},
+  {id:'bronze', en:'BRONZE', jp:'ブロンズ',   pct:7.01,   col:'var(--bronze)', c:'#c08a4e', divs:true},
+  {id:'rookie', en:'ROOKIE', jp:'ルーキー',   pct:1.007,  col:'var(--rookie)', c:'#8a93a6', divs:false, lp:true},
 ];
 const above = {}; let acc=0;
 TIERS.forEach(t=>{ above[t.id]=acc; acc+=t.pct; });
@@ -508,7 +506,7 @@ async function makeCard(){
 
   // footer
   g.fillStyle='#7387b3'; g.font=NJ('400 15px');
-  g.fillText('Apex Legends Season 29 Split 2 ランク分布 / apexlegendsstatus.com（2026-07-07時点・全機種合算）/ 偏差値=正規分布写像の理論値', 64, H-40);
+  g.fillText('Apex Legends Season 29 Split 2 ランク分布 / apexlegendsstatus.com（2026-07-27時点・全機種合算）/ 偏差値=正規分布写像の理論値', 64, H-40);
   return cv;
 }
 
