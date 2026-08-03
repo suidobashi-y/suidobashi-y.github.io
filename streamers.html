@@ -35,15 +35,15 @@
   position:relative;display:flex;flex-direction:column;transition:border-color .16s,transform .16s}
 .st:hover{border-color:var(--cyan);transform:translateY(-2px)}
 .st.live{border-color:rgba(255,45,120,.55);background:linear-gradient(180deg,rgba(255,45,120,.06),var(--panel))}
-.st .top{display:flex;align-items:center;gap:10px}
-.av{width:38px;height:38px;border-radius:50%;flex:0 0 auto;overflow:hidden;
-  border:1px solid rgba(0,229,255,.25);background:var(--panel2);
-  display:flex;align-items:center;justify-content:center}
+.st .top{display:flex;align-items:center;gap:12px}
+.av{width:64px;height:64px;border-radius:50%;flex:0 0 auto;overflow:hidden;
+  border:2px solid rgba(0,229,255,.3);background:var(--panel2);
+  display:flex;align-items:center;justify-content:center;position:relative}
+.st.live .av{border-color:var(--pink);box-shadow:0 0 14px rgba(255,45,120,.45)}
 .av img{width:100%;height:100%;object-fit:cover;display:block}
-.av span{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--bg)}
-.st.live .av{border-color:rgba(255,45,120,.6)}
+.av span{font-family:'Chakra Petch';font-size:26px;font-weight:700;color:var(--bg)}
 .st .tt{flex:1;min-width:0}
-.st .nm{font-family:'Chakra Petch';font-size:15px;font-weight:700;letter-spacing:.02em;
+.st .nm{font-family:'Chakra Petch';font-size:16px;font-weight:700;letter-spacing:.02em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .st .onair{font-family:'Chakra Petch';font-size:9px;letter-spacing:.12em;color:#fff;
   background:var(--pink);padding:2px 6px;border-radius:2px;flex:0 0 auto}
@@ -56,11 +56,17 @@
 .st .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:9px}
 .st .tg{font-size:10px;color:var(--muted);border:1px solid rgba(0,229,255,.16);
   background:rgba(0,229,255,.04);padding:2px 7px;border-radius:2px;white-space:nowrap}
-.st .go{display:flex;gap:7px;margin-top:11px;padding-top:9px;border-top:1px solid rgba(0,229,255,.09)}
-.st .go a{font-family:'Chakra Petch';font-size:11px;letter-spacing:.05em;text-decoration:none;
-  color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:2px;transition:.15s}
-.st .go a:hover{color:var(--cyan);border-color:var(--cyan)}
-.st .go a.tw:hover{color:#c99bff;border-color:#c99bff}
+.st .go{margin-top:12px}
+.st .go a{display:flex;align-items:center;justify-content:center;gap:7px;
+  font-family:'Chakra Petch';font-size:13px;letter-spacing:.06em;font-weight:600;
+  text-decoration:none;min-height:42px;padding:0 14px;border-radius:3px;transition:.15s;
+  color:var(--cyan);border:1px solid rgba(0,229,255,.4);background:rgba(0,229,255,.07)}
+.st .go a:hover{background:rgba(0,229,255,.16);border-color:var(--cyan)}
+.st .go a:active{transform:scale(.98)}
+.st.live .go a{color:#fff;border-color:var(--pink);
+  background:linear-gradient(135deg,rgba(255,45,120,.85),rgba(255,45,120,.6))}
+.st.live .go a:hover{background:linear-gradient(135deg,var(--pink),rgba(255,45,120,.75))}
+.st .go a svg{width:15px;height:15px;flex:0 0 auto}
 .empty{grid-column:1/-1;text-align:center;padding:32px 12px;color:var(--muted);font-size:13px}
 .count{font-family:'Chakra Petch';font-size:11.5px;color:var(--muted);margin:0 0 10px;letter-spacing:.05em}
 </style>
@@ -128,9 +134,10 @@ var CUR  = "all";
 
 /* タグタブ */
 function renderTabs(){
+  var base = activeList();
   document.getElementById("tagbar").innerHTML = TAGS.map(function(t){
-    var n = t.id==="all" ? LIST.length
-          : LIST.filter(function(s){return s.tags.indexOf(t.id)>=0}).length;
+    var n = t.id==="all" ? base.length
+          : base.filter(function(s){return s.tags.indexOf(t.id)>=0}).length;
     if(n===0 && t.id!=="all") return "";
     return '<button data-t="'+t.id+'"'+(t.id===CUR?' class="on"':'')+'>'
          + t.label+'<i>'+n+'</i></button>';
@@ -182,9 +189,17 @@ function openTwitch(e, login){
 }
 
 /* 一覧 */
+/* Twitchから情報が取れた人だけを対象にする。
+   API未取得・失敗時(ICONSが空)は絞り込まず全員表示する。 */
+function activeList(){
+  if(!Object.keys(ICONS).length) return LIST;
+  return LIST.filter(function(s){ return ICONS[s.twitch] || ICONS[s.twitch.toLowerCase()]; });
+}
+
 function renderList(){
-  var rows = CUR==="all" ? LIST
-           : LIST.filter(function(s){return s.tags.indexOf(CUR)>=0});
+  var base = activeList();
+  var rows = CUR==="all" ? base
+           : base.filter(function(s){return s.tags.indexOf(CUR)>=0});
 
   // 配信中を先頭に
   if(LIVE){
@@ -208,7 +223,10 @@ function renderList(){
     var nums = s.tw ? ['フォロワー <b>'+fmt(s.tw)+'</b>'] : [];
     var links = '<a class="tw" href="'+twUrl(s)+'" target="_blank" rel="noopener"'
               + ' onclick="openTwitch(event,\''+s.twitch+'\')">'
-              + (isLive ? '配信を見る' : 'チャンネル') + '</a>';
+              + (isLive
+                  ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>配信を見る'
+                  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16v11H4z"/><path d="M9 21h6M12 17v4"/></svg>チャンネル')
+              + '</a>';
     return '<div class="st'+(isLive?' live':'')+'">'
       + '<div class="top">'+avatar(s)
       +   '<span class="tt"><span class="nm">'+esc(s.name)+'</span>'
@@ -231,12 +249,13 @@ function loadLive(){
       LIVE   = j.live   || [];
       ICONS  = j.icons  || {};
       TITLES = j.titles || {};
-      var n = LIST.filter(function(s){return LIVE.indexOf(s.twitch)>=0}).length;
+      var n = activeList().filter(function(s){return LIVE.indexOf(s.twitch)>=0}).length;
       var bar=document.getElementById("livebar");
       bar.style.display="flex";
       document.getElementById("live-count").textContent = n+"人が配信中";
       document.getElementById("live-note").textContent =
         n ? "一覧の先頭に表示しています" : "現在このリストに配信中の人はいません";
+      renderTabs();
       renderList();
     })
     .catch(function(e){
