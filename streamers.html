@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ライブ配信 | NEON GRID</title>
+<meta name="description" content="Apex Legends を配信している国内のTwitch配信者を、解説・ランク・競技などのタグから探せます。配信中の人もひと目で分かります。">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_shared.css">
+<script src="./_data.js"></script>
+<style>
+/* タグタブ */
+.tagbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin:16px 0 0;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tagbar::-webkit-scrollbar{display:none}
+.tagbar button{font-family:'Chakra Petch';font-size:12px;letter-spacing:.06em;color:var(--muted);
+  background:none;border:1px solid var(--line);padding:6px 13px;border-radius:2px;
+  cursor:pointer;white-space:nowrap;transition:.15s}
+.tagbar button:hover{color:var(--text)}
+.tagbar button.on{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)}
+.tagbar button i{font-style:normal;opacity:.55;margin-left:5px;font-size:10.5px}
+/* 配信中バー */
+.livebar{background:linear-gradient(90deg,rgba(255,45,120,.1),transparent);
+  border:1px solid rgba(255,45,120,.3);border-radius:4px;padding:10px 13px;margin-bottom:14px;
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pink);flex:0 0 auto;
+  box-shadow:0 0 8px var(--pink)}
+@media(prefers-reduced-motion:no-preference){.dot{animation:bl 1.6s ease-in-out infinite}
+  @keyframes bl{50%{opacity:.35}}}
+.livebar .lb{font-family:'Chakra Petch';font-size:11.5px;letter-spacing:.1em;color:var(--pink)}
+.livebar .ln{font-size:12px;color:var(--muted)}
+/* 一覧 */
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:10px}
+.st{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:13px 14px;
+  position:relative;display:flex;flex-direction:column;transition:border-color .16s,transform .16s}
+.st:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.st.live{border-color:rgba(255,45,120,.55);background:linear-gradient(180deg,rgba(255,45,120,.06),var(--panel))}
+.st .top{display:flex;align-items:center;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;flex:0 0 auto;overflow:hidden;
+  border:1px solid rgba(0,229,255,.25);background:var(--panel2);
+  display:flex;align-items:center;justify-content:center}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av span{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--bg)}
+.st.live .av{border-color:rgba(255,45,120,.6)}
+.st .tt{flex:1;min-width:0}
+.st .nm{font-family:'Chakra Petch';font-size:15px;font-weight:700;letter-spacing:.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.st .onair{font-family:'Chakra Petch';font-size:9px;letter-spacing:.12em;color:#fff;
+  background:var(--pink);padding:2px 6px;border-radius:2px;flex:0 0 auto}
+.st .num{font-family:'Chakra Petch';font-size:11.5px;color:var(--muted);margin-top:2px;
+  display:flex;gap:10px;flex-wrap:wrap}
+.st .tt .num{display:flex}
+.st .num b{color:var(--text);font-weight:700}
+.st .ttl{font-size:11.5px;color:#c4cbdd;margin-top:8px;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.st .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:9px}
+.st .tg{font-size:10px;color:var(--muted);border:1px solid rgba(0,229,255,.16);
+  background:rgba(0,229,255,.04);padding:2px 7px;border-radius:2px;white-space:nowrap}
+.st .go{display:flex;gap:7px;margin-top:11px;padding-top:9px;border-top:1px solid rgba(0,229,255,.09)}
+.st .go a{font-family:'Chakra Petch';font-size:11px;letter-spacing:.05em;text-decoration:none;
+  color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:2px;transition:.15s}
+.st .go a:hover{color:var(--cyan);border-color:var(--cyan)}
+.st .go a.tw:hover{color:#c99bff;border-color:#c99bff}
+.empty{grid-column:1/-1;text-align:center;padding:32px 12px;color:var(--muted);font-size:13px}
+.count{font-family:'Chakra Petch';font-size:11.5px;color:var(--muted);margin:0 0 10px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">NEON<span>GRID</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./streamers.html" class="on">ライブ配信</a>
+    <a href="./roadmap.html">ロードマップ</a>
+</div></div>
+
+<div class="wrap">
+
+<div style="padding-top:20px">
+  <div class="eyebrow">Live Streamers</div>
+  <h1>ライブ<span class="accent">配信</span></h1>
+  <p style="font-size:13.5px;color:var(--muted)">見たい配信のタイプから探せます。上達のヒントは、自分に合った配信者を見つけるところから。</p>
+</div>
+
+<div class="tagbar" id="tagbar"></div>
+
+<div class="livebar" id="livebar" style="display:none">
+  <span class="dot"></span>
+  <span class="lb" id="live-count">—</span>
+  <span class="ln" id="live-note"></span>
+</div>
+
+<div class="count" id="count">—</div>
+<div class="list" id="list"></div>
+
+<p class="note">※フォロワー数は概算で、定期的に更新しています。配信中の状態とアイコンはTwitchから自動取得しています。タグは配信内容の傾向を示す目安です。
+掲載・修正のご依頼は下記までご連絡ください。</p>
+
+<footer>
+  <p>掲載依頼・修正・掲載停止のご連絡: X @apexwidgets</p>
+  <p class="disc">非公式ファンサイトです。EA / Respawn Entertainment とは一切関係ありません。
+  Apex Legends is a trademark of Electronic Arts Inc.</p>
+</footer>
+
+</div>
+
+<script>
+/* ---- 配信中とアイコンの取得 ----
+   Cloudflare Workers 経由でTwitch APIを叩きます（キーはWorker側に保管）。
+   レスポンス: { live:["ユーザー名",...], icons:{"ユーザー名":"URL"}, titles:{...} }
+   未設定・取得失敗の場合は、頭文字アバターの一覧のみ表示します。 */
+var LIVE_API = "https://apex-map-streamer.suidobashi-y.workers.dev/live";
+
+var TAGS = APEX_DATA.streamerTags;
+var LIST = APEX_DATA.streamers.slice().sort(function(a,b){ return b.tw-a.tw; });
+var LIVE = null;          // 配信中のtwitch名の配列
+var ICONS = {};           // Twitchのプロフィール画像 {ユーザー名: URL}
+var TITLES = {};          // 配信タイトル
+var CUR  = "all";
+
+/* タグタブ */
+function renderTabs(){
+  document.getElementById("tagbar").innerHTML = TAGS.map(function(t){
+    var n = t.id==="all" ? LIST.length
+          : LIST.filter(function(s){return s.tags.indexOf(t.id)>=0}).length;
+    if(n===0 && t.id!=="all") return "";
+    return '<button data-t="'+t.id+'"'+(t.id===CUR?' class="on"':'')+'>'
+         + t.label+'<i>'+n+'</i></button>';
+  }).join("");
+  document.querySelectorAll("#tagbar button").forEach(function(b){
+    b.onclick=function(){ CUR=b.dataset.t; renderTabs(); renderList(); };
+  });
+}
+
+function label(id){
+  var t=TAGS.find(function(x){return x.id===id});
+  return t? t.label : id;
+}
+function fmt(n){ return n>=1000 ? (n/1000).toFixed(1)+"M" : n+"K"; }
+
+/* アイコン未設定時は頭文字アバターを生成（名前から安定した色を決定） */
+var AVC=["#00e5ff","#ff2d78","#2dffa8","#ffb020","#a06bff","#69b7ff","#ff8a5c","#3fd3c8"];
+function avatar(s){
+  var src = ICONS[s.twitch] || ICONS[s.twitch.toLowerCase()];
+  if(src) return '<span class="av"><img src="'+src+'" alt="" loading="lazy" '
+    + 'onerror="this.parentNode.innerHTML=\'<span style=&quot;background:'+color(s.name)
+    + ';width:100%;height:100%;display:flex;align-items:center;justify-content:center&quot;>'
+    + esc(initial(s.name))+'</span>\'"></span>';
+  return '<span class="av" style="background:'+color(s.name)+'"><span>'+esc(initial(s.name))+'</span></span>';
+}
+function initial(n){ return n.replace(/[^\wぁ-んァ-ヶ一-龠A-Za-z0-9]/g,"").charAt(0).toUpperCase() || "?"; }
+function color(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return AVC[h%AVC.length]; }
+function esc(t){ return String(t).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+/* リンク先。href は常に https（＝ユニバーサルリンク）にしておき、
+   アプリ内ブラウザではスキーム起動を試みてからフォールバックする。
+   JSが動かない環境でも https として機能する。 */
+function twUrl(s){ return "https://www.twitch.tv/"+s.twitch; }
+
+var IS_MOBILE  = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+/* X / Instagram / Facebook などのアプリ内ブラウザ判定 */
+var IS_INAPP   = /Twitter|FBAN|FBAV|Instagram|Line\//i.test(navigator.userAgent);
+
+function openTwitch(e, login){
+  if(!IS_MOBILE || !IS_INAPP) return;      // 通常ブラウザはユニバーサルリンクに任せる
+  e.preventDefault();
+  var web = "https://www.twitch.tv/"+login;
+  var app = "twitch://stream/"+login;
+  var t = setTimeout(function(){ location.href = web; }, 900);   // 起動しなければWebへ
+  function cancel(){ if(document.hidden) clearTimeout(t); }      // アプリが開いたらキャンセル
+  document.addEventListener("visibilitychange", cancel, {once:true});
+  location.href = app;
+}
+
+/* 一覧 */
+function renderList(){
+  var rows = CUR==="all" ? LIST
+           : LIST.filter(function(s){return s.tags.indexOf(CUR)>=0});
+
+  // 配信中を先頭に
+  if(LIVE){
+    rows = rows.slice().sort(function(a,b){
+      var la=LIVE.indexOf(a.twitch)>=0?1:0, lb=LIVE.indexOf(b.twitch)>=0?1:0;
+      return lb-la;
+    });
+  }
+
+  document.getElementById("count").textContent =
+    rows.length + "人" + (CUR==="all" ? "" : " / " + label(CUR));
+
+  if(!rows.length){
+    document.getElementById("list").innerHTML =
+      '<div class="empty">該当する配信者がいません。別のタグを選んでください。</div>';
+    return;
+  }
+
+  document.getElementById("list").innerHTML = rows.map(function(s){
+    var isLive = LIVE && LIVE.indexOf(s.twitch)>=0;
+    var nums = s.tw ? ['フォロワー <b>'+fmt(s.tw)+'</b>'] : [];
+    var links = '<a class="tw" href="'+twUrl(s)+'" target="_blank" rel="noopener"'
+              + ' onclick="openTwitch(event,\''+s.twitch+'\')">'
+              + (isLive ? '配信を見る' : 'チャンネル') + '</a>';
+    return '<div class="st'+(isLive?' live':'')+'">'
+      + '<div class="top">'+avatar(s)
+      +   '<span class="tt"><span class="nm">'+esc(s.name)+'</span>'
+      +   '<span class="num">'+nums.join("")+'</span></span>'
+      +   (isLive?'<span class="onair">配信中</span>':'')+'</div>'
+      + (isLive && TITLES[s.twitch] ? '<div class="ttl">'+esc(TITLES[s.twitch])+'</div>' : '')
+      + (s.tags.length ? '<div class="tags">'
+          +s.tags.map(function(t){return '<span class="tg">'+label(t)+'</span>'}).join("")+'</div>' : '')
+      + '<div class="go">'+links+'</div>'
+      + '</div>';
+  }).join("");
+}
+
+/* 配信中の取得 */
+function loadLive(){
+  if(!LIVE_API) return;
+  fetch(LIVE_API)
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(j){
+      LIVE   = j.live   || [];
+      ICONS  = j.icons  || {};
+      TITLES = j.titles || {};
+      var n = LIST.filter(function(s){return LIVE.indexOf(s.twitch)>=0}).length;
+      var bar=document.getElementById("livebar");
+      bar.style.display="flex";
+      document.getElementById("live-count").textContent = n+"人が配信中";
+      document.getElementById("live-note").textContent =
+        n ? "一覧の先頭に表示しています" : "現在このリストに配信中の人はいません";
+      renderList();
+    })
+    .catch(function(e){
+      console.error("[live]", e);   // 取得できない場合は一覧のみ表示
+    });
+}
+
+renderTabs();
+renderList();
+loadLive();
+</script>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>

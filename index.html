@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEON GRID — Apex Legends ツール</title>
+<meta name="description" content="Apex Legends のプレイヤー向けツールキット。ランク分布、ランク偏差値、エイムアシスト仕様、マップローテーション、開発ロードマップ。">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_shared.css">
+<style>
+.tagline{font-family:'Noto Sans JP';font-size:13px;font-weight:400;color:var(--muted);
+  letter-spacing:0;white-space:nowrap}
+@media(max-width:520px){h1{font-size:22px}.tagline{display:block;font-size:12px;margin-top:2px}}
+
+/* --- ファーストビュー: 2枚のカードは完全に同じ骨格・同じ文字サイズ ---
+   eyebrow:10.5px / primary:21px / secondary:12.5px / foot:11px --- */
+.fv{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card.wide{grid-column:1/-1}
+@media(max-width:620px){.fv{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);border-radius:4px;padding:13px 16px 11px;
+  position:relative;overflow:hidden;display:flex;flex-direction:column}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px}
+.card.season::before{background:linear-gradient(90deg,var(--cyan),var(--pink));
+  box-shadow:0 0 10px rgba(0,229,255,.5)}
+.card.mapcard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+.eyeb{font-family:'Chakra Petch';font-size:10.5px;letter-spacing:.2em;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eyeb b{color:var(--cyan);font-size:12.5px;margin:0 3px;font-weight:700}
+.eyeb span{color:var(--text)}
+.prim{font-family:'Chakra Petch';font-size:21px;font-weight:700;line-height:1.3;
+  letter-spacing:.02em;margin:4px 0 1px;white-space:nowrap}
+.season .prim{color:var(--text)}
+.snm b{color:var(--cyan);font-weight:700;margin-right:2px}
+.snm em{font-style:normal;font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;
+  color:var(--bg);background:var(--cyan);padding:2px 7px;border-radius:2px;
+  vertical-align:5px;margin-left:8px;font-weight:700}
+.sec .dim{color:var(--muted);margin-left:8px}
+.season .sec b{color:var(--green)}
+.mapcard .prim{color:var(--text)}
+.sec{font-family:'Chakra Petch';font-size:12.5px;color:var(--muted)}
+.sec b{font-size:12.5px;font-weight:700;color:var(--green)}
+/* バー(2枚で共通の高さ) */
+.sbar{position:relative;height:8px;border-radius:4px;margin:10px 0 8px;
+  background:rgba(255,255,255,.07);overflow:visible}
+.sbar.plain{overflow:hidden}
+.sbar i{display:block;height:100%;width:0;border-radius:4px;
+  background:linear-gradient(90deg,rgba(0,229,255,.55),var(--cyan));
+  box-shadow:0 0 12px rgba(0,229,255,.45);transition:width 1.1s cubic-bezier(.2,.85,.25,1)}
+.mapcard .sbar i{background:linear-gradient(90deg,rgba(255,45,120,.5),var(--pink));
+  box-shadow:0 0 10px rgba(255,45,120,.4);transition:width 1s linear}
+.sbar u{position:absolute;top:-3px;width:2px;height:14px;background:var(--pink);
+  box-shadow:0 0 8px var(--pink);left:0;transition:left 1.1s cubic-bezier(.2,.85,.25,1)}
+.sbar s{position:absolute;top:-2px;width:1px;height:12px;background:rgba(255,255,255,.5);left:0}
+.sbar s::after{content:"SP2";position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  font-family:'Chakra Petch';font-size:8.5px;color:var(--muted);letter-spacing:.08em}
+/* フッター行(2枚で共通) */
+.foot{font-family:'Chakra Petch';font-size:11px;color:var(--muted);letter-spacing:.04em;
+  margin-top:auto;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.foot .next b{color:var(--amber);font-size:11px;font-weight:700}
+.foot .src{opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot .more{color:var(--cyan);white-space:nowrap;text-decoration:none}
+a.more:hover{text-decoration:underline}
+
+a.card{text-decoration:none;color:inherit;transition:border-color .18s,transform .18s}
+a.card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
+/* ミニ分布 */
+.mini{margin:8px 0 9px;display:flex;flex-direction:column;gap:3px}
+.mini .m{display:grid;grid-template-columns:34px 1fr 40px;gap:7px;align-items:center}
+.mini .mn{font-family:'Chakra Petch';font-size:9.5px;letter-spacing:.06em;text-align:right;color:var(--c)}
+.mini .mt{height:9px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.mini .mt i{display:block;height:100%;width:0;background:var(--c);border-radius:2px;
+  transition:width .9s cubic-bezier(.2,.85,.25,1)}
+.mini .mv{font-family:'Chakra Petch';font-size:10px;color:var(--muted);text-align:right}
+.mini .m.c-rookie{--c:#9aa3b8}.mini .m.c-bronze{--c:#c58b52}.mini .m.c-silver{--c:#b9c3d4}
+.mini .m.c-gold{--c:#ffcc4d}.mini .m.c-plat{--c:#3fd3c8}.mini .m.c-dia{--c:#69b7ff}
+.mini .m.c-master{--c:#b06bff}.mini .m.c-pred{--c:#ff4d6d}
+
+/* ツールグリッド */
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px}
+.tool{display:block;text-decoration:none;color:inherit;background:var(--panel);
+  border:1px solid var(--line);border-radius:4px;padding:16px;position:relative;
+  transition:border-color .18s,transform .18s}
+.tool:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.tool .ico{width:26px;height:26px;color:var(--cyan);margin-bottom:8px}
+.tool .t{font-family:'Chakra Petch';font-size:15px;font-weight:700;letter-spacing:.04em}
+.tool .d{font-size:12px;color:var(--muted);line-height:1.6;margin-top:3px}
+.tool .badge{position:absolute;top:12px;right:12px;font-family:'Chakra Petch';font-size:9px;
+  letter-spacing:.1em;padding:2px 7px;border-radius:2px;
+  color:var(--amber);border:1px solid rgba(255,176,32,.45);background:rgba(255,176,32,.08)}
+.tool.soon{opacity:.62;pointer-events:none}
+.tool.soon .badge{color:var(--muted);border-color:rgba(138,147,173,.4);background:rgba(138,147,173,.08)}
+
+/* 更新履歴 */
+.updates{list-style:none}
+.updates li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(0,229,255,.08);font-size:13px}
+.updates li:last-child{border-bottom:none}
+.updates .d{font-family:'Chakra Petch';font-size:11.5px;color:var(--muted);flex:0 0 76px;letter-spacing:.04em}
+</style>
+</head>
+<body>
+
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">NEON<span>GRID</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html" class="on">HOME</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./roadmap.html">ロードマップ</a>
+</div></div>
+
+<div class="wrap">
+
+<div style="padding-top:18px">
+  <h1>NEON <span class="accent">GRID</span> <span class="tagline">— Apex Legends ツールキット</span></h1>
+</div>
+
+<!-- ファーストビュー -->
+<div class="fv">
+  <a class="card" href="./rank.html">
+    <div class="eyeb">RANK DISTRIBUTION // ランク分布</div>
+    <div class="mini" id="mini-dist"></div>
+    <div class="foot"><span id="mini-note">—</span><span class="more">詳しく見る →</span></div>
+  </a>
+
+  <div class="card season">
+    <div class="eyeb">SEASON PROGRESS</div>
+    <div class="prim snm"><b id="s29-no">S29</b> <span id="s29-name">—</span><em id="s29-sp"></em></div>
+    <div class="sec"><span id="s29-left">—</span><span class="dim" id="s29-pct"></span></div>
+    <div class="sbar"><i id="s29-bar"></i><s id="s29-split" title="スプリット2開始"></s><u id="s29-head"></u></div>
+    <div class="foot"><span id="s29-range">—</span><span class="next" id="s29-end">—</span></div>
+  </div>
+
+  <div class="card mapcard wide">
+    <div class="eyeb">RANKED // 現在のマップ</div>
+    <div class="prim" id="rk-name">読み込み中</div>
+    <div class="sec">残り <b id="rk-rest">--:--</b></div>
+    <div class="sbar plain"><i id="rk-bar"></i></div>
+    <div class="foot"><span>次: <span id="rk-next">—</span></span><span class="src">Apex Legends Status</span></div>
+  </div>
+</div>
+
+<section>
+  <h2>ツール</h2>
+  <div class="tools">
+
+    <a class="tool" href="./assist.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+      <div class="t">エイムアシスト</div>
+      <div class="d">現在のアシスト値、発動条件の変更履歴、デバイス規制の状況。</div>
+    </a>
+
+    <a class="tool" href="./deviation.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20h18"/><path d="M3 16c3 0 3-9 6-9s3 9 6 9 3-5 6-5"/></svg>
+      <div class="t">ランク偏差値</div>
+      <div class="d">自分のランクが上位何%か、偏差値で可視化。シェア画像も生成できます。</div>
+    </a>
+
+    <a class="tool" href="./rank.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z"/><path d="M9 12l2 2 4-4"/></svg>
+      <div class="t">ランク分布</div>
+      <div class="d">各ランク帯の人口比と累積上位%。自分の位置を数字で確認。</div>
+    </a>
+
+    <a class="tool" href="./streamers.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8.5l4 2-4 2z"/></svg>
+      <div class="t">ライブ配信</div>
+      <div class="d">配信のタイプから配信者を探せます。配信中の人もひと目で分かります。</div>
+    </a>
+
+    <a class="tool" href="./roadmap.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18h18M6 18V9M12 18V5M18 18v-7"/><circle cx="6" cy="9" r="1.6"/><circle cx="12" cy="5" r="1.6"/><circle cx="18" cy="11" r="1.6"/></svg>
+      <div class="t">開発ロードマップ</div>
+      <div class="d">S30以降の公式ロードマップを図解。S32のランク大改定まで。</div>
+    </a>
+  </div>
+</section>
+
+<section>
+  <h2>更新履歴</h2>
+  <div class="panel">
+    <ul class="updates">
+      <li><span class="d">08-03</span><span>ランク分布を最新データに更新。ディビジョン別表示を追加</span></li>
+      <li><span class="d">08-02</span><span>ライブ配信ページを公開。タグで配信者を絞り込めます</span></li>
+      <li><span class="d">08-02</span><span>開発ロードマップページを図解化。S31・S32の公式ロードマップを反映</span></li>
+      <li><span class="d">08-02</span><span>エイムアシスト仕様ページを公開。デバイス規制の履歴を追加</span></li>
+      <li><span class="d">08-01</span><span>マップローテーション / ランク分布ページを追加</span></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p>NEON GRID — Apex Legends ツールキット</p>
+  <p id="dsrc">マップローテーション: Apex Legends Status / ランク分布: Apex Legends Tracker</p>
+  <p class="disc">非公式ファンサイトです。EA / Respawn Entertainment とは一切関係ありません。
+  Apex Legends is a trademark of Electronic Arts Inc.<br>
+  マップローテーションのデータ提供: <a href="https://apexlegendsstatus.com" target="_blank" rel="noopener">Apex Legends Status</a></p>
+</footer>
+
+</div>
+
+<script src="./_data.js"></script>
+<script src="./_rotation.js"></script>
+<script>
+var SEASON = APEX_DATA.season;   /* 設定は _data.js で管理 */
+
+(function(){
+  var st=new Date(SEASON.start).getTime(), en=new Date(SEASON.end).getTime();
+  var sp=new Date(SEASON.splitStart).getTime();
+  document.getElementById("s29-no").textContent   = "S"+SEASON.no;
+  document.getElementById("s29-name").textContent = SEASON.name;
+  function md(t){var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()}
+  document.getElementById("s29-range").textContent = md(st)+" — "+md(en);
+  document.getElementById("s29-split").style.left = ((sp-st)/(en-st)*100)+"%";
+
+  function tick(){
+    var now=Date.now(), left=en-now;
+    var pct=Math.max(0,Math.min(100,(now-st)/(en-st)*100));
+    document.getElementById("s29-bar").style.width = pct+"%";
+    document.getElementById("s29-head").style.left = pct+"%";
+
+    var elL=document.getElementById("s29-left"), elN=document.getElementById("s29-end");
+    if(left<=0){
+      elL.textContent="シーズン終了"; elN.textContent="S"+(SEASON.no+1)+" 開幕済み";
+      document.getElementById("s29-sp").textContent="END";
+      document.getElementById("s29-pct").textContent="100% 経過";
+    }else{
+      var d=Math.floor(left/86400000), h=Math.floor(left%86400000/3600000),
+          m=Math.floor(left%3600000/60000);
+      document.getElementById("s29-sp").textContent = now>=sp ? "SPLIT 2" : "SPLIT 1";
+      elL.innerHTML = "残り <b>"+d+"</b>日 "+h+"時間";
+      document.getElementById("s29-pct").textContent = pct.toFixed(1)+"% 経過";
+      elN.textContent = "次: S"+(SEASON.no+1)+" "+SEASON.nextName;
+    }
+    setTimeout(tick, 60000);
+  }
+  tick();
+})();
+// ミニ分布カード
+(function(){
+  var t=APEX_DATA.rank.tiers, cum=APEX_DATA.cumulative();
+  var max=Math.max.apply(null,t.map(function(x){return x.pct}));
+  document.getElementById("mini-dist").innerHTML = t.map(function(x){
+    return '<div class="m c-'+x.c+'"><span class="mn">'+x.s+'</span>'
+      + '<span class="mt"><i data-w="'+(x.pct/max*100)+'"></i></span>'
+      + '<span class="mv">'+x.pct.toFixed(1)+'%</span></div>';
+  }).join("");
+  requestAnimationFrame(function(){
+    document.querySelectorAll("#mini-dist .mt i").forEach(function(el){ el.style.width=el.dataset.w+"%"; });
+  });
+  var di=t.findIndex(function(x){return x.n==="ダイヤモンド"});
+  document.getElementById("mini-note").textContent =
+    di<0 ? APEX_DATA.rank.updated : "ダイヤ以上 上位"+cum[di].toFixed(1)+"%";
+})();
+
+// マップローテーション描画
+NeonRotation.load(function(rot,err){
+  if(err){
+    document.getElementById("rk-name").textContent="取得できません";
+    document.getElementById("rk-next").textContent=err;
+    return;
+  }
+  NeonRotation.bind(rot.ranked,"rk");
+});
+</script>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>
