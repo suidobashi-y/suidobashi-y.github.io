@@ -6,8 +6,8 @@
 <title>ランク分布 | NEON GRID</title>
 <meta name="description" content="Apex Legends のランク分布をチャートで表示。各ランク帯の人口比と累積上位%を確認できます。">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./_shared.css">
-<script src="./_data.js"></script>
+<link rel="stylesheet" href="./shared.css">
+<script src="./data.js"></script>
 <style>
 /* ===== チャート ===== */
 .chart{padding:18px 14px 8px}
@@ -124,7 +124,7 @@
 </div>
 
 <script>
-var DATA = APEX_DATA.rank;   /* データは _data.js で一元管理 */
+var DATA = APEX_DATA.rank;   /* データは data.js で一元管理 */
 var VIEW = "tier";
 
 function setView(v){

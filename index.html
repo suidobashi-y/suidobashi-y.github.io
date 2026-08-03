@@ -6,7 +6,7 @@
 <title>NEON GRID — Apex Legends ツール</title>
 <meta name="description" content="Apex Legends のプレイヤー向けツールキット。ランク分布、ランク偏差値、エイムアシスト仕様、マップローテーション、開発ロードマップ。">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./_shared.css">
+<link rel="stylesheet" href="./shared.css">
 <style>
 .tagline{font-family:'Noto Sans JP';font-size:13px;font-weight:400;color:var(--muted);
   letter-spacing:0;white-space:nowrap}
@@ -206,10 +206,10 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 
 </div>
 
-<script src="./_data.js"></script>
-<script src="./_rotation.js"></script>
+<script src="./data.js"></script>
+<script src="./rotation.js"></script>
 <script>
-var SEASON = APEX_DATA.season;   /* 設定は _data.js で管理 */
+var SEASON = APEX_DATA.season;   /* 設定は data.js で管理 */
 
 (function(){
   var st=new Date(SEASON.start).getTime(), en=new Date(SEASON.end).getTime();
