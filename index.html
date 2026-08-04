@@ -95,6 +95,8 @@ a.card.livecard:hover{border-color:var(--pink)}
   @keyframes lvbl{50%{opacity:.35}}}
 .lvrow{display:flex;gap:10px;overflow-x:auto;padding:11px 0 9px;
   scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.lvrow.two{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);
+  grid-auto-columns:46px;justify-content:start}
 .lvrow::-webkit-scrollbar{display:none}
 .lvav{width:46px;height:46px;border-radius:50%;flex:0 0 auto;overflow:hidden;
   border:2px solid var(--pink);box-shadow:0 0 10px rgba(255,45,120,.35);
@@ -309,7 +311,8 @@ NeonRotation.load(function(rot,err){
 (function(){
   var LIVE_API   = "https://apex-map-streamer.suidobashi-y.workers.dev/live";
   var APEX_GAME  = "511224";
-  var MAX        = 12;
+  var MAX        = 24;   /* 表示するアイコンの最大数（超えたら +N） */
+  var TWO_ROWS   = 8;    /* この人数を超えたら2段組にする */
   var AVC=["#00e5ff","#ff2d78","#2dffa8","#ffb020","#a06bff","#69b7ff","#ff8a5c","#3fd3c8"];
 
   function esc(t){ return String(t).replace(/[&<>"]/g,function(c){
@@ -358,7 +361,9 @@ NeonRotation.load(function(rot,err){
       }).join("");
       if(rows.length > MAX) html += '<span class="lvmore">+'+(rows.length-MAX)+'</span>';
 
-      document.getElementById("lv-avatars").innerHTML = html;
+      var row = document.getElementById("lv-avatars");
+      row.className = "lvrow" + (rows.length > TWO_ROWS ? " two" : "");
+      row.innerHTML = html;
       document.getElementById("lv-count").textContent = rows.length+"人";
       var names = rows.slice(0,3).map(function(s){ return s.name; }).join(" / ");
       document.getElementById("lv-names").textContent =
