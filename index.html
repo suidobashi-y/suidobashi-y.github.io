@@ -86,9 +86,11 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 .mini .m.c-master{--c:#b06bff}.mini .m.c-pred{--c:#ff4d6d}
 
 /* ライブ配信カード */
-a.card.livecard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
-a.card.livecard:hover{border-color:var(--pink)}
+.card.livecard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+.card.livecard:hover{border-color:rgba(255,45,120,.45)}
 .livecard .eyeb b{color:var(--pink);font-size:10.5px}
+.livecard .foot .more{color:var(--pink);text-decoration:none}
+.livecard .foot .more:hover{text-decoration:underline}
 .lvdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pink);
   box-shadow:0 0 8px var(--pink);margin-right:6px;vertical-align:1px}
 @media(prefers-reduced-motion:no-preference){.lvdot{animation:lvbl 1.6s ease-in-out infinite}
@@ -100,12 +102,16 @@ a.card.livecard:hover{border-color:var(--pink)}
 .lvrow::-webkit-scrollbar{display:none}
 .lvav{width:46px;height:46px;border-radius:50%;flex:0 0 auto;overflow:hidden;
   border:2px solid var(--pink);box-shadow:0 0 10px rgba(255,45,120,.35);
-  background:var(--panel2);display:flex;align-items:center;justify-content:center}
+  background:var(--panel2);display:flex;align-items:center;justify-content:center;
+  text-decoration:none;transition:transform .15s,box-shadow .15s}
+a.lvav:hover{transform:scale(1.09);box-shadow:0 0 16px rgba(255,45,120,.7)}
+a.lvav:active{transform:scale(.97)}
 .lvav img{width:100%;height:100%;object-fit:cover;display:block}
 .lvav span{font-family:'Chakra Petch';font-size:19px;font-weight:700;color:var(--bg)}
-.lvmore{width:46px;height:46px;border-radius:50%;flex:0 0 auto;
+.lvmore{width:46px;height:46px;border-radius:50%;flex:0 0 auto;text-decoration:none;
   border:1px dashed rgba(255,45,120,.5);display:flex;align-items:center;justify-content:center;
   font-family:'Chakra Petch';font-size:12px;color:var(--pink)}
+a.lvmore:hover{border-style:solid}
 
 /* ツールグリッド */
 .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px}
@@ -176,11 +182,11 @@ a.card.livecard:hover{border-color:var(--pink)}
     <div class="foot"><span>次: <span id="rk-next">—</span></span><span class="src">Apex Legends Status</span></div>
   </div>
 
-  <a class="card livecard wide" href="./streamers.html" id="livecard" style="display:none">
+  <div class="card livecard wide" id="livecard" style="display:none">
     <div class="eyeb"><span class="lvdot"></span>LIVE // <b id="lv-count">—</b> が Apex 配信中</div>
     <div class="lvrow" id="lv-avatars"></div>
-    <div class="foot"><span class="src" id="lv-names">—</span><span class="more">ライブ配信を見る →</span></div>
-  </a>
+    <div class="foot"><span class="src" id="lv-names">—</span><a class="more" href="./streamers.html">ライブ配信を見る →</a></div>
+  </div>
 </div>
 
 <section>
@@ -324,13 +330,19 @@ NeonRotation.load(function(rot,err){
   function initial(n){ return n.replace(/[^\wぁ-んァ-ヶ一-龠A-Za-z0-9]/g,"").charAt(0).toUpperCase() || "?"; }
   function color(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return AVC[h%AVC.length]; }
   function fallback(s){
-    return '<span class="lvav" style="background:'+color(s.name)+'"><span>'+esc(initial(s.name))+'</span></span>';
+    return '<span style="background:'+color(s.name)+';width:100%;height:100%;display:flex;'
+      + 'align-items:center;justify-content:center"><span>'+esc(initial(s.name))+'</span></span>';
   }
+  /* アイコン1つ = その人のTwitchチャンネルへのリンク */
   function avatar(s, url){
-    if(!url) return fallback(s);
-    return '<span class="lvav"><img src="'+url+'" alt="'+esc(s.name)+'" loading="lazy"'
-      + ' onerror="this.parentNode.outerHTML=\'<span class=&quot;lvav&quot; style=&quot;background:'
-      + color(s.name)+'&quot;><span>'+esc(initial(s.name))+'</span></span>\'"></span>';
+    var inner = url
+      ? '<img src="'+url+'" alt="'+esc(s.name)+'" loading="lazy"'
+        + ' onerror="this.outerHTML=\'<span style=&quot;background:'+color(s.name)
+        + ';width:100%;height:100%;display:flex;align-items:center;justify-content:center&quot;>'
+        + '<span>'+esc(initial(s.name))+'</span></span>\'">'
+      : fallback(s);
+    return '<a class="lvav" href="https://www.twitch.tv/'+encodeURIComponent(s.twitch)+'"'
+      + ' target="_blank" rel="noopener" title="'+esc(s.name)+' の配信を見る">'+inner+'</a>';
   }
 
   fetch(LIVE_API)
@@ -363,7 +375,8 @@ NeonRotation.load(function(rot,err){
         var key=s.twitch.toLowerCase();
         return avatar(s, icons[key] || icons[s.twitch]);
       }).join("");
-      if(rows.length > MAX) html += '<span class="lvmore">+'+(rows.length-MAX)+'</span>';
+      if(rows.length > MAX) html += '<a class="lvmore" href="./streamers.html"'
+        + ' title="配信中の残り'+(rows.length-MAX)+'人を見る">+'+(rows.length-MAX)+'</a>';
 
       var row = document.getElementById("lv-avatars");
       row.className = "lvrow" + (rows.length > TWO_ROWS ? " two" : "");
@@ -372,8 +385,7 @@ NeonRotation.load(function(rot,err){
       var names = rows.slice(0,3).map(function(s){ return s.name; }).join(" / ");
       document.getElementById("lv-names").textContent =
         rows.length>3 ? names+" ほか" : names;
-      document.getElementById("livecard").style.display = "flex";
-    })
+      document.getElementById("livecard").style.display = "flex";    })
     .catch(function(e){ console.error("[livecard]", e); });   /* 失敗時も非表示のまま */
 })();
 </script>
