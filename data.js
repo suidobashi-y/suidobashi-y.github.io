@@ -87,7 +87,8 @@ APEX_DATA.streamers = [
   {name:"4rufq", twitch:"4rufq", tw:51, tags:["rank"]},
   {name:"lykq8don", twitch:"lykq8don", tw:50, tags:["rank"]},
   {name:"ピースだ", twitch:"peace_da", tw:43, tags:["rank"]},
-  {name:"わぶ", twitch:"wabu1", tw:14, tags:["rank"]},
+  /* わぶさんは稼働中のチャンネルに変更（旧: wabu1 / tw:14） */
+  {name:"わぶ", twitch:"deep_learning_f", tw:0, tags:["rank"]},
   /* 2026-08-04 追加（フォロワー数は未確認のため0。判明したら入れてください） */
   {name:"ほそしん", twitch:"hososhin_twitch", tw:0, tags:["rank"]},
   {name:"にごんご", twitch:"nigongo25", tw:0, tags:["rank"]},
@@ -96,7 +97,22 @@ APEX_DATA.streamers = [
   {name:"あいりーん28", twitch:"irene28___", tw:0, tags:["rank"]},
   {name:"からからちゃん", twitch:"karakaramann", tw:0, tags:["rank"]},
   {name:"建設系配信者沢田", twitch:"sawada0117", tw:0, tags:["rank"]},
-  {name:"甘楽ちょこ", twitch:"chocolate5d", tw:0, tags:["rank"]}
+  {name:"甘楽ちょこ", twitch:"chocolate5d", tw:0, tags:["rank"]},
+  /* 2026-08-04 追加（/discover より・フォロワー数未確認） */
+  {name:"雨宮ツユリ", twitch:"amemiya328", tw:0, tags:["rank"]},
+  {name:"ねくすと_", twitch:"next_dayo", tw:0, tags:["rank"]},
+  {name:"もちゆず", twitch:"mochiyuzu_", tw:0, tags:["rank"]},
+  {name:"IeNaGa25", twitch:"ienaga25", tw:0, tags:["rank"]},
+  {name:"るりーです", twitch:"lullyru11", tw:0, tags:["rank"]},
+  {name:"チットチャット", twitch:"chitchat_ai", tw:0, tags:["rank"]},
+  {name:"ImperialKaz", twitch:"imperialkaz", tw:0, tags:["rank"]},
+  {name:"ふじこ_", twitch:"iamfjk", tw:0, tags:["rank"]},
+  {name:"星舞ちる", twitch:"hoshimai_chill", tw:0, tags:["rank"]},
+  {name:"さぽてん", twitch:"sapo_ten", tw:0, tags:["rank"]},
+  {name:"布団もぐり", twitch:"futon_moguri", tw:0, tags:["rank"]},
+  {name:"愛姫みこな", twitch:"hashihimemikona", tw:0, tags:["rank"]},
+  {name:"天音ひな", twitch:"amanehina", tw:0, tags:["rank"]},
+  {name:"おっさんの挑戦", twitch:"89workers", tw:0, tags:["rank"]}
 ];
 
 /* タグ定義（タブの並び順もこの順） */
