@@ -3,6 +3,8 @@
    ============================================================ */
 var APEX_DATA = {
 
+  /* 現在のシーズン。nextSeason の start を過ぎると自動でそちらに切り替わります
+     （切り替えは APEX_DATA.currentSeason() が判定。手動更新は不要） */
   season: {
     no: 29, name: "OVERCLOCK",
     start:      "2026-05-06T02:00:00+09:00",  // S29開幕（日本時間）
@@ -11,11 +13,24 @@ var APEX_DATA = {
     nextName:   "MARKED"
   },
 
+  /* 次シーズン。start を過ぎた時点で自動的に現在のシーズンになります。
+     ★ end と splitStart は S29 の期間（91日 / 49日）から算出した予測値です。
+       公式発表が出たら正しい日付に差し替えてください。 */
+  nextSeason: {
+    no: 30, name: "MARKED",
+    start:      "2026-08-05T02:00:00+09:00",  // S30開幕（公式）
+    splitStart: "2026-09-23T02:00:00+09:00",  // スプリット2開始（予測）
+    end:        "2026-11-04T02:00:00+09:00",  // S31開幕（予測）
+    nextName:   "TBA",
+    estimated:  true                          // 期間が予測値であることの目印
+  },
+
   /* ランク分布：上位ティアから順に記述
      div : ディビジョン別の内訳 [I, II, III, IV]（合計が pct になるように）
      出典: apex.tracker.gg（同サイトの追跡母集団=約15万人ベース。ゲーム全体の実数ではありません）
      ★グラフからの読み取り値のため誤差があります。正確な値は各バーのツールチップで確認を */
   rank: {
+    seasonNo: 29,   // この分布データのシーズン。現在のシーズンと違うと注意書きが出ます
     label:   "シーズン29 スプリット2 / ランクマッチ",
     updated: "2026-08-03",
     source:  "apex.tracker.gg",
@@ -31,6 +46,18 @@ var APEX_DATA = {
       {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 1.5, div:[0.4, 0.4, 0.4, 0.3]}
     ]
   }
+};
+
+/* 現在のシーズンを返す（nextSeason の開幕時刻を過ぎたら自動で切り替わる） */
+APEX_DATA.currentSeason = function(){
+  var n = this.nextSeason;
+  if(n && n.start && Date.now() >= new Date(n.start).getTime()) return n;
+  return this.season;
+};
+
+/* 表示中のランク分布が現在のシーズンのものかどうか */
+APEX_DATA.rankIsStale = function(){
+  return this.rank.seasonNo !== this.currentSeason().no;
 };
 
 /* ディビジョン単位のフラット配列を返す（上位から順） */

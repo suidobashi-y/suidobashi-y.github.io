@@ -64,7 +64,29 @@ GitHub Pages は既定で Jekyll を通し、`_` で始まるファイルを公�
 
 ## S30開幕(8/5 2:00)後にやること
 
-1. `data.js` の `season` を更新（no/name/start/splitStart/end/nextName）
-2. パッチノートでエイムアシスト関連の記載を確認し、`assist.html` の変更履歴に追記
-3. `roadmap.html` のS30カードを「確定」から実装済みの内容に更新、S31を「進行中」へ
-4. ランク分布はスプリット序盤の数値に入れ替え
+開幕時の表示切り替えは**自動**です（シーズンカード / ロードマップのカウントダウン・
+ステータス・現在地マーカー / マップローテーション）。深夜に作業する必要はありません。
+
+開幕後、落ち着いてから手を入れる箇所:
+
+1. `data.js` の `nextSeason` — `splitStart` と `end` は S29 の期間からの**予測値**。
+   公式発表が出たら正しい日付に差し替える
+2. ランク分布 — 数日〜1週間ほどデータが溜まってから `data.js` の `rank` を更新し、
+   `seasonNo` を 30 に、`label` を「シーズン30 …」に変更する
+   （それまでは「シーズン29終了時点の分布」と自動で注記が出ます）
+3. パッチノートでエイムアシスト関連の記載を確認し、`assist.html` の変更履歴に追記
+4. `roadmap.html` のS30カードを実装済みの内容に更新
+5. S31の日付が判明したら、`data.js` の `nextSeason` を S31 に書き換え、
+   `season` に S30 を移す。`roadmap.html` の `MILESTONES` にも追記する
+
+## 自動で切り替わる仕組み
+
+| 対象 | ファイル | 判定 |
+|---|---|---|
+| シーズンカード（番号・名称・期間・進捗バー） | `index.html` | `APEX_DATA.currentSeason()` |
+| 分布が前シーズンのものである旨の注記 | `rank.html` / `index.html` | `APEX_DATA.rankIsStale()` |
+| カウントダウンの対象 | `roadmap.html` | `MILESTONES` の直近の未来日 |
+| S30カードの「確定」→「開催中」 | `roadmap.html` | 開幕時刻 |
+| タイムライン軸の現在地マーカー | `roadmap.html` | 現在日から座標を計算 |
+| 過ぎた予定を薄く表示 | `roadmap.html` | 各 `li` の `data-date` |
+| マップローテーション | `rotation.js` | APIから毎回取得（対応不要） |

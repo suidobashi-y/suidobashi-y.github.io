@@ -194,10 +194,15 @@ function render(){
 
   document.getElementById("src").textContent =
     DATA.label + "（データ更新: " + DATA.updated + "）";
-  document.getElementById("vnote").textContent =
-    VIEW==="div" && DATA.divEstimated
-      ? "※ディビジョン別の内訳は推計値です。ティア全体の比率は実データに基づいています。"
-      : "";
+  var notes = [];
+  if(APEX_DATA.rankIsStale()){
+    notes.push("※現在はシーズン" + APEX_DATA.currentSeason().no
+      + "です。以下はシーズン" + DATA.seasonNo + "終了時点の分布で、最新の集計ではありません。");
+  }
+  if(VIEW==="div" && DATA.divEstimated){
+    notes.push("※ディビジョン別の内訳は推計値です。ティア全体の比率は実データに基づいています。");
+  }
+  document.getElementById("vnote").innerHTML = notes.join("<br>");
 }
 setView("tier");
 </script>

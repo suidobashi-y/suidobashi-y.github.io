@@ -246,7 +246,7 @@ a.card.livecard:hover{border-color:var(--pink)}
 <script src="./data.js"></script>
 <script src="./rotation.js"></script>
 <script>
-var SEASON = APEX_DATA.season;   /* 設定は data.js で管理 */
+var SEASON = APEX_DATA.currentSeason();   /* 開幕時刻を過ぎると自動で次シーズンに切り替わります */
 
 (function(){
   var st=new Date(SEASON.start).getTime(), en=new Date(SEASON.end).getTime();
@@ -254,10 +254,13 @@ var SEASON = APEX_DATA.season;   /* 設定は data.js で管理 */
   document.getElementById("s29-no").textContent   = "S"+SEASON.no;
   document.getElementById("s29-name").textContent = SEASON.name;
   function md(t){var d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()}
-  document.getElementById("s29-range").textContent = md(st)+" — "+md(en);
+  document.getElementById("s29-range").textContent = md(st)+" — "+md(en)
+    + (SEASON.estimated ? "(予測)" : "");
   document.getElementById("s29-split").style.left = ((sp-st)/(en-st)*100)+"%";
 
   function tick(){
+    /* 開幕時刻をまたいだら読み直して新シーズン表示に切り替える */
+    if(APEX_DATA.currentSeason() !== SEASON){ location.reload(); return; }
     var now=Date.now(), left=en-now;
     var pct=Math.max(0,Math.min(100,(now-st)/(en-st)*100));
     document.getElementById("s29-bar").style.width = pct+"%";
@@ -293,8 +296,9 @@ var SEASON = APEX_DATA.season;   /* 設定は data.js で管理 */
     document.querySelectorAll("#mini-dist .mt i").forEach(function(el){ el.style.width=el.dataset.w+"%"; });
   });
   var di=t.findIndex(function(x){return x.n==="ダイヤモンド"});
+  var stale = APEX_DATA.rankIsStale() ? "S"+APEX_DATA.rank.seasonNo+"実績 / " : "";
   document.getElementById("mini-note").textContent =
-    di<0 ? APEX_DATA.rank.updated : "ダイヤ以上 上位"+cum[di].toFixed(1)+"%";
+    di<0 ? APEX_DATA.rank.updated : stale+"ダイヤ以上 上位"+cum[di].toFixed(1)+"%";
 })();
 
 // マップローテーション描画

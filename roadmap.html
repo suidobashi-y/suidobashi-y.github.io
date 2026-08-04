@@ -151,9 +151,9 @@ footer a{color:var(--cyan)}
 </header>
 
 <div class="count">
-  <div class="lbl">SEASON 30 // MARKED 開幕まで</div>
+  <div class="lbl" id="count-lbl">SEASON 30 // MARKED 開幕まで</div>
   <div class="clock" id="clock">--:--:--:--</div>
-  <div class="sub">2026年8月5日(水) 午前2:00 開幕(日本時間)</div>
+  <div class="sub" id="count-sub">2026年8月5日(水) 午前2:00 開幕(日本時間)</div>
 </div>
 
 <section>
@@ -194,8 +194,8 @@ footer a{color:var(--cyan)}
         <circle cx="116" cy="40" r="6" fill="#0a0e1a" stroke="#2dffa8" stroke-width="2.5"/>
         <circle cx="350" cy="40" r="6" fill="#0a0e1a" stroke="#00e5ff" stroke-width="2.5"/>
         <circle cx="584" cy="40" r="6" fill="#0a0e1a" stroke="#8a93ad" stroke-width="2.5" stroke-dasharray="3 2"/>
-        <!-- 現在地マーカー -->
-        <g class="pulse">
+        <!-- 現在地マーカー（位置はJSで日付から自動計算） -->
+        <g class="pulse" id="nowmark">
           <line x1="100" y1="14" x2="100" y2="40" stroke="#ff2d78" stroke-width="1.5"/>
           <rect x="66" y="2" width="68" height="15" rx="2" fill="#ff2d78"/>
           <text class="nowchip" x="100" y="13" text-anchor="middle">現在地</text>
@@ -208,7 +208,7 @@ footer a{color:var(--cyan)}
 
         <div class="scard s30">
           <div class="head">
-            <span class="status">確定</span>
+            <span class="status" id="s30-status">確定</span>
             <div class="sn">S30</div>
             <div class="title">MARKED</div>
             <div class="period">2026.08.05 — 11月上旬頃</div>
@@ -304,29 +304,29 @@ footer a{color:var(--cyan)}
 
 <section>
   <h2>今後の予定</h2>
-  <ul class="timeline">
-    <li>
+  <ul class="timeline" id="timeline">
+    <li data-date="2026-08-05T02:00:00+09:00">
       <div class="d">2026-08-05</div>
       <div class="t">シーズン30「Marked」開幕 <span class="tag official">公式</span></div>
       <p>日本時間 午前2:00。ブラハリワーク・ルーティング刷新・ワールズエッジ改修。ランクも新スプリットへ。</p>
     </li>
-    <li>
+    <li data-date="2026-10-31T00:00:00+09:00">
       <div class="d">2026-10(予定)</div>
       <div class="t">第11回 CRカップ Apex <span class="tag tbd">詳細未発表</span></div>
       <p>2023年1月の第10回以来、約3年9か月ぶりの開催が発表済み。出場者・日程は続報待ち。</p>
     </li>
-    <li>
+    <li data-date="2026-11-04T02:00:00+09:00">
       <div class="d">2026-11頃(予測)</div>
       <div class="t">シーズン31 — BRモード本体のアップデート <span class="tag official">公式ロードマップ</span></div>
       <p>バトルロイヤルの根幹(リング・リスポーン・ルート等)に関わる変更が見込まれるほか、
       「既存の人気武器に新たな使用方法を導入」と記載。開始時期は過去パターンからの予測。</p>
     </li>
-    <li>
+    <li data-date="2027-01-31T00:00:00+09:00">
       <div class="d">2027-01-28〜31</div>
       <div class="t">ALGS Year 6 Championship <span class="tag official">公式</span></div>
       <p>賞金総額700万ドルのYear 6最終戦。札幌・大和ハウス プレミストドームでの開催は3年連続。</p>
     </li>
-    <li>
+    <li data-date="2027-02-28T00:00:00+09:00">
       <div class="d">2027-02頃(予測)</div>
       <div class="t">シーズン32 — ランクマッチ大規模アップデート <span class="tag official">公式ロードマップ</span></div>
       <p>公式ロードマップの集大成。ランクの大規模改定に加え、新レジェンド追加(S29のアクセル以来)、
@@ -347,21 +347,97 @@ footer a{color:var(--cyan)}
 </div>
 
 <script>
+/* 日付に応じてロードマップの表示を自動更新する。
+   ここのマイルストーンだけ足していけば、以降は手を入れずに切り替わります。 */
 (function(){
-  var target = new Date("2026-08-05T02:00:00+09:00").getTime();
+  var MILESTONES = [
+    { at:"2026-08-05T02:00:00+09:00",
+      lbl:"SEASON 30 // MARKED 開幕まで",
+      sub:"2026年8月5日(水) 午前2:00 開幕(日本時間)" },
+    { at:"2026-11-04T02:00:00+09:00",
+      lbl:"SEASON 31 開幕まで（予測）",
+      sub:"2026年11月上旬の開幕見込み・公式発表待ち" },
+    { at:"2027-01-28T00:00:00+09:00",
+      lbl:"ALGS YEAR 6 CHAMPIONSHIP まで",
+      sub:"2027年1月28日〜31日 / 札幌・大和ハウス プレミストドーム" }
+  ];
+  var S30 = new Date("2026-08-05T02:00:00+09:00").getTime();
+
+  /* --- カウントダウン: 直近の未来のマイルストーンを自動で選ぶ --- */
   var el = document.getElementById("clock");
   function pad(n){return String(n).padStart(2,"0")}
+  function nextMilestone(){
+    var now = Date.now();
+    for(var i=0;i<MILESTONES.length;i++){
+      if(new Date(MILESTONES[i].at).getTime() > now) return MILESTONES[i];
+    }
+    return null;
+  }
   function tick(){
-    var diff = target - Date.now();
-    if(diff <= 0){ el.textContent = "LIVE NOW"; el.style.color = "#ff2d78"; return; }
+    var m = nextMilestone();
+    if(!m){
+      document.getElementById("count-lbl").textContent = "次の予定は未定です";
+      document.getElementById("count-sub").textContent = "公式発表があり次第、更新します";
+      el.textContent = "—";
+      return;
+    }
+    document.getElementById("count-lbl").textContent = m.lbl;
+    document.getElementById("count-sub").textContent = m.sub;
+    var diff = new Date(m.at).getTime() - Date.now();
+    if(diff <= 0){ setTimeout(tick, 500); return; }   /* 到達したら次の予定へ */
     var d = Math.floor(diff/86400000),
         h = Math.floor(diff%86400000/3600000),
-        m = Math.floor(diff%3600000/60000),
+        mi= Math.floor(diff%3600000/60000),
         s = Math.floor(diff%60000/1000);
-    el.textContent = d + "d " + pad(h) + ":" + pad(m) + ":" + pad(s);
+    el.textContent = d + "d " + pad(h) + ":" + pad(mi) + ":" + pad(s);
     setTimeout(tick, 1000);
   }
   tick();
+
+  /* --- S30のステータス: 開幕したら「開催中」に --- */
+  (function(){
+    var st = document.getElementById("s30-status");
+    if(st && Date.now() >= S30){
+      st.textContent = "開催中";
+      st.style.color = "#ff2d78";
+      st.style.borderColor = "rgba(255,45,120,.5)";
+    }
+  })();
+
+  /* --- 今後の予定: 過ぎた項目を控えめに --- */
+  (function(){
+    var now = Date.now();
+    var items = document.querySelectorAll("#timeline li[data-date]");
+    for(var i=0;i<items.length;i++){
+      if(new Date(items[i].getAttribute("data-date")).getTime() < now){
+        items[i].style.opacity = ".5";
+      }
+    }
+  })();
+
+  /* --- 現在地マーカー: 軸上の位置を日付から計算 --- */
+  (function(){
+    var g = document.getElementById("nowmark");
+    if(!g) return;
+    var A = [                                    /* 軸の目盛（x座標と日付） */
+      { x:116, t:new Date("2026-08-01T00:00:00+09:00").getTime() },
+      { x:350, t:new Date("2026-11-01T00:00:00+09:00").getTime() },
+      { x:584, t:new Date("2027-02-01T00:00:00+09:00").getTime() }
+    ];
+    var now = Date.now(), x;
+    if(now <= A[0].t)      x = 100;
+    else if(now >= A[2].t) x = 584;
+    else {
+      var i = now < A[1].t ? 0 : 1;
+      var r = (now - A[i].t) / (A[i+1].t - A[i].t);
+      x = A[i].x + (A[i+1].x - A[i].x) * r;
+    }
+    x = Math.round(x);
+    g.querySelector("line").setAttribute("x1", x);
+    g.querySelector("line").setAttribute("x2", x);
+    g.querySelector("rect").setAttribute("x", x - 34);
+    g.querySelector("text").setAttribute("x", x);
+  })();
 })();
 </script>
 <script>
