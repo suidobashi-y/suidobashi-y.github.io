@@ -87,7 +87,16 @@ APEX_DATA.streamers = [
   {name:"4rufq", twitch:"4rufq", tw:51, tags:["rank"]},
   {name:"lykq8don", twitch:"lykq8don", tw:50, tags:["rank"]},
   {name:"ピースだ", twitch:"peace_da", tw:43, tags:["rank"]},
-  {name:"わぶ", twitch:"wabu1", tw:14, tags:["rank"]}
+  {name:"わぶ", twitch:"wabu1", tw:14, tags:["rank"]},
+  /* 2026-08-04 追加（フォロワー数は未確認のため0。判明したら入れてください） */
+  {name:"ほそしん", twitch:"hososhin_twitch", tw:0, tags:["rank"]},
+  {name:"にごんご", twitch:"nigongo25", tw:0, tags:["rank"]},
+  {name:"かのんんん", twitch:"kanontyandayo", tw:0, tags:["rank"]},
+  {name:"エルスターしゅんしゅん", twitch:"lstarshunshun", tw:0, tags:["rank"]},
+  {name:"あいりーん28", twitch:"irene28___", tw:0, tags:["rank"]},
+  {name:"からからちゃん", twitch:"karakaramann", tw:0, tags:["rank"]},
+  {name:"建設系配信者沢田", twitch:"sawada0117", tw:0, tags:["rank"]},
+  {name:"甘楽ちょこ", twitch:"chocolate5d", tw:0, tags:["rank"]}
 ];
 
 /* タグ定義（タブの並び順もこの順） */
