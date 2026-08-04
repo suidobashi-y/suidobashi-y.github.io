@@ -43,6 +43,17 @@
   position:relative;display:flex;flex-direction:column;transition:border-color .16s,transform .16s}
 .st:hover{border-color:var(--cyan);transform:translateY(-2px)}
 .st.live{border-color:rgba(255,45,120,.55);background:linear-gradient(180deg,rgba(255,45,120,.06),var(--panel))}
+/* Apex以外を配信中: アンバー系で区別する */
+.st.live.other{border-color:rgba(255,176,32,.5);
+  background:linear-gradient(180deg,rgba(255,176,32,.06),var(--panel))}
+.st.live.other .av{border-color:var(--amber);box-shadow:0 0 14px rgba(255,176,32,.4)}
+.st.live.other .onair{background:var(--amber);color:var(--bg)}
+.st.live.other .go a{color:var(--bg);border-color:var(--amber);
+  background:linear-gradient(135deg,rgba(255,176,32,.85),rgba(255,176,32,.6))}
+.st.live.other .go a:hover{background:linear-gradient(135deg,var(--amber),rgba(255,176,32,.75))}
+.st .gm{font-family:'Chakra Petch';font-size:10px;letter-spacing:.06em;color:var(--amber);
+  border:1px solid rgba(255,176,32,.35);background:rgba(255,176,32,.07);
+  padding:2px 7px;border-radius:2px;margin-top:8px;display:inline-block}
 .st .top{display:flex;align-items:center;gap:12px}
 .av{width:64px;height:64px;border-radius:50%;flex:0 0 auto;overflow:hidden;
   border:2px solid rgba(0,229,255,.3);background:var(--panel2);
@@ -138,7 +149,20 @@ var LIST = APEX_DATA.streamers.slice().sort(function(a,b){ return b.tw-a.tw; });
 var LIVE = null;          // 配信中のtwitch名の配列
 var ICONS = {};           // Twitchのプロフィール画像 {ユーザー名: URL}
 var TITLES = {};          // 配信タイトル
+var GAMES = {};           // 配信中のゲーム {ユーザー名: {id,name}}
+var APEX_GAME_ID = "511224";
 var CUR  = "all";
+
+/* Apexを配信中かどうか（ゲーム情報が無い場合はApex扱いにする） */
+function isApex(login){
+  var g = GAMES[login] || GAMES[String(login).toLowerCase()];
+  if(!g) return true;
+  return String(g.id || g) === APEX_GAME_ID;
+}
+function gameName(login){
+  var g = GAMES[login] || GAMES[String(login).toLowerCase()];
+  return g && g.name ? g.name : "";
+}
 
 /* タグタブ */
 function renderTabs(){
@@ -209,12 +233,13 @@ function renderList(){
   var rows = CUR==="all" ? base
            : base.filter(function(s){return s.tags.indexOf(CUR)>=0});
 
-  // 配信中を先頭に
+  // 配信中を先頭に（Apex配信 → Apex以外の配信 → オフライン）
   if(LIVE){
-    rows = rows.slice().sort(function(a,b){
-      var la=LIVE.indexOf(a.twitch)>=0?1:0, lb=LIVE.indexOf(b.twitch)>=0?1:0;
-      return lb-la;
-    });
+    function rankOf(s){
+      if(LIVE.indexOf(s.twitch)<0) return 0;
+      return isApex(s.twitch) ? 2 : 1;
+    }
+    rows = rows.slice().sort(function(a,b){ return rankOf(b)-rankOf(a); });
   }
 
   document.getElementById("count").textContent =
@@ -228,6 +253,8 @@ function renderList(){
 
   document.getElementById("list").innerHTML = rows.map(function(s){
     var isLive = LIVE && LIVE.indexOf(s.twitch)>=0;
+    var apex   = isLive && isApex(s.twitch);
+    var other  = isLive && !apex;
     var nums = s.tw ? ['フォロワー <b>'+fmt(s.tw)+'</b>'] : [];
     var links = '<a class="tw" href="'+twUrl(s)+'" target="_blank" rel="noopener"'
               + ' onclick="openTwitch(event,\''+s.twitch+'\')">'
@@ -235,11 +262,12 @@ function renderList(){
                   ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>配信を見る'
                   : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16v11H4z"/><path d="M9 21h6M12 17v4"/></svg>チャンネル')
               + '</a>';
-    return '<div class="st'+(isLive?' live':'')+'">'
+    return '<div class="st'+(isLive?' live':'')+(other?' other':'')+'">'
       + '<div class="top">'+avatar(s)
       +   '<span class="tt"><span class="nm">'+esc(s.name)+'</span>'
       +   '<span class="num">'+nums.join("")+'</span></span>'
       +   (isLive?'<span class="onair">配信中</span>':'')+'</div>'
+      + (other && gameName(s.twitch) ? '<div><span class="gm">'+esc(gameName(s.twitch))+'</span></div>' : '')
       + (isLive && TITLES[s.twitch] ? '<div class="ttl">'+esc(TITLES[s.twitch])+'</div>' : '')
       + (s.tags.length ? '<div class="tags">'
           +s.tags.map(function(t){return '<span class="tg">'+label(t)+'</span>'}).join("")+'</div>' : '')
@@ -257,12 +285,17 @@ function loadLive(){
       LIVE   = j.live   || [];
       ICONS  = j.icons  || {};
       TITLES = j.titles || {};
-      var n = activeList().filter(function(s){return LIVE.indexOf(s.twitch)>=0}).length;
+      GAMES  = j.games  || {};
+      var on = activeList().filter(function(s){return LIVE.indexOf(s.twitch)>=0});
+      var n  = on.length;
+      var na = on.filter(function(s){return isApex(s.twitch)}).length;
       var bar=document.getElementById("livebar");
       bar.style.display="flex";
       document.getElementById("live-count").textContent = n+"人が配信中";
       document.getElementById("live-note").textContent =
-        n ? "一覧の先頭に表示しています" : "現在このリストに配信中の人はいません";
+        n ? (na<n ? "うちApexは"+na+"人。他ゲームはオレンジで表示しています"
+                  : "一覧の先頭に表示しています")
+          : "現在このリストに配信中の人はいません";
       renderTabs();
       renderList();
     })
