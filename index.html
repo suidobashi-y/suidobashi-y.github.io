@@ -85,6 +85,26 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 .mini .m.c-gold{--c:#ffcc4d}.mini .m.c-plat{--c:#3fd3c8}.mini .m.c-dia{--c:#69b7ff}
 .mini .m.c-master{--c:#b06bff}.mini .m.c-pred{--c:#ff4d6d}
 
+/* ライブ配信カード */
+a.card.livecard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+a.card.livecard:hover{border-color:var(--pink)}
+.livecard .eyeb b{color:var(--pink);font-size:10.5px}
+.lvdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pink);
+  box-shadow:0 0 8px var(--pink);margin-right:6px;vertical-align:1px}
+@media(prefers-reduced-motion:no-preference){.lvdot{animation:lvbl 1.6s ease-in-out infinite}
+  @keyframes lvbl{50%{opacity:.35}}}
+.lvrow{display:flex;gap:10px;overflow-x:auto;padding:11px 0 9px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.lvrow::-webkit-scrollbar{display:none}
+.lvav{width:46px;height:46px;border-radius:50%;flex:0 0 auto;overflow:hidden;
+  border:2px solid var(--pink);box-shadow:0 0 10px rgba(255,45,120,.35);
+  background:var(--panel2);display:flex;align-items:center;justify-content:center}
+.lvav img{width:100%;height:100%;object-fit:cover;display:block}
+.lvav span{font-family:'Chakra Petch';font-size:19px;font-weight:700;color:var(--bg)}
+.lvmore{width:46px;height:46px;border-radius:50%;flex:0 0 auto;
+  border:1px dashed rgba(255,45,120,.5);display:flex;align-items:center;justify-content:center;
+  font-family:'Chakra Petch';font-size:12px;color:var(--pink)}
+
 /* ツールグリッド */
 .tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px}
 .tool{display:block;text-decoration:none;color:inherit;background:var(--panel);
@@ -153,6 +173,12 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
     <div class="sbar plain"><i id="rk-bar"></i></div>
     <div class="foot"><span>次: <span id="rk-next">—</span></span><span class="src">Apex Legends Status</span></div>
   </div>
+
+  <a class="card livecard wide" href="./streamers.html" id="livecard" style="display:none">
+    <div class="eyeb"><span class="lvdot"></span>LIVE // <b id="lv-count">—</b> が Apex 配信中</div>
+    <div class="lvrow" id="lv-avatars"></div>
+    <div class="foot"><span class="src" id="lv-names">—</span><span class="more">ライブ配信を見る →</span></div>
+  </a>
 </div>
 
 <section>
@@ -195,6 +221,7 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
   <h2>更新履歴</h2>
   <div class="panel">
     <ul class="updates">
+      <li><span class="d">08-04</span><span>トップにライブ配信カードを追加。Apex配信中の人だけ表示します</span></li>
       <li><span class="d">08-03</span><span>ランク分布を最新データに更新。ディビジョン別表示を追加</span></li>
       <li><span class="d">08-02</span><span>ライブ配信ページを公開。タグで配信者を絞り込めます</span></li>
       <li><span class="d">08-02</span><span>開発ロードマップページを図解化。S31・S32の公式ロードマップを反映</span></li>
@@ -277,6 +304,69 @@ NeonRotation.load(function(rot,err){
   }
   NeonRotation.bind(rot.ranked,"rk");
 });
+
+/* ライブ配信カード（Apex配信中の人だけ / 0人ならカードごと非表示） */
+(function(){
+  var LIVE_API   = "https://apex-map-streamer.suidobashi-y.workers.dev/live";
+  var APEX_GAME  = "511224";
+  var MAX        = 12;
+  var AVC=["#00e5ff","#ff2d78","#2dffa8","#ffb020","#a06bff","#69b7ff","#ff8a5c","#3fd3c8"];
+
+  function esc(t){ return String(t).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function initial(n){ return n.replace(/[^\wぁ-んァ-ヶ一-龠A-Za-z0-9]/g,"").charAt(0).toUpperCase() || "?"; }
+  function color(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return AVC[h%AVC.length]; }
+  function fallback(s){
+    return '<span class="lvav" style="background:'+color(s.name)+'"><span>'+esc(initial(s.name))+'</span></span>';
+  }
+  function avatar(s, url){
+    if(!url) return fallback(s);
+    return '<span class="lvav"><img src="'+url+'" alt="'+esc(s.name)+'" loading="lazy"'
+      + ' onerror="this.parentNode.outerHTML=\'<span class=&quot;lvav&quot; style=&quot;background:'
+      + color(s.name)+'&quot;><span>'+esc(initial(s.name))+'</span></span>\'"></span>';
+  }
+
+  fetch(LIVE_API)
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(j){
+      var icons=j.icons||{}, games=j.games||{}, viewers=j.viewers||{};
+
+      /* Apex配信中のログイン名。workerがapexを返さない場合はgamesから判定 */
+      var apex = j.apex;
+      if(!apex){
+        apex = (j.live||[]).filter(function(l){
+          var g = games[l]; return g && String(g.id||g) === APEX_GAME;
+        });
+      }
+      if(!apex.length) return;                       /* 0人 → 非表示のまま */
+
+      /* data.js のリストと突き合わせ */
+      var by={};
+      APEX_DATA.streamers.forEach(function(s){ by[s.twitch.toLowerCase()]=s; });
+      var rows = apex.map(function(l){ return by[String(l).toLowerCase()]; })
+                     .filter(Boolean);
+      if(!rows.length) return;
+
+      rows.sort(function(a,b){
+        return (viewers[b.twitch.toLowerCase()]||0) - (viewers[a.twitch.toLowerCase()]||0);
+      });
+
+      var shown = rows.slice(0, MAX);
+      var html  = shown.map(function(s){
+        var key=s.twitch.toLowerCase();
+        return avatar(s, icons[key] || icons[s.twitch]);
+      }).join("");
+      if(rows.length > MAX) html += '<span class="lvmore">+'+(rows.length-MAX)+'</span>';
+
+      document.getElementById("lv-avatars").innerHTML = html;
+      document.getElementById("lv-count").textContent = rows.length+"人";
+      var names = rows.slice(0,3).map(function(s){ return s.name; }).join(" / ");
+      document.getElementById("lv-names").textContent =
+        rows.length>3 ? names+" ほか" : names;
+      document.getElementById("livecard").style.display = "flex";
+    })
+    .catch(function(e){ console.error("[livecard]", e); });   /* 失敗時も非表示のまま */
+})();
 </script>
 <script>
 (function(){
