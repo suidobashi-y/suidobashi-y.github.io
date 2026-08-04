@@ -142,6 +142,73 @@ APEX_DATA.streamers = [
   {name:"おっさんの挑戦", twitch:"89workers", tw:0, tags:["rank"]}
 ];
 
+/* ============================================================
+   レジェンドピック率（全ランク帯）
+   出典: apexlegendsstatus.com/game-stats/legends-pick-rates
+   ★スナップショットです。シーズン/スプリットごとに取り直してください
+   legends の並びは自由（表示時にピック率で並べ替えます）
+   [英名, 日本語名, ピック率%, 7日前比%, レジェンドのイメージカラー]
+   ============================================================ */
+APEX_DATA.pickrate = {
+  seasonNo: 29,
+  label:   "シーズン29 / 全ランク帯・全モード",
+  updated: "2026-08-05",
+  source:  "apexlegendsstatus.com",
+  sample:  "約3,400万プレイヤー",
+  legends: [
+    ["Axle","アクセル",11.8,-5.47,"#c44dff"],
+    ["Pathfinder","パスファインダー",8.4,-2.09,"#6ec8ff"],
+    ["Mad Maggie","マッドマギー",7.4,2.06,"#ff2d78"],
+    ["Octane","オクタン",6.5,3.38,"#6fdd3a"],
+    ["Valkyrie","ヴァルキリー",6.1,-9.03,"#5f6bd8"],
+    ["Bangalore","バンガロール",5.4,-0.89,"#93a06a"],
+    ["Wraith","レイス",5.3,1.98,"#8a5cff"],
+    ["Fuse","ヒューズ",5.1,12.02,"#ff6a1f"],
+    ["Lifeline","ライフライン",4.0,2.06,"#3ad6b0"],
+    ["Seer","シア",3.4,-7.6,"#d0a02a"],
+    ["Conduit","コンジット",3.4,-6.18,"#ff7ad9"],
+    ["Alter","オルター",3.2,-7.87,"#b06bff"],
+    ["Sparrow","スパロウ",3.0,3.57,"#e0603a"],
+    ["Caustic","コースティック",2.8,2.61,"#b6d442"],
+    ["Gibraltar","ジブラルタル",2.8,3.87,"#3b8fd6"],
+    ["Ash","アッシュ",2.7,1.29,"#b03a8f"],
+    ["Mirage","ミラージュ",2.6,6.27,"#ffc93d"],
+    ["Wattson","ワットソン",2.3,0.07,"#ffe14d"],
+    ["Revenant","レヴナント",2.3,1.49,"#c02a45"],
+    ["Vantage","ヴァンテージ",2.1,0.41,"#a8d8f0"],
+    ["Bloodhound","ブラッドハウンド",1.8,26.14,"#e0453f"],
+    ["Loba","ローバ",1.6,24.44,"#d95ac2"],
+    ["Horizon","ホライゾン",1.5,6.88,"#9fe8ff"],
+    ["Newcastle","ニューキャッスル",1.2,1.47,"#2f6fff"],
+    ["Rampart","ランパート",1.1,8.3,"#3fd3c8"],
+    ["Ballistic","バリスティック",0.9,-15.78,"#c8a04a"],
+    ["Crypto","クリプト",0.8,-6.84,"#39c46a"],
+    ["Catalyst","カタリスト",0.7,6.44,"#6a4dd6"]
+  ]
+};
+
+/* ピック率データが現在のシーズンのものかどうか */
+APEX_DATA.pickrateIsStale = function(){
+  return this.pickrate.seasonNo !== this.currentSeason().no;
+};
+
+/* ピック率降順に並べ替えた配列を返す */
+APEX_DATA.pickrateSorted = function(){
+  return this.pickrate.legends.slice().sort(function(a,b){ return b[2]-a[2]; });
+};
+
+/* 「崖」= 3位〜12位の範囲で隣接順位の差が最大になる位置。
+   1位→2位の差は除外（突出した1体がいるとそこが常に最大になるため） */
+APEX_DATA.pickrateCliff = function(){
+  var s = this.pickrateSorted(), cut = 3, gap = -1;
+  var limit = Math.min(12, s.length - 1);
+  for(var i = 3; i <= limit; i++){
+    var g = s[i-1][2] - s[i][2];
+    if(g > gap){ gap = g; cut = i; }
+  }
+  return { cut: cut, gap: gap };
+};
+
 /* タグ定義（タブの並び順もこの順） */
 APEX_DATA.streamerTags = [
   {id:"all",        label:"すべて"},

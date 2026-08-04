@@ -31,6 +31,12 @@
 .card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px}
 .card.season::before{background:linear-gradient(90deg,var(--cyan),var(--pink));
   box-shadow:0 0 10px rgba(0,229,255,.5)}
+/* シーズン進捗: ヘッダー直下の細い帯として扱う */
+.card.season.slim{padding:10px 16px 9px}
+.card.season.slim .prim{font-size:17px;margin:2px 0 0}
+.card.season.slim .sec{font-size:11.5px;margin-top:1px}
+.card.season.slim .sbar{margin-top:7px}
+.card.season.slim .foot{margin-top:6px}
 .card.mapcard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
 .eyeb{font-family:'Chakra Petch';font-size:10.5px;letter-spacing:.2em;color:var(--muted);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -84,6 +90,28 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 .mini .m.c-rookie{--c:#9aa3b8}.mini .m.c-bronze{--c:#c58b52}.mini .m.c-silver{--c:#b9c3d4}
 .mini .m.c-gold{--c:#ffcc4d}.mini .m.c-plat{--c:#3fd3c8}.mini .m.c-dia{--c:#69b7ff}
 .mini .m.c-master{--c:#b06bff}.mini .m.c-pred{--c:#ff4d6d}
+
+/* ピック率カード */
+.card.pickcard::before{background:var(--amber);box-shadow:0 0 10px rgba(255,176,32,.55)}
+.card.pickcard:hover{border-color:rgba(255,176,32,.5)}
+.pickcard .eyeb b{color:var(--amber);font-size:10.5px}
+.pickcard .foot .more{color:var(--amber);text-decoration:none}
+.pickcard .foot .more:hover{text-decoration:underline}
+.prlist{margin:9px 0 8px;display:flex;flex-direction:column;gap:4px}
+.prlist .pr{display:grid;grid-template-columns:14px 104px 1fr 46px;gap:7px;align-items:center}
+.prlist .prn{font-family:'Chakra Petch';font-size:10.5px;font-weight:700;color:var(--muted);text-align:right}
+.prlist .pr:nth-child(-n+3) .prn{color:var(--amber)}
+.prlist .prl{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prlist .prt{height:8px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.prlist .prt i{display:block;height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,176,32,.5),var(--amber));
+  transition:width .9s cubic-bezier(.2,.85,.25,1)}
+/* レジェンドごとのイメージカラー（--lc は描画時に付与） */
+.prlist .prt i[style*="--lc"]{background:var(--lc)}
+.prlist .prv{font-family:'Chakra Petch';font-size:11px;color:var(--muted);text-align:right}
+@media(min-width:621px){.prlist .pr{grid-template-columns:14px 92px 1fr 44px;gap:6px}}
+@media(max-width:400px){.prlist .pr{grid-template-columns:14px 88px 1fr 44px;gap:6px}
+  .prlist .prl{font-size:11px}}
 
 /* ライブ配信カード */
 .card.livecard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
@@ -148,6 +176,7 @@ a.lvmore:hover{border-style:solid}
     <a href="./assist.html">エイムアシスト</a>
     <a href="./deviation.html">ランク偏差値</a>
     <a href="./rank.html">ランク分布</a>
+    <a href="./pickrate.html">ピック率</a>
     <a href="./streamers.html">ライブ配信</a>
     <a href="./roadmap.html">ロードマップ</a>
 </div></div>
@@ -160,13 +189,7 @@ a.lvmore:hover{border-style:solid}
 
 <!-- ファーストビュー -->
 <div class="fv">
-  <a class="card" href="./rank.html">
-    <div class="eyeb">RANK DISTRIBUTION // ランク分布</div>
-    <div class="mini" id="mini-dist"></div>
-    <div class="foot"><span id="mini-note">—</span><span class="more">詳しく見る →</span></div>
-  </a>
-
-  <div class="card season">
+  <div class="card season slim wide">
     <div class="eyeb">SEASON PROGRESS</div>
     <div class="prim snm"><b id="s29-no">S29</b> <span id="s29-name">—</span><em id="s29-sp"></em></div>
     <div class="sec"><span id="s29-left">—</span><span class="dim" id="s29-pct"></span></div>
@@ -174,13 +197,25 @@ a.lvmore:hover{border-style:solid}
     <div class="foot"><span id="s29-range">—</span><span class="next" id="s29-end">—</span></div>
   </div>
 
-  <div class="card mapcard wide">
+  <div class="card mapcard wide" id="mapcard">
     <div class="eyeb">RANKED // 現在のマップ</div>
     <div class="prim" id="rk-name">読み込み中</div>
     <div class="sec">残り <b id="rk-rest">--:--</b></div>
     <div class="sbar plain"><i id="rk-bar"></i></div>
     <div class="foot"><span>次: <span id="rk-next">—</span></span><span class="src">Apex Legends Status</span></div>
   </div>
+
+  <a class="card" href="./rank.html">
+    <div class="eyeb">RANK DISTRIBUTION // ランク分布</div>
+    <div class="mini" id="mini-dist"></div>
+    <div class="foot"><span id="mini-note">—</span><span class="more">詳しく見る →</span></div>
+  </a>
+
+  <a class="card pickcard" href="./pickrate.html">
+    <div class="eyeb">PICK RATE // <b id="pr-label">レジェンドピック率</b> BEST 5</div>
+    <div class="prlist" id="pr-list"></div>
+    <div class="foot"><span class="src" id="pr-src">—</span><span class="more">すべて見る →</span></div>
+  </a>
 
   <div class="card livecard wide" id="livecard" style="display:none">
     <div class="eyeb"><span class="lvdot"></span>LIVE // <b id="lv-count">—</b> が Apex 配信中</div>
@@ -211,6 +246,12 @@ a.lvmore:hover{border-style:solid}
       <div class="d">各ランク帯の人口比と累積上位%。自分の位置を数字で確認。</div>
     </a>
 
+    <a class="tool" href="./pickrate.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h13M4 12h9M4 18h5"/><circle cx="20" cy="6" r="1.4"/><circle cx="16" cy="12" r="1.4"/><circle cx="12" cy="18" r="1.4"/></svg>
+      <div class="t">レジェンドピック率</div>
+      <div class="d">今どのレジェンドが使われているか。7日間の上昇率・下落率でも並べ替えられます。</div>
+    </a>
+
     <a class="tool" href="./streamers.html">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4M10 8.5l4 2-4 2z"/></svg>
       <div class="t">ライブ配信</div>
@@ -229,6 +270,7 @@ a.lvmore:hover{border-style:solid}
   <h2>更新履歴</h2>
   <div class="panel">
     <ul class="updates">
+      <li><span class="d">08-05</span><span>レジェンドピック率ページを公開。トップにBEST5カードを追加しました</span></li>
       <li><span class="d">08-04</span><span>トップにライブ配信カードを追加。Apex配信中の人だけ表示します</span></li>
       <li><span class="d">08-03</span><span>ランク分布を最新データに更新。ディビジョン別表示を追加</span></li>
       <li><span class="d">08-02</span><span>ライブ配信ページを公開。タグで配信者を絞り込めます</span></li>
@@ -250,9 +292,46 @@ a.lvmore:hover{border-style:solid}
 </div>
 
 <script src="./data.js"></script>
+<script>
+/* ピック率カード（BEST 5） */
+(function(){
+  var card = document.getElementById("pr-list");
+  if(!card || !window.APEX_DATA || !APEX_DATA.pickrate) return;
+  var pr  = APEX_DATA.pickrate;
+  var top = APEX_DATA.pickrateSorted().slice(0,5);
+  var max = top[0][2];
+
+  card.innerHTML = top.map(function(r,i){
+    return '<div class="pr">' +
+             '<span class="prn">' + (i+1) + '</span>' +
+             '<span class="prl">' + r[1] + '</span>' +
+             '<span class="prt"><i style="--lc:' + (r[4] || "var(--amber)") + '" data-w="'
+                                     + (r[2]/max*100).toFixed(1) + '"></i></span>' +
+             '<span class="prv">' + r[2].toFixed(1) + '%</span>' +
+           '</div>';
+  }).join("");
+
+  requestAnimationFrame(function(){
+    Array.prototype.forEach.call(card.querySelectorAll(".prt i"), function(el){
+      el.style.width = el.getAttribute("data-w") + "%";
+    });
+  });
+
+  document.getElementById("pr-src").textContent =
+    (APEX_DATA.pickrateIsStale() ? "S" + pr.seasonNo + "終了時点 / " : "") +
+    pr.updated.replace(/-/g,"/") + " 時点 / " + pr.source;
+})();
+</script>
 <script src="./rotation.js"></script>
 <script>
-var SEASON = APEX_DATA.currentSeason();   /* 開幕時刻を過ぎると自動で次シーズンに切り替わります */
+/* data.js が旧版でも動くようにフォールバックを用意 */
+function currentSeason(){
+  return APEX_DATA.currentSeason ? APEX_DATA.currentSeason() : APEX_DATA.season;
+}
+function rankIsStale(){
+  return APEX_DATA.rankIsStale ? APEX_DATA.rankIsStale() : false;
+}
+var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シーズンに切り替わります */
 
 (function(){
   var st=new Date(SEASON.start).getTime(), en=new Date(SEASON.end).getTime();
@@ -266,7 +345,7 @@ var SEASON = APEX_DATA.currentSeason();   /* 開幕時刻を過ぎると自動�
 
   function tick(){
     /* 開幕時刻をまたいだら読み直して新シーズン表示に切り替える */
-    if(APEX_DATA.currentSeason() !== SEASON){ location.reload(); return; }
+    if(currentSeason() !== SEASON){ location.reload(); return; }
     var now=Date.now(), left=en-now;
     var pct=Math.max(0,Math.min(100,(now-st)/(en-st)*100));
     document.getElementById("s29-bar").style.width = pct+"%";
@@ -302,20 +381,40 @@ var SEASON = APEX_DATA.currentSeason();   /* 開幕時刻を過ぎると自動�
     document.querySelectorAll("#mini-dist .mt i").forEach(function(el){ el.style.width=el.dataset.w+"%"; });
   });
   var di=t.findIndex(function(x){return x.n==="ダイヤモンド"});
-  var stale = APEX_DATA.rankIsStale() ? "S"+APEX_DATA.rank.seasonNo+"実績 / " : "";
+  var stale = rankIsStale() ? "S"+APEX_DATA.rank.seasonNo+"実績 / " : "";
   document.getElementById("mini-note").textContent =
     di<0 ? APEX_DATA.rank.updated : stale+"ダイヤ以上 上位"+cum[di].toFixed(1)+"%";
 })();
 
-// マップローテーション描画
-NeonRotation.load(function(rot,err){
-  if(err){
-    document.getElementById("rk-name").textContent="取得できません";
-    document.getElementById("rk-next").textContent=err;
-    return;
+/* マップローテーション描画
+   取得に失敗した場合・データが空の場合・一定時間応答がない場合は、
+   エラー文言を出さずにカードごと非表示にする */
+(function(){
+  var card    = document.getElementById("mapcard");
+  var done    = false;
+  var TIMEOUT = 8000;
+
+  function hide(reason){
+    if(done) return;
+    done = true;
+    if(card) card.style.display = "none";
+    if(reason) console.warn("[mapcard] 非表示:", reason);
   }
-  NeonRotation.bind(rot.ranked,"rk");
-});
+
+  var timer = setTimeout(function(){ hide("応答なし (" + TIMEOUT + "ms)"); }, TIMEOUT);
+
+  NeonRotation.load(function(rot, err){
+    if(done) return;              /* すでにタイムアウトで非表示 */
+    clearTimeout(timer);
+    if(err || !rot || !rot.ranked){ hide(err || "データが空です"); return; }
+    try {
+      NeonRotation.bind(rot.ranked, "rk");
+      done = true;                /* 成功。以降 hide() は効かない */
+    } catch(e){
+      hide((e && e.message) || e);
+    }
+  });
+})();
 
 /* ライブ配信カード（Apex配信中の人だけ / 0人ならカードごと非表示） */
 (function(){
