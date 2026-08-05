@@ -10,6 +10,10 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-seri
     linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);background-size:32px 32px;}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
 a{color:var(--cyan)}
+/* 視覚的に非表示だが、クローラー / スクリーンリーダーには読まれる要素。
+   ヒーローを持たないページで h1 を保持するために使う */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 /* 共通ナビ */
 .gnav{position:sticky;top:0;z-index:60;background:rgba(10,14,26,.94);
   backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
@@ -17,7 +21,7 @@ a{color:var(--cyan)}
   display:flex;align-items:center;justify-content:space-between;gap:14px}
 .gnav .brand{font-family:'Chakra Petch';font-weight:700;font-size:15px;letter-spacing:.1em;
   color:var(--text);text-decoration:none;white-space:nowrap}
-.gnav .brand span{color:var(--cyan)}
+.gnav .brand span{color:var(--pink);text-shadow:0 0 12px rgba(255,45,120,.45)}
 /* ハンバーガー */
 .burger{width:34px;height:28px;border:1px solid var(--line);border-radius:2px;background:none;
   cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:0}
