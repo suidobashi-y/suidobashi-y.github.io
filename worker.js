@@ -6,6 +6,7 @@
  *
  *   GET /maprotation → マップローテーション（Apex Legends Status）
  *   GET /live        → 配信中のTwitchチャンネル一覧 {"live":["name",...]}
+ *   GET /feed        → 海外の話題ピックアップ（Reddit速度順 + Google News日本語）
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -47,10 +48,11 @@ export default {
       if (url.pathname === "/maprotation") return cors(await mapRotation(env, ctx), origin);
       if (url.pathname === "/live")        return cors(await live(env, ctx), origin);
       if (url.pathname === "/discover")    return cors(await discover(env, url), origin);
+      if (url.pathname === "/feed")        return cors(await feed(request, ctx), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
         twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定"
       }), origin);
@@ -215,6 +217,171 @@ async function discover(env, url) {
     twitchUsersSnippet: found.map(s => `"${s.twitch}"`).join(", "),
     updated: new Date().toISOString()
   }, 200, 60);
+}
+
+/* ---------- 海外の話題ピックアップ ----------
+   GET /feed
+     reddit : r/apexlegends を「速度順」で並べ替えたもの
+              生スコアだとミームが上位を占めるため、
+              スコア速度 + コメント速度×3 で並べ、Humor/Gameplay は除外
+              badges  debate=賛否が割れている / accelerating=話題が加速中
+                      dev=開発者が反応 / text=テキスト投稿
+     news   : Google News（日本語）の直近48時間
+              「日本語圏にもう着弾しているか」の突き合わせ用
+
+   ※ 本文(selftext)は意図的に返していません。転載にならないよう、
+      解釈を書くときは permalink 側で読んでください。               */
+
+const FEED_TTL            = 900;      // 15分キャッシュ
+const FEED_UA             = "neongrid-feed/1.0 (+https://suidobashi-y.github.io)";
+const FEED_EXCLUDE_FLAIR  = ["Humor", "Gameplay", "Fan Art", "Creative"];
+const FEED_MIN_AGE_H      = 0.5;
+const FEED_MAX_AGE_H      = 24;
+const FEED_COMMENT_WEIGHT = 3;        // コメント速度の重み
+const FEED_DEBATE_RATIO   = 0.9;      // これ未満で「賛否が割れている」
+
+async function feed(request, ctx) {
+  const cache = caches.default;
+  const key = new Request(new URL(request.url).toString(), { method: "GET" });
+
+  const hit = await cache.match(key);
+  if (hit) return hit;
+
+  // ソースごとに独立して失敗を握り潰す（片方が落ちても全体は返る）
+  const [reddit, news] = await Promise.all([
+    feedReddit().catch(e => ({ ok: false, error: String(e.message || e), items: [] })),
+    feedNewsJa().catch(e => ({ ok: false, error: String(e.message || e), items: [] }))
+  ]);
+
+  const res = json({
+    generatedAt: new Date().toISOString(),
+    reddit,
+    news
+  }, 200, FEED_TTL);
+
+  if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(key, res.clone()));
+  return res;
+}
+
+/* Reddit — 速度順 */
+async function feedReddit() {
+  // Workerからのアクセスが弾かれる場合に備えて2系統試す
+  const endpoints = [
+    "https://www.reddit.com/r/apexlegends/hot.json?limit=50",
+    "https://old.reddit.com/r/apexlegends/hot.json?limit=50"
+  ];
+
+  let data = null, lastStatus = 0, used = "";
+  for (const ep of endpoints) {
+    try {
+      const r = await fetch(ep, {
+        headers: { "User-Agent": FEED_UA, "Accept": "application/json" },
+        cf: { cacheTtl: FEED_TTL, cacheEverything: true }
+      });
+      lastStatus = r.status;
+      if (!r.ok) continue;
+      data = await r.json();
+      used = ep;
+      break;
+    } catch (_) { /* 次を試す */ }
+  }
+  if (!data) return { ok: false, error: "reddit fetch failed (" + lastStatus + ")", items: [] };
+
+  const now = Date.now() / 1000;
+  const items = [];
+
+  for (const c of (data.data && data.data.children) || []) {
+    const d = c.data;
+    if (!d || d.stickied) continue;                       // 運営の固定投稿は除外
+
+    const flair = d.link_flair_text || "";
+    if (FEED_EXCLUDE_FLAIR.includes(flair)) continue;
+
+    const ageH = (now - d.created_utc) / 3600;
+    if (ageH < FEED_MIN_AGE_H || ageH > FEED_MAX_AGE_H) continue;
+
+    const scoreV = d.score / ageH;
+    const cmtV   = d.num_comments / ageH;
+    const ratio  = typeof d.upvote_ratio === "number" ? d.upvote_ratio : 1;
+
+    const badges = [];
+    if (ratio < FEED_DEBATE_RATIO)  badges.push("debate");
+    if (cmtV >= 5)                  badges.push("accelerating");
+    if (/dev reply/i.test(flair))   badges.push("dev");
+    if (d.is_self)                  badges.push("text");
+
+    items.push({
+      id:       d.id,
+      title:    d.title,
+      // 必ず permalink を使う（url だと画像への直リンクになりコメント欄に届かない）
+      url:      "https://www.reddit.com" + d.permalink,
+      flair:    flair || null,
+      ratio:    Math.round(ratio * 100) / 100,
+      score:    d.score,
+      comments: d.num_comments,
+      ageH:     Math.round(ageH * 10) / 10,
+      velocity: Math.round((scoreV + cmtV * FEED_COMMENT_WEIGHT) * 10) / 10,
+      badges
+    });
+  }
+
+  items.sort((a, b) => b.velocity - a.velocity);
+  return { ok: true, source: used, count: items.length, items: items.slice(0, 15) };
+}
+
+/* Google News（日本語）— 日本語圏への着弾を見るため */
+async function feedNewsJa() {
+  const ep = "https://news.google.com/rss/search?q=Apex+Legends&hl=ja&gl=JP&ceid=JP:ja";
+
+  const r = await fetch(ep, {
+    headers: { "User-Agent": FEED_UA },
+    cf: { cacheTtl: FEED_TTL, cacheEverything: true }
+  });
+  if (!r.ok) return { ok: false, error: "news fetch failed (" + r.status + ")", items: [] };
+
+  const xml = await r.text();
+  const now = Date.now();
+  const items = [];
+
+  // Workers に DOMParser は無いので <item> ブロックを切り出して処理する
+  const blocks = xml.split("<item>").slice(1);
+  for (const b of blocks) {
+    const chunk = b.split("</item>")[0];
+    const title = feedTag(chunk, "title");
+    if (!title) continue;
+
+    const date = feedTag(chunk, "pubDate");
+    const t = date ? Date.parse(date) : NaN;
+    const ageH = isNaN(t) ? null : Math.round(((now - t) / 3600000) * 10) / 10;
+    if (ageH !== null && ageH > 48) continue;
+
+    items.push({
+      title,
+      url:    feedTag(chunk, "link") || null,
+      source: feedTag(chunk, "source") || null,
+      ageH
+    });
+  }
+
+  return { ok: true, count: items.length, items: items.slice(0, 20) };
+}
+
+function feedTag(chunk, tag) {
+  const m = chunk.match(new RegExp("<" + tag + "[^>]*>([\\s\\S]*?)</" + tag + ">"));
+  if (!m) return null;
+  let v = m[1].trim();
+  const cd = v.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
+  if (cd) v = cd[1];
+  return feedDecode(v.replace(/<[^>]+>/g, "").trim());
+}
+
+function feedDecode(s) {
+  return s
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&amp;/g, "&");   // &amp; は最後に処理する
 }
 
 /* ---------- ヘルパー ---------- */
