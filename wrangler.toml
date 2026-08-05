@@ -1,0 +1,11 @@
+# ★ name は Cloudflare 上の既存 Worker と完全に同じ名前にしてください。
+#    違う名前にすると「別の新しいWorker」が作られ、今のURLは更新されません。
+#    確認方法: Workers の管理画面のURL、または今使っている
+#              https://＜ここの部分＞.＜サブドメイン＞.workers.dev
+name = "apex-map-streamer"
+
+main = "worker.js"
+compatibility_date = "2026-08-05"
+
+# シークレット（APEX_API_KEY / TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET）は
+# Cloudflare 側に保存されたままで、deploy しても消えません。ここに書く必要はありません。
