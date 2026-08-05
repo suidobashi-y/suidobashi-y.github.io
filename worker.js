@@ -6,7 +6,7 @@
  *
  *   GET /maprotation → マップローテーション（Apex Legends Status）
  *   GET /live        → 配信中のTwitchチャンネル一覧 {"live":["name",...]}
- *   GET /feed        → 海外の話題ピックアップ（Reddit速度順 + Google News日本語）
+ *   GET /feed        → 配信トレンド（Apex配信中のタイトルからモード・話題語を集計）
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -48,7 +48,7 @@ export default {
       if (url.pathname === "/maprotation") return cors(await mapRotation(env, ctx), origin);
       if (url.pathname === "/live")        return cors(await live(env, ctx), origin);
       if (url.pathname === "/discover")    return cors(await discover(env, url), origin);
-      if (url.pathname === "/feed")        return cors(await feed(request, ctx), origin);
+      if (url.pathname === "/feed")        return cors(await feed(request, env, ctx), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
@@ -219,169 +219,164 @@ async function discover(env, url) {
   }, 200, 60);
 }
 
-/* ---------- 海外の話題ピックアップ ----------
+/* ---------- 配信トレンド ----------
    GET /feed
-     reddit : r/apexlegends を「速度順」で並べ替えたもの
-              生スコアだとミームが上位を占めるため、
-              スコア速度 + コメント速度×3 で並べ、Humor/Gameplay は除外
-              badges  debate=賛否が割れている / accelerating=話題が加速中
-                      dev=開発者が反応 / text=テキスト投稿
-     news   : Google News（日本語）の直近48時間
-              「日本語圏にもう着弾しているか」の突き合わせ用
+     登録配信者のうち Apex を配信中の人のタイトルを解析し、
+     「いま日本の上位層が何をやっているか」を返す。
 
-   ※ 本文(selftext)は意図的に返していません。転載にならないよう、
-      解釈を書くときは permalink 側で読んでください。               */
+     modes   モードの内訳（ランク / カジュアル / 大会・スクリム など）
+             人数と視聴者数の両方で集計する。少人数でも視聴者が多ければ
+             そちらのほうが「話題」に近いため。
+     terms   レジェンド・武器・ランク帯の言及。普段はまばらだが、
+             特定の語が跳ねたときがシグナルになる。
+     streams 視聴者数の多い順の実配信（10件）
 
-const FEED_TTL            = 900;      // 15分キャッシュ
-const FEED_UA             = "neongrid-feed/1.0 (+https://suidobashi-y.github.io)";
-const FEED_EXCLUDE_FLAIR  = ["Humor", "Gameplay", "Fan Art", "Creative"];
-const FEED_MIN_AGE_H      = 0.5;
-const FEED_MAX_AGE_H      = 24;
-const FEED_COMMENT_WEIGHT = 3;        // コメント速度の重み
-const FEED_DEBATE_RATIO   = 0.9;      // これ未満で「賛否が割れている」
+   Reddit / Google News は Worker からのアクセスが遮断されるため取りやめ。
+   こちらは既存の Twitch 認証をそのまま使うので追加のキーは不要。      */
 
-async function feed(request, ctx) {
+const FEED_TTL = 300;   // 5分キャッシュ（配信は入れ替わりが速い）
+
+/* モード判定。上から順に評価し、最初に当たったものを採用する */
+const FEED_MODES = [
+  { key: "大会・スクリム", words: ["大会", "スクリム", "カスタム", "scrim", "algs", "予選", "本戦"] },
+  { key: "ランク",        words: ["ランク", "らんく", "ランクマ", "rank", "ソロランク", "デュオランク"] },
+  { key: "参加型",        words: ["参加型", "視聴者参加", "参加者募集", "コーチング"] },
+  { key: "練習・検証",    words: ["射撃訓練", "練習", "検証", "エイム", "aim", "感度"] },
+  { key: "カジュアル",    words: ["カジュアル", "カジュ", "ミックステープ", "アリーナ", "デュオ", "トリオ"] }
+];
+
+/* 話題語。ここを増やせば拾える語が増える */
+const FEED_TERMS = [
+  // ランク帯
+  { key: "プレデター", cat: "tier",   words: ["プレデター", "プレデタ", "pred"] },
+  { key: "マスター",   cat: "tier",   words: ["マスター", "master"] },
+  { key: "ダイヤ",     cat: "tier",   words: ["ダイヤ", "diamond"] },
+  { key: "プラチナ",   cat: "tier",   words: ["プラチナ", "プラチナ帯", "plat"] },
+  // 武器（S30 の調整対象を中心に）
+  { key: "RE-45",      cat: "weapon", words: ["re-45", "re45", "アールイー"] },
+  { key: "ボルト",     cat: "weapon", words: ["ボルト", "volt"] },
+  { key: "ネメシス",   cat: "weapon", words: ["ネメシス", "nemesis"] },
+  { key: "フラットライン", cat: "weapon", words: ["フラットライン", "フラトラ", "flatline"] },
+  { key: "R-301",      cat: "weapon", words: ["r-301", "r301", "サンマルイチ"] },
+  { key: "ウィングマン", cat: "weapon", words: ["ウィングマン", "wingman"] },
+  { key: "R-99",       cat: "weapon", words: ["r-99", "r99"] },
+  { key: "ハボック",   cat: "weapon", words: ["ハボック", "havoc"] },
+  { key: "ヘムロック", cat: "weapon", words: ["ヘムロック", "hemlok"] },
+  { key: "クレーバー", cat: "weapon", words: ["クレーバー", "kraber"] },
+  // レジェンド（使用率の高い順に絞って掲載）
+  { key: "アッシュ",   cat: "legend", words: ["アッシュ", "ash"] },
+  { key: "ブラッドハウンド", cat: "legend", words: ["ブラッドハウンド", "ブラハ", "bloodhound"] },
+  { key: "パスファインダー", cat: "legend", words: ["パスファインダー", "パスファ", "pathfinder"] },
+  { key: "オクタン",   cat: "legend", words: ["オクタン", "octane"] },
+  { key: "レイス",     cat: "legend", words: ["レイス", "wraith"] },
+  { key: "ホライゾン", cat: "legend", words: ["ホライゾン", "horizon"] },
+  { key: "カタリスト", cat: "legend", words: ["カタリスト", "catalyst"] },
+  { key: "ニューキャッスル", cat: "legend", words: ["ニューキャッスル", "ニューキャ", "newcastle"] },
+  { key: "コースティック", cat: "legend", words: ["コースティック", "カスティ", "caustic"] },
+  { key: "ジブラルタル", cat: "legend", words: ["ジブラルタル", "ジブ", "gibraltar"] },
+  // 仕様・話題
+  { key: "エネルギー弾", cat: "topic", words: ["エネルギー弾", "エネルギー"] },
+  { key: "ルート",     cat: "topic",  words: ["ルート", "loot", "漁り"] },
+  { key: "新シーズン", cat: "topic",  words: ["シーズン30", "s30", "新シーズン", "アプデ", "パッチ"] }
+];
+
+async function feed(request, env, ctx) {
   const cache = caches.default;
   const key = new Request(new URL(request.url).toString(), { method: "GET" });
-
   const hit = await cache.match(key);
   if (hit) return hit;
 
-  // ソースごとに独立して失敗を握り潰す（片方が落ちても全体は返る）
-  const [reddit, news] = await Promise.all([
-    feedReddit().catch(e => ({ ok: false, error: String(e.message || e), items: [] })),
-    feedNewsJa().catch(e => ({ ok: false, error: String(e.message || e), items: [] }))
-  ]);
+  const id = env.TWITCH_CLIENT_ID, secret = env.TWITCH_CLIENT_SECRET;
+  if (!id || !secret) return json({ ok: false, error: "Twitchの認証情報が未設定です" }, 200, 60);
+
+  let streams = [];
+  try {
+    const token = await twitchToken(id, secret);
+    const head = { "Client-ID": id, "Authorization": "Bearer " + token };
+
+    for (let i = 0; i < TWITCH_USERS.length; i += 100) {
+      const q = new URLSearchParams();
+      TWITCH_USERS.slice(i, i + 100).forEach(u => q.append("user_login", u));
+      q.append("first", "100");
+      const r = await fetch("https://api.twitch.tv/helix/streams?" + q, {
+        headers: head,
+        cf: { cacheTtl: 60, cacheEverything: true }
+      });
+      if (!r.ok) continue;
+      const j = await r.json();
+      (j.data || []).forEach(st => {
+        if (String(st.game_id) !== APEX_GAME_ID) return;   // Apex 以外は除外
+        streams.push({
+          login:   (st.user_login || "").toLowerCase(),
+          name:    st.user_name || "",
+          title:   st.title || "",
+          viewers: st.viewer_count || 0,
+          startedAt: st.started_at || null
+        });
+      });
+    }
+  } catch (e) {
+    return json({ ok: false, error: String(e.message || e) }, 200, 60);
+  }
+
+  streams.sort((a, b) => b.viewers - a.viewers);
+  const totalViewers = streams.reduce((n, s) => n + s.viewers, 0);
+
+  // --- モードの内訳 ---
+  const modes = {};
+  for (const st of streams) {
+    const t = feedNorm(st.title);
+    let hitKey = "その他";
+    for (const m of FEED_MODES) {
+      if (m.words.some(w => t.includes(feedNorm(w)))) { hitKey = m.key; break; }
+    }
+    if (!modes[hitKey]) modes[hitKey] = { key: hitKey, streams: 0, viewers: 0 };
+    modes[hitKey].streams++;
+    modes[hitKey].viewers += st.viewers;
+  }
+  const modeList = Object.values(modes).sort((a, b) => b.viewers - a.viewers);
+
+  // --- 話題語の言及 ---
+  const terms = [];
+  for (const term of FEED_TERMS) {
+    let n = 0, v = 0; const who = [];
+    for (const st of streams) {
+      const t = feedNorm(st.title);
+      if (term.words.some(w => t.includes(feedNorm(w)))) {
+        n++; v += st.viewers;
+        if (who.length < 3) who.push(st.name || st.login);
+      }
+    }
+    if (n > 0) terms.push({ key: term.key, cat: term.cat, streams: n, viewers: v, who });
+  }
+  terms.sort((a, b) => b.viewers - a.viewers);
 
   const res = json({
+    ok: true,
     generatedAt: new Date().toISOString(),
-    reddit,
-    news
+    summary: {
+      tracked: TWITCH_USERS.length,
+      apexLive: streams.length,
+      totalViewers
+    },
+    modes: modeList,
+    terms,
+    streams: streams.slice(0, 10)
   }, 200, FEED_TTL);
 
   if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(key, res.clone()));
   return res;
 }
 
-/* Reddit — 速度順 */
-async function feedReddit() {
-  // Workerからのアクセスが弾かれる場合に備えて2系統試す
-  const endpoints = [
-    "https://www.reddit.com/r/apexlegends/hot.json?limit=50",
-    "https://old.reddit.com/r/apexlegends/hot.json?limit=50"
-  ];
-
-  let data = null, lastStatus = 0, used = "";
-  for (const ep of endpoints) {
-    try {
-      const r = await fetch(ep, {
-        headers: { "User-Agent": FEED_UA, "Accept": "application/json" },
-        cf: { cacheTtl: FEED_TTL, cacheEverything: true }
-      });
-      lastStatus = r.status;
-      if (!r.ok) continue;
-      data = await r.json();
-      used = ep;
-      break;
-    } catch (_) { /* 次を試す */ }
-  }
-  if (!data) return { ok: false, error: "reddit fetch failed (" + lastStatus + ")", items: [] };
-
-  const now = Date.now() / 1000;
-  const items = [];
-
-  for (const c of (data.data && data.data.children) || []) {
-    const d = c.data;
-    if (!d || d.stickied) continue;                       // 運営の固定投稿は除外
-
-    const flair = d.link_flair_text || "";
-    if (FEED_EXCLUDE_FLAIR.includes(flair)) continue;
-
-    const ageH = (now - d.created_utc) / 3600;
-    if (ageH < FEED_MIN_AGE_H || ageH > FEED_MAX_AGE_H) continue;
-
-    const scoreV = d.score / ageH;
-    const cmtV   = d.num_comments / ageH;
-    const ratio  = typeof d.upvote_ratio === "number" ? d.upvote_ratio : 1;
-
-    const badges = [];
-    if (ratio < FEED_DEBATE_RATIO)  badges.push("debate");
-    if (cmtV >= 5)                  badges.push("accelerating");
-    if (/dev reply/i.test(flair))   badges.push("dev");
-    if (d.is_self)                  badges.push("text");
-
-    items.push({
-      id:       d.id,
-      title:    d.title,
-      // 必ず permalink を使う（url だと画像への直リンクになりコメント欄に届かない）
-      url:      "https://www.reddit.com" + d.permalink,
-      flair:    flair || null,
-      ratio:    Math.round(ratio * 100) / 100,
-      score:    d.score,
-      comments: d.num_comments,
-      ageH:     Math.round(ageH * 10) / 10,
-      velocity: Math.round((scoreV + cmtV * FEED_COMMENT_WEIGHT) * 10) / 10,
-      badges
-    });
-  }
-
-  items.sort((a, b) => b.velocity - a.velocity);
-  return { ok: true, source: used, count: items.length, items: items.slice(0, 15) };
-}
-
-/* Google News（日本語）— 日本語圏への着弾を見るため */
-async function feedNewsJa() {
-  const ep = "https://news.google.com/rss/search?q=Apex+Legends&hl=ja&gl=JP&ceid=JP:ja";
-
-  const r = await fetch(ep, {
-    headers: { "User-Agent": FEED_UA },
-    cf: { cacheTtl: FEED_TTL, cacheEverything: true }
-  });
-  if (!r.ok) return { ok: false, error: "news fetch failed (" + r.status + ")", items: [] };
-
-  const xml = await r.text();
-  const now = Date.now();
-  const items = [];
-
-  // Workers に DOMParser は無いので <item> ブロックを切り出して処理する
-  const blocks = xml.split("<item>").slice(1);
-  for (const b of blocks) {
-    const chunk = b.split("</item>")[0];
-    const title = feedTag(chunk, "title");
-    if (!title) continue;
-
-    const date = feedTag(chunk, "pubDate");
-    const t = date ? Date.parse(date) : NaN;
-    const ageH = isNaN(t) ? null : Math.round(((now - t) / 3600000) * 10) / 10;
-    if (ageH !== null && ageH > 48) continue;
-
-    items.push({
-      title,
-      url:    feedTag(chunk, "link") || null,
-      source: feedTag(chunk, "source") || null,
-      ageH
-    });
-  }
-
-  return { ok: true, count: items.length, items: items.slice(0, 20) };
-}
-
-function feedTag(chunk, tag) {
-  const m = chunk.match(new RegExp("<" + tag + "[^>]*>([\\s\\S]*?)</" + tag + ">"));
-  if (!m) return null;
-  let v = m[1].trim();
-  const cd = v.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
-  if (cd) v = cd[1];
-  return feedDecode(v.replace(/<[^>]+>/g, "").trim());
-}
-
-function feedDecode(s) {
-  return s
-    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
-    .replace(/&amp;/g, "&");   // &amp; は最後に処理する
+/* 全角・大小・記号のゆれを吸収してから照合する。
+   長音符「ー」はハイフンに変換しないこと。変換すると
+   「エネルギー」→「エネルギ-」となり辞書側と一致しなくなる。 */
+function feedNorm(s) {
+  return (s || "")
+    .toLowerCase()
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/[‐‑‒–—―]/g, "-")
+    .replace(/[\s　]+/g, "");
 }
 
 /* ---------- ヘルパー ---------- */
