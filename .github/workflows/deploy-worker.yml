@@ -1,1 +1,27 @@
+# 置き場所: .github/workflows/deploy-worker.yml
+#
+# worker.js を push すると自動で Cloudflare にデプロイされます。
+# 手動実行したいときは GitHub の Actions タブ → Run workflow から。
 
+name: Deploy Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker.js'
+      - 'wrangler.toml'
+      - '.github/workflows/deploy-worker.yml'
+  workflow_dispatch:        # 手動実行用のボタンが出ます
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
