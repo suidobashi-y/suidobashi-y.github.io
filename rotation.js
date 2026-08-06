@@ -1,4 +1,4 @@
-/* NEON GRID — マップローテーション共通モジュール
+/* APEX WORKBOOK — マップローテーション共通モジュール
    データ提供: Apex Legends Status (api.mozambiquehe.re)
    使い方: 下の API_KEY に自分のキーを入れる (https://apexlegendsstatus.com/api で無料取得)
    キーをクライアントに置きたくない場合は、PROXY_URL に自前の中継APIを指定してください。 */

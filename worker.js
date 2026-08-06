@@ -1,5 +1,5 @@
 /**
- * NEON GRID — API中継Worker (Cloudflare Workers)
+ * APEX WORKBOOK — API中継Worker (Cloudflare Workers)
  *
  * APIキーをブラウザに晒さずに済ませるための中継サーバーです。
  * 2つのエンドポイントを提供します。

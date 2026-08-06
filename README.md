@@ -1,4 +1,4 @@
-# NEON GRID — Apex Legends ツールキット
+# APEX WORKBOOK — エペの数値早見帳
 
 ## ファイル構成
 
