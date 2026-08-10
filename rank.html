@@ -25,7 +25,7 @@
 <meta name="description" content="Apex Legends のランク分布をチャートで表示。各ランク帯の人口比と累積上位%を確認できます。">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./shared.css">
-<script src="./data.js"></script>
+<script src="./data.js?v=20260810"></script>
 <style>
 /* ===== チャート ===== */
 .chart{padding:18px 14px 8px}
@@ -112,8 +112,8 @@
 </div>
 
 <div class="vtabs">
-  <button id="v-tier" class="on" onclick="setView('tier')">ティア別</button>
-  <button id="v-div" onclick="setView('div')">ディビジョン別</button>
+  <button id="v-tier" onclick="setView('tier')">ティア別</button>
+  <button id="v-div" class="on" onclick="setView('div')">ディビジョン別</button>
   <button id="v-ghost" class="on" onclick="toggleGhost()" style="margin-left:auto">S29最終を重ねる</button>
 </div>
 
@@ -152,9 +152,9 @@
 
 <script>
 var DATA = APEX_DATA.rank;        /* データは data.js で一元管理 */
-var PREV = APEX_DATA.rankPrev;    /* 比較用（ゴースト） */
-var VIEW = "tier";
-var GHOST = true;
+var PREV = APEX_DATA.rankPrev || APEX_DATA.rank;   /* 比較用（ゴースト）。古いdata.jsでも落ちないように */
+var VIEW = "div";
+var GHOST = !!APEX_DATA.rankPrev;
 
 function toggleGhost(){
   GHOST = !GHOST;
@@ -253,7 +253,7 @@ function render(){
   }
   document.getElementById("vnote").innerHTML = notes.join("<br>");
 }
-setView("tier");
+setView("div");
 </script>
 <script>
 (function(){

@@ -296,7 +296,7 @@ footer a{color:var(--cyan);text-decoration:none}
 
 <script>
 // ---- 既定値（data.js が読めなかった場合のフォールバック）
-let POP_EST = 616135; // 推定サンプル規模（プレデター=750×3機種 から逆算）
+let POP_EST = 616135, SHARE_SEASON = 'SEASON 30'; // 推定サンプル規模（プレデター=750×3機種 から逆算）
 const TIERS = [ // top -> bottom（全ティア実測値）
   {id:'pred',   en:'PRED',   jp:'プレデター', pct:0.5,    col:'var(--pred)',   c:'#ff3b5c', divs:false},
   {id:'master', en:'MASTER', jp:'マスター',   pct:2.008,  col:'var(--master)', c:'#b36bff', divs:false, lp:true},
@@ -319,6 +319,7 @@ try{
     if(t.divs && r.div) DIVW[t.id] = r.div;   // [I, II, III, IV]
   });
   DATA_LABEL = R.label; DATA_UPDATED = R.updated; DATA_SOURCE = R.source;
+  SHARE_SEASON = 'SEASON ' + R.seasonNo + ' // ' + R.updated.replace(/-/g,'.');
   POP_EST = Math.round(2250 / (R.tiers[0].pct/100));   // Pred=750×3機種 から母数を逆算
 }catch(e){}
 
@@ -421,7 +422,7 @@ function render(anim=true){
   $('score').textContent = dev.toFixed(1);
   $('top').innerHTML = `${topP<1?topP.toFixed(2):topP.toFixed(1)}<em>%</em>`;
   $('pct').innerHTML = `${(p*100).toFixed(1)}<em>%tile</em>`;
-  $('rankN').innerHTML = `${rankN.toLocaleString()}<em>位 / ${(POP/10000).toFixed(0)}万</em>`;
+  $('rankN').innerHTML = `${rankN.toLocaleString()}<em>位 / ${(POP_EST/10000).toFixed(0)}万</em>`;
   $('peer').innerHTML = `${peer.toLocaleString()}<em>人に1人</em>`;
   $('verdict').innerHTML = (t.pct===0
     ? `<b style="color:var(--magenta)">${t.jp}はまだ到達者が集計されていません。</b>リセット直後のため、この判定は暫定です。<br>`
@@ -482,7 +483,7 @@ async function makeCard(){
   g.fillText('N E O N   G R I D   / /   R A N K   A N A L Y Z E R', 64, 80);
   g.fillStyle='#ff2e7e'; g.font=CP('700 22px'); g.textAlign='right';
   g.shadowColor='rgba(255,46,126,.55)'; g.shadowBlur=12;
-  g.fillText('SEASON 29 // SPLIT 2', W-64, 80);
+  g.fillText(SHARE_SEASON, W-64, 80);
   g.shadowBlur=0; g.textAlign='left';
   g.fillStyle='#ffffff'; g.font=CP('700 54px');
   g.shadowColor='rgba(0,229,255,.7)'; g.shadowBlur=22;
