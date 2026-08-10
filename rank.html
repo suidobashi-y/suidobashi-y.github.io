@@ -37,6 +37,13 @@
   transition:width .95s cubic-bezier(.2,.85,.25,1);position:relative}
 .crow .val{font-family:'Chakra Petch';font-size:13px;font-weight:600;white-space:nowrap;
   opacity:0;transition:opacity .5s .5s}
+/* 前シーズン最終のゴースト（点線の輪郭） */
+.crow .ghost{position:absolute;left:0;top:0;height:22px;width:0;pointer-events:none;
+  border:1px dashed color-mix(in srgb,var(--c) 55%,transparent);border-left:none;border-radius:0 3px 3px 0;
+  background:color-mix(in srgb,var(--c) 7%,transparent);
+  transition:width .95s cubic-bezier(.2,.85,.25,1);opacity:0}
+.chart.gh .crow .ghost{opacity:1}
+.crow .bar{z-index:1}
 /* 目盛 */
 .axis{position:relative;margin-left:98px;height:26px;border-top:1px solid rgba(0,229,255,.14)}
 @media(max-width:520px){.axis{margin-left:82px}}
@@ -71,6 +78,7 @@
 .sum div{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:11px 12px;text-align:center}
 .sum .k{font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;color:var(--muted)}
 .sum .v{font-family:'Chakra Petch';font-size:20px;font-weight:700;color:var(--cyan);line-height:1.35}
+.sum .p{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.4}
 .cta{display:block;margin-top:18px;text-decoration:none;
   background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(255,45,120,.1));
   border:1px solid var(--cyan);border-radius:4px;padding:14px 16px;color:inherit;text-align:center}
@@ -106,6 +114,7 @@
 <div class="vtabs">
   <button id="v-tier" class="on" onclick="setView('tier')">ティア別</button>
   <button id="v-div" onclick="setView('div')">ディビジョン別</button>
+  <button id="v-ghost" class="on" onclick="toggleGhost()" style="margin-left:auto">S29最終を重ねる</button>
 </div>
 
 <div class="panel" style="margin-top:10px;padding:0">
@@ -117,16 +126,16 @@
 </div>
 
 <div class="sum">
-  <div><div class="k">プラチナ以上</div><div class="v" id="s-plat">—</div></div>
-  <div><div class="k">ダイヤ以上</div><div class="v" id="s-dia">—</div></div>
-  <div><div class="k">マスター以上</div><div class="v" id="s-mas">—</div></div>
+  <div><div class="k">ダイヤ以上</div><div class="v" id="s-dia">—</div><div class="p" id="p-dia">—</div></div>
+  <div><div class="k">プラチナ以上</div><div class="v" id="s-plat">—</div><div class="p" id="p-plat">—</div></div>
+  <div><div class="k">中央値の位置</div><div class="v" id="s-med">—</div><div class="p" id="p-med">—</div></div>
 </div>
 
 
 <p class="note" id="vnote" style="color:var(--amber)"></p>
-<p class="note">※出典サイトが追跡しているプレイヤー(約15万人)に対する比率で、ゲーム全体の実数ではありません。
+<p class="note">※出典サイトのデータベースに登録されたプレイヤーに対する比率で、ゲーム全体の実数ではありません。
 アクティブなプレイヤーほど登録されやすいため、上位帯の比率は実際より高めに出る傾向があります。
-スプリット序盤は下位帯、終盤は上位帯に偏る点もご留意ください。</p>
+点線は比較用に重ねたシーズン29スプリット2の最終分布です。</p>
 
 <a class="cta" href="./deviation.html">
   <div class="t">自分の偏差値を計算する →</div>
@@ -134,7 +143,7 @@
 </a>
 
 <footer>
-  <p>データ出典: <a href="https://apex.tracker.gg" target="_blank" rel="noopener">Apex Legends Tracker</a></p>
+  <p>データ出典: <a href="https://apexlegendsstatus.com/game-stats/ranked-distribution" target="_blank" rel="noopener">Apex Legends Status</a></p>
   <p class="disc">非公式ファンサイトです。EA / Respawn Entertainment とは一切関係ありません。
   Apex Legends is a trademark of Electronic Arts Inc.</p>
 </footer>
@@ -142,8 +151,16 @@
 </div>
 
 <script>
-var DATA = APEX_DATA.rank;   /* データは data.js で一元管理 */
+var DATA = APEX_DATA.rank;        /* データは data.js で一元管理 */
+var PREV = APEX_DATA.rankPrev;    /* 比較用（ゴースト） */
 var VIEW = "tier";
+var GHOST = true;
+
+function toggleGhost(){
+  GHOST = !GHOST;
+  document.getElementById("v-ghost").className = GHOST ? "on" : "";
+  render();
+}
 
 function setView(v){
   VIEW = v;
@@ -162,19 +179,27 @@ function render(){
   var rows = VIEW==="tier"
     ? DATA.tiers.map(function(t){ return {name:t.n, c:t.c, pct:t.pct, head:true}; })
     : APEX_DATA.divisions();
+  var prows = VIEW==="tier"
+    ? PREV.tiers.map(function(t){ return {name:t.n, pct:t.pct}; })
+    : APEX_DATA.divisions(PREV);
+  var pmap = {}; prows.forEach(function(x){ pmap[x.name]=x.pct; });
+  rows.forEach(function(x){ x.prev = pmap[x.name]!==undefined ? pmap[x.name] : 0; });
 
-  var max = Math.max.apply(null, rows.map(function(x){return x.pct}));
+  var max = Math.max.apply(null, rows.map(function(x){
+    return GHOST ? Math.max(x.pct, x.prev) : x.pct; }));
   var step = niceStep(max);
   var axisMax = Math.ceil(max/step)*step;
 
+  document.getElementById("chart").className = "chart" + (GHOST ? " gh" : "");
   document.getElementById("chart").innerHTML = rows.map(function(x,i){
     var cls = "crow c-"+x.c + (VIEW==="div" ? (x.head?" gtop":" sub") : "");
     var sep = (VIEW==="div" && x.head && i>0) ? '<div class="gsep"></div>' : '';
     return sep + '<div class="'+cls+'">'
       + '<div class="lbl">'+x.name+'</div>'
       + '<div class="barwrap">'
+      +   '<div class="ghost" data-w="'+(x.prev/axisMax*100)+'"></div>'
       +   '<div class="bar" data-w="'+(x.pct/axisMax*100)+'"></div>'
-      +   '<div class="val">'+x.pct.toFixed(1)+'%</div>'
+      +   '<div class="val">'+x.pct.toFixed(x.pct<1?2:1)+'%</div>'
       + '</div></div>';
   }).join("");
 
@@ -188,26 +213,40 @@ function render(){
   document.getElementById("gridlines").innerHTML = gl;
 
   requestAnimationFrame(function(){
-    document.querySelectorAll(".crow .bar").forEach(function(el){ el.style.width = el.dataset.w+"%"; });
+      document.querySelectorAll(".crow .bar, .crow .ghost").forEach(function(el){ el.style.width = el.dataset.w+"%"; });
     document.querySelectorAll(".crow .val").forEach(function(el){ el.style.opacity = 1; });
   });
 
   /* サマリーは常にティア基準 */
-  var t=DATA.tiers, cum=APEX_DATA.cumulative();
-  function cumOf(name){
-    var i=t.findIndex(function(x){return x.n===name});
-    return i<0? "—" : "上位 "+cum[i].toFixed(1)+"%";
+  var t=DATA.tiers, cum=APEX_DATA.cumulative(), cumP=APEX_DATA.cumulative(PREV);
+  function idxOf(name){ return t.findIndex(function(x){return x.n===name}); }
+  function setCum(elNow, elPrev, name){
+    var i=idxOf(name);
+    document.getElementById(elNow).textContent  = i<0? "—" : "上位 "+cum[i].toFixed(1)+"%";
+    document.getElementById(elPrev).textContent = i<0? ""  : "S29最終: 上位 "+cumP[i].toFixed(1)+"%";
   }
-  document.getElementById("s-plat").textContent = cumOf("プラチナ");
-  document.getElementById("s-dia").textContent  = cumOf("ダイヤモンド");
-  document.getElementById("s-mas").textContent  = cumOf("マスター");
+  setCum("s-dia",  "p-dia",  "ダイヤモンド");
+  setCum("s-plat", "p-plat", "プラチナ");
+
+  /* 中央値（50%ライン）がどのディビジョンに入るか */
+  function medianOf(src){
+    var run=0, rows=APEX_DATA.divisions(src);
+    for(var i=0;i<rows.length;i++){ run+=rows[i].pct; if(run>=50) return rows[i].name; }
+    return "—";
+  }
+  document.getElementById("s-med").textContent = medianOf(DATA);
+  document.getElementById("p-med").textContent = "S29最終: "+medianOf(PREV);
 
   document.getElementById("src").textContent =
-    DATA.label + "（データ更新: " + DATA.updated + "）";
+    DATA.label + "（データ取得: " + DATA.updated + " / 出典: " + DATA.source + "）";
   var notes = [];
   if(APEX_DATA.rankIsStale()){
     notes.push("※現在はシーズン" + APEX_DATA.currentSeason().no
       + "です。以下はシーズン" + DATA.seasonNo + "終了時点の分布で、最新の集計ではありません。");
+  }
+  if(DATA.inProgress){
+    notes.push("※シーズン進行中のスナップショットです。全員がリセット直後のため上位帯はまだ埋まっておらず、"
+      + "この分布は今後数週間かけて点線（S29最終）の形に近づいていきます。");
   }
   if(VIEW==="div" && DATA.divEstimated){
     notes.push("※ディビジョン別の内訳は推計値です。ティア全体の比率は実データに基づいています。");

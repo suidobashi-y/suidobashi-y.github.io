@@ -27,23 +27,45 @@ var APEX_DATA = {
 
   /* ランク分布：上位ティアから順に記述
      div : ディビジョン別の内訳 [I, II, III, IV]（合計が pct になるように）
-     出典: apex.tracker.gg（同サイトの追跡母集団=約15万人ベース。ゲーム全体の実数ではありません）
-     ★グラフからの読み取り値のため誤差があります。正確な値は各バーのツールチップで確認を */
+     出典: apexlegendsstatus.com（同サイトのDB登録プレイヤーが母集団。ゲーム全体の実数ではありません）
+     ★グラフからの読み取り値です。ゴールドIII / ダイヤI / プレデターはツールチップ実測値で
+       検証したところ誤差0.04pp以内でした。合計が100%になるよう正規化しています */
   rank: {
-    seasonNo: 29,   // この分布データのシーズン。現在のシーズンと違うと注意書きが出ます
-    label:   "シーズン29 スプリット2 / ランクマッチ",
-    updated: "2026-08-03",
-    source:  "apex.tracker.gg",
+    seasonNo: 30,   // この分布データのシーズン。現在のシーズンと違うと注意書きが出ます
+    label:   "シーズン30 スプリット1 / ランクマッチ（開幕6日目）",
+    updated: "2026-08-10",
+    dayFromStart: 6,
+    source:  "apexlegendsstatus.com",
+    divEstimated: false,
+    inProgress: true,   // シーズン進行中のスナップショット（上位帯がまだ埋まっていない）
+    tiers: [
+      {n:"プレデター",   s:"PRED", c:"pred",   pct: 0.19},
+      {n:"マスター",     s:"MAS",  c:"master", pct: 0.00},
+      {n:"ダイヤモンド", s:"DIA",  c:"dia",    pct: 6.46, div:[0.69, 1.05, 2.41, 2.31]},
+      {n:"プラチナ",     s:"PLA",  c:"plat",   pct:14.91, div:[2.16, 2.91, 4.87, 4.97]},
+      {n:"ゴールド",     s:"GLD",  c:"gold",   pct:33.54, div:[6.08, 7.99, 10.43, 9.04]},
+      {n:"シルバー",     s:"SIL",  c:"silver", pct:29.54, div:[7.38, 7.64, 7.74, 6.78]},
+      {n:"ブロンズ",     s:"BRZ",  c:"bronze", pct:14.32, div:[4.17, 3.57, 2.86, 3.72]},
+      {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 1.04, div:[0.45, 0.02, 0.02, 0.55]}
+    ]
+  },
+
+  /* 前シーズン最終の分布（ゴースト重ね表示・比較用）。同じ出典で揃えてあります */
+  rankPrev: {
+    seasonNo: 29,
+    label:   "シーズン29 スプリット2 最終",
+    updated: "2026-08-10",
+    source:  "apexlegendsstatus.com",
     divEstimated: false,
     tiers: [
-      {n:"プレデター",   s:"PRED", c:"pred",   pct: 1.5},
-      {n:"マスター",     s:"MAS",  c:"master", pct: 5.7},
-      {n:"ダイヤモンド", s:"DIA",  c:"dia",    pct:27.2, div:[3.3, 5.3, 10.4, 8.2]},
-      {n:"プラチナ",     s:"PLA",  c:"plat",   pct:27.9, div:[3.5, 5.9, 11.7, 6.8]},
-      {n:"ゴールド",     s:"GLD",  c:"gold",   pct:20.8, div:[4.0, 4.8, 6.0, 6.0]},
-      {n:"シルバー",     s:"SIL",  c:"silver", pct:11.9, div:[3.1, 3.0, 2.9, 2.9]},
-      {n:"ブロンズ",     s:"BRZ",  c:"bronze", pct: 3.5, div:[1.0, 0.9, 0.8, 0.8]},
-      {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 1.5, div:[0.4, 0.4, 0.4, 0.3]}
+      {n:"プレデター",   s:"PRED", c:"pred",   pct: 0.45},
+      {n:"マスター",     s:"MAS",  c:"master", pct: 2.55},
+      {n:"ダイヤモンド", s:"DIA",  c:"dia",    pct:35.15, div:[3.45, 6.80, 13.80, 11.10]},
+      {n:"プラチナ",     s:"PLA",  c:"plat",   pct:25.60, div:[6.80, 6.40, 7.00, 5.40]},
+      {n:"ゴールド",     s:"GLD",  c:"gold",   pct:16.95, div:[3.30, 3.75, 4.50, 5.40]},
+      {n:"シルバー",     s:"SIL",  c:"silver", pct:11.40, div:[2.05, 2.25, 2.65, 4.45]},
+      {n:"ブロンズ",     s:"BRZ",  c:"bronze", pct: 6.95, div:[1.30, 1.30, 1.30, 3.05]},
+      {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 0.95, div:[0.65, 0.00, 0.00, 0.30]}
     ]
   }
 };
@@ -61,9 +83,9 @@ APEX_DATA.rankIsStale = function(){
 };
 
 /* ディビジョン単位のフラット配列を返す（上位から順） */
-APEX_DATA.divisions = function(){
+APEX_DATA.divisions = function(src){
   var out=[];
-  this.rank.tiers.forEach(function(t){
+  (src || this.rank).tiers.forEach(function(t){
     if(!t.div){ out.push({name:t.n, tier:t.n, c:t.c, pct:t.pct, head:true}); return; }
     t.div.forEach(function(p,i){
       out.push({name:t.n+" "+["I","II","III","IV"][i], tier:t.n, c:t.c, pct:p, head:i===0});
@@ -72,9 +94,18 @@ APEX_DATA.divisions = function(){
   return out;
 };
 
+/* 前シーズン最終との差分（ポイント）を返す。上位ティアから順 */
+APEX_DATA.rankDelta = function(){
+  var prev=this.rankPrev.tiers;
+  return this.rank.tiers.map(function(t,i){
+    return {n:t.n, now:t.pct, prev:prev[i]?prev[i].pct:0,
+            diff:+(t.pct-(prev[i]?prev[i].pct:0)).toFixed(2)};
+  });
+};
+
 /* 累積(上位から)を返す */
-APEX_DATA.cumulative = function(){
-  var t=this.rank.tiers, cum=[], run=0;
+APEX_DATA.cumulative = function(src){
+  var t=(src || this.rank).tiers, cum=[], run=0;
   for(var i=0;i<t.length;i++){ run+=t[i].pct; cum[i]=run; }
   return cum;
 };
