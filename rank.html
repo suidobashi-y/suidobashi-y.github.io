@@ -114,7 +114,7 @@
 <div class="vtabs">
   <button id="v-tier" onclick="setView('tier')">ティア別</button>
   <button id="v-div" class="on" onclick="setView('div')">ディビジョン別</button>
-  <button id="v-ghost" class="on" onclick="toggleGhost()" style="margin-left:auto">S29最終を重ねる</button>
+  <button id="v-ghost" onclick="toggleGhost()" style="margin-left:auto">S29最終を重ねる</button>
 </div>
 
 <div class="panel" style="margin-top:10px;padding:0">
@@ -154,7 +154,7 @@
 var DATA = APEX_DATA.rank;        /* データは data.js で一元管理 */
 var PREV = APEX_DATA.rankPrev || APEX_DATA.rank;   /* 比較用（ゴースト）。古いdata.jsでも落ちないように */
 var VIEW = "div";
-var GHOST = !!APEX_DATA.rankPrev;
+var GHOST = false;
 
 function toggleGhost(){
   GHOST = !GHOST;
@@ -197,7 +197,7 @@ function render(){
     return sep + '<div class="'+cls+'">'
       + '<div class="lbl">'+x.name+'</div>'
       + '<div class="barwrap">'
-      +   '<div class="ghost" data-w="'+(x.prev/axisMax*100)+'"></div>'
+      +   '<div class="ghost" data-w="'+(GHOST ? x.prev/axisMax*100 : 0)+'"></div>'
       +   '<div class="bar" data-w="'+(x.pct/axisMax*100)+'"></div>'
       +   '<div class="val">'+x.pct.toFixed(x.pct<1?2:1)+'%</div>'
       + '</div></div>';
