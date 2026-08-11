@@ -170,7 +170,14 @@ APEX_DATA.streamers = [
   {name:"布団もぐり", twitch:"futon_moguri", tw:0, tags:["rank"]},
   {name:"愛姫みこな", twitch:"hashihimemikona", tw:0, tags:["rank"]},
   {name:"天音ひな", twitch:"amanehina", tw:0, tags:["rank"]},
-  {name:"おっさんの挑戦", twitch:"89workers", tw:0, tags:["rank"]}
+  {name:"おっさんの挑戦", twitch:"89workers", tw:0, tags:["rank"]},
+  /* 2026-08-11 追加（女性配信者・VTuber中心）
+     しゃちくさくさんはプロフィール記載のVTuber。フォロワー数は西村ほのかさん以外未確認のため0 */
+  {name:"しゃちくさく", twitch:"syachikusaku", tw:0, tags:["vtuber","rank"]},
+  {name:"どんちゃんん", twitch:"d0n__chqn_", tw:0, tags:["rank"]},
+  {name:"西村ほのか", twitch:"nishimura_honoka", tw:33, tags:["rank"]},
+  {name:"TsukiyuriKira", twitch:"tsukiyurikira", tw:0, tags:["rank"]},
+  {name:"事務員しぐま", twitch:"sigma_e57", tw:0, tags:["rank"]}
 ];
 
 /* ============================================================

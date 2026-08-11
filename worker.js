@@ -32,7 +32,9 @@ const TWITCH_USERS = [
   "irene28___", "karakaramann", "sawada0117", "chocolate5d",
   "amemiya328", "next_dayo", "mochiyuzu_", "ienaga25", "lullyru11",
   "chitchat_ai", "imperialkaz", "iamfjk", "hoshimai_chill", "sapo_ten",
-  "futon_moguri", "hashihimemikona", "amanehina", "89workers"
+  "futon_moguri", "hashihimemikona", "amanehina", "89workers",
+  "syachikusaku", "d0n__chqn_", "nishimura_honoka", "tsukiyurikira",
+  "sigma_e57"
 ];
 
 export default {
