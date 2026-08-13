@@ -285,7 +285,7 @@ footer a{color:var(--cyan);text-decoration:none}
       <div class="stat"><div class="k">同格プレイヤー</div><div class="v" id="peer">—<em>人に1人</em></div></div>
     </div>
     <div class="verdict" id="verdict"></div>
-    <button class="share" id="shareBtn">⬢ 結果を画像で保存</button>
+    <button class="share" id="shareBtn">⬢ 結果を画像でシェア</button>
     <div class="sharehint">Xの投稿に添付できる16:9カード（1200×675px・TLで見切れないサイズ）を生成します</div>
   </div>
 </section>
@@ -584,6 +584,18 @@ async function makeCard(){
   const f=$('footsrc'); if(f) f.textContent = `分布出典: ${DATA_SOURCE} 全プラットフォーム合算（${DATA_UPDATED}取得 / ${DATA_LABEL}）`;
 })();
 
+/* ---- 共有テキスト（画像に添えてXへ渡す） ---- */
+const SHARE_TAG = '#エペ早見帳';
+const SHARE_URL = 'https://apex-workbook.com/deviation.html?s=x';
+function buildShareText(){
+  const {t, topP} = currentCalc();
+  const rank = t.jp + divLabel(t);
+  const top  = topP<1 ? topP.toFixed(2) : topP.toFixed(1);
+  const sNo  = (SHARE_SEASON.match(/SEASON\s*(\d+)/)||[])[1];
+  const head = sNo ? ('S'+sNo+' ') : '';
+  return head + rank + '\n上位' + top + '%\n\n' + SHARE_TAG + '\n' + SHARE_URL;
+}
+
 const shareBtn=$('shareBtn');
 shareBtn.onclick=async()=>{
   shareBtn.disabled=true; shareBtn.textContent='⬢ 生成中…';
@@ -591,20 +603,25 @@ shareBtn.onclick=async()=>{
     const cv=await makeCard();
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const file=new File([blob],'apex-hensachi.png',{type:'image/png'});
+    const text=buildShareText();
+    /* 共有先がテキストを落とす実装に備えて、クリップボードにも入れておく */
+    try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } }catch(e){}
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'APEX 偏差値'});
+      await navigator.share({files:[file],title:'APEX 偏差値',text:text});
+      if(window.gtag) gtag('event','share_card',{method:'web_share'});
     }else{
+      if(window.gtag) gtag('event','share_card',{method:'download'});
       const a=document.createElement('a');
       a.href=URL.createObjectURL(blob); a.download='apex-hensachi.png';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     }
-    shareBtn.classList.add('done'); shareBtn.textContent='⬢ 保存しました';
+    shareBtn.classList.add('done'); shareBtn.textContent='⬢ 完了';
   }catch(e){
-    shareBtn.textContent = (e && e.name==='AbortError') ? '⬢ 結果を画像で保存' : '⬢ 失敗… もう一度タップ';
+    shareBtn.textContent = (e && e.name==='AbortError') ? '⬢ 結果を画像でシェア' : '⬢ 失敗… もう一度タップ';
   }finally{
     shareBtn.disabled=false;
-    setTimeout(()=>{shareBtn.classList.remove('done');shareBtn.textContent='⬢ 結果を画像で保存';},2500);
+    setTimeout(()=>{shareBtn.classList.remove('done');shareBtn.textContent='⬢ 結果を画像でシェア';},2500);
   }
 };
 </script>
