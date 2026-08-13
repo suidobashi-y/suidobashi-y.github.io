@@ -95,6 +95,13 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   border-radius:2px;padding:3px 10px;font-size:12.5px}
 .bad{margin-top:8px;font-size:13px;color:var(--muted)}
 .bad::before{content:"✕ ";color:var(--pink)}
+.fix{border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.05);
+  border-radius:4px;padding:13px 15px;margin-top:14px}
+.fix .lb{font-family:'Chakra Petch';font-size:10px;letter-spacing:.18em;color:var(--amber)}
+.fix ul{list-style:none;margin-top:7px}
+.fix li{font-size:12.5px;color:#c4cbdd;padding-left:14px;position:relative;margin-bottom:5px}
+.fix li::before{content:"–";position:absolute;left:0;color:var(--amber)}
+.fix .d{font-family:'Chakra Petch';color:var(--muted);margin-right:8px}
 .next{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:16px}
 .next a{font-weight:700;text-decoration:none}
 /* 元ポストへのリンク */
@@ -293,7 +300,16 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 
   <p class="note">対応クラス・効果の方向はゲーム内表記に準拠。
   実測値（マガジン数・発射速度の変化量）は計測でき次第このページに追記します。</p>
+  <div class="fix">
+    <div class="lb">UPDATED</div>
+    <ul>
+      <li><span class="d">2026-08-13</span>03 タクティカルレーザーの相性◎を
+      「P2020／R-99」から「プラウラー／P2020」に修正。R-99を相性×に移動しました。
+      反動制御が落ちる点について複数の指摘をいただき、内容を見直しています。</li>
+    </ul>
+  </div>
   <div class="post"><a href="https://x.com/apexwidgets/status/2087497352693346497" target="_blank" rel="noopener">元のポストを見る</a></div>
+  <p class="note">X で公開した画像版は03の推奨がR-99のままです。当ページの内容が最新となります。</p>
 </section>
 
 <section>
