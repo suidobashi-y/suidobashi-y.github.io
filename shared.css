@@ -43,6 +43,13 @@ a{color:var(--cyan)}
 .drawer a:last-child{border-bottom:none}
 .drawer a.on{color:var(--cyan)}
 .drawer a::after{content:"→";opacity:.35;font-size:12px}
+/* ドロワー内グループ（図解） */
+.drawer .grp{font-family:'Chakra Petch';font-size:10px;letter-spacing:.22em;
+  color:var(--cyan);opacity:.8;padding:13px 4px 5px}
+.drawer .grpbox{border-left:2px solid rgba(0,229,255,.22);
+  margin:0 0 2px 3px;padding-left:11px}
+.drawer .grpbox a{font-size:13px}
+.drawer .grpbox a:last-child{border-bottom:none}
 .eyebrow{font-family:'Chakra Petch';font-size:11px;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase}
 h1{font-family:'Chakra Petch';font-size:clamp(24px,5.5vw,34px);font-weight:700;line-height:1.2;margin:6px 0 10px}
 h1 .accent{color:var(--pink)}
