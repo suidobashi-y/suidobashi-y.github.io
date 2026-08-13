@@ -470,111 +470,144 @@ async function makeCard(){
   const g=cv.getContext('2d');
   const CP=w=>`${w} 'Chakra Petch','Noto Sans JP',sans-serif`;
   const NJ=w=>`${w} 'Noto Sans JP',sans-serif`;
-
-  // bg
-  g.fillStyle='#05060e'; g.fillRect(0,0,W,H);
-  let rg=g.createRadialGradient(W*.85,-60,0,W*.85,-60,700); rg.addColorStop(0,'rgba(123,92,255,.28)'); rg.addColorStop(1,'rgba(123,92,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
-  rg=g.createRadialGradient(-40,H*.7,0,-40,H*.7,650); rg.addColorStop(0,'rgba(0,229,255,.16)'); rg.addColorStop(1,'rgba(0,229,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
-  rg=g.createRadialGradient(W,H,0,W,H,520); rg.addColorStop(0,'rgba(255,46,126,.16)'); rg.addColorStop(1,'rgba(255,46,126,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
-  // grid
-  g.strokeStyle='rgba(0,229,255,.06)'; g.lineWidth=1;
-  for(let x=0;x<=W;x+=44){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
-  for(let y=0;y<=H;y+=44){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
-  // frame
-  g.strokeStyle='#1c2a4d'; g.lineWidth=2; g.strokeRect(24,24,W-48,H-48);
-  g.strokeStyle='#00e5ff'; g.lineWidth=3;
-  g.beginPath(); g.moveTo(24,64); g.lineTo(24,24); g.lineTo(120,24); g.stroke();
-  g.strokeStyle='#ff2e7e';
-  g.beginPath(); g.moveTo(W-24,H-64); g.lineTo(W-24,H-24); g.lineTo(W-120,H-24); g.stroke();
-
-  // header
-  g.fillStyle='#00e5ff'; g.font=CP('600 20px'); g.textBaseline='alphabetic';
-  g.fillText('N E O N   G R I D   / /   R A N K   A N A L Y Z E R', 64, 80);
-  g.fillStyle='#ff2e7e'; g.font=CP('700 22px'); g.textAlign='right';
-  g.shadowColor='rgba(255,46,126,.55)'; g.shadowBlur=12;
-  g.fillText(SHARE_SEASON, W-64, 80);
-  g.shadowBlur=0; g.textAlign='left';
-  g.fillStyle='#ffffff'; g.font=CP('700 54px');
-  g.shadowColor='rgba(0,229,255,.7)'; g.shadowBlur=22;
-  g.fillText('APEX 偏差値', 62, 144);
-  g.shadowBlur=0;
-
-  // tier badge (left column)
-  const bx=64, by=192;
-  g.fillStyle=t.c; g.shadowColor=t.c; g.shadowBlur=26;
-  g.beginPath();
-  g.moveTo(bx,by); g.lineTo(bx+330,by); g.lineTo(bx+352,by+22); g.lineTo(bx+352,by+86); g.lineTo(bx+22,by+86); g.lineTo(bx,by+64); g.closePath(); g.fill();
-  g.shadowBlur=0;
-  g.fillStyle='#050810'; g.font=CP('700 42px');
-  g.fillText(t.en + divLabel(t), bx+26, by+58);
-  g.fillStyle='#7387b3'; g.font=NJ('500 22px');
-  g.fillText('現在ランク：'+t.jp+(t.divs?divLabel(t):''), bx, by+122);
-
-  // stats (horizontal row, clear of the bottom strip)
-  const stats=[
-    ['TOP', (topP<1?topP.toFixed(2):topP.toFixed(1))+' %', 64],
-    ['PERCENTILE', (p*100).toFixed(1)+' %tile', 268],
-    ['RARITY', peer.toLocaleString()+'人に1人', 500],
-  ];
-  stats.forEach(([k,v,sx])=>{
-    g.fillStyle='#7387b3'; g.font=CP('600 18px'); g.fillText(k, sx, 386);
-    g.fillStyle=k==='TOP'?'#ff2e7e':'#d7e4ff';
-    if(k==='TOP'){g.shadowColor='rgba(255,46,126,.6)';g.shadowBlur=14;}
-    g.font=CP('700 40px'); g.fillText(v, sx, 430);
-    g.shadowBlur=0;
-  });
-
-  // giant hensachi gauge (right, enlarged)
-  const cx=W-320, cy=278, R=190;
-  const f=Math.min(1,Math.max(0,(dev-30)/60));
-  g.lineWidth=16; g.lineCap='round';
-  g.strokeStyle='#1c2a4d';
-  g.beginPath(); g.arc(cx,cy,R,Math.PI*0.75,Math.PI*2.25); g.stroke();
-  const lg=g.createLinearGradient(cx-R,cy,cx+R,cy);
-  lg.addColorStop(0,'#ff2e7e'); lg.addColorStop(.55,'#7b5cff'); lg.addColorStop(1,'#00e5ff');
-  g.strokeStyle=lg; g.shadowColor='rgba(0,229,255,.55)'; g.shadowBlur=20;
-  g.beginPath(); g.arc(cx,cy,R,Math.PI*0.75,Math.PI*(0.75+1.5*f)); g.stroke();
-  g.shadowBlur=0;
-  g.fillStyle='#ffffff'; g.textAlign='center';
-  g.shadowColor='rgba(0,229,255,.8)'; g.shadowBlur=34;
-  g.font=CP('700 150px'); g.fillText(dev.toFixed(1), cx, cy+50);
-  g.shadowBlur=0;
-  g.fillStyle='#00e5ff'; g.font=CP('600 24px');
-  g.fillText('H E N S A C H I', cx, cy+108);
-  g.textAlign='left';
-
-  // distribution strip with YOU marker (bottom, thicker)
-  // Apex公式ランクカラー準拠の明るめパレット（画像専用）
+  const MUT='#7387b3', CYAN='#00e5ff', MAG='#ff2e7e';
+  /* 画像専用の明るめパレット（Apex公式ランクカラー準拠） */
   const BRIGHT={rookie:'#BCC5D2',bronze:'#c08a4e',silver:'#cfd6e2',gold:'#f5c542',
                 plat:'#4CF0D5',dia:'#63B4FF',master:'#C97DFF',pred:'#FF4655'};
-  const dx=64, dy=520, dw=W-128, dh=48;
-  let ax=dx;
-  [...TIERS].reverse().forEach(tt=>{ // rookie -> pred, left to right
-    const w=dw*tt.pct/100;
-    const col=BRIGHT[tt.id]||tt.c;
-    if(tt.id===tier){ g.shadowColor=col; g.shadowBlur=18; g.globalAlpha=1; }
-    else{ g.shadowBlur=0; g.globalAlpha=.72; }
-    g.fillStyle=col;
-    g.fillRect(ax,dy,Math.max(w,2),dh);
-    g.shadowBlur=0; g.globalAlpha=1;
-    ax+=w;
-  });
-  g.strokeStyle='#1c2a4d'; g.lineWidth=1.5; g.strokeRect(dx,dy,dw,dh);
-  const mx=dx+dw*p;
-  g.fillStyle='#ff2e7e'; g.shadowColor='#ff2e7e'; g.shadowBlur=16;
-  g.beginPath(); g.moveTo(mx,dy-12); g.lineTo(mx-12,dy-30); g.lineTo(mx+12,dy-30); g.closePath(); g.fill();
-  g.fillRect(mx-2,dy-12,4,dh+12);
-  g.shadowBlur=0;
-  g.font=CP('700 22px'); g.textAlign=mx>W-170?'right':'left';
-  g.fillText('YOU', mx>W-170?mx-18:mx+16, dy-14);
-  g.textAlign='left';
-  g.fillStyle='#7387b3'; g.font=CP('600 16px');
-  g.fillText('◀ 下位', dx, dy+dh+30);
-  g.textAlign='right'; g.fillText('上位 ▶', dx+dw, dy+dh+30); g.textAlign='left';
+  const dim=(hex,f)=>{
+    const n=parseInt(hex.slice(1),16);
+    return `rgb(${Math.round((n>>16&255)*f)},${Math.round((n>>8&255)*f)},${Math.round((n&255)*f)})`;
+  };
 
-  // footer
-  g.fillStyle='#7387b3'; g.font=NJ('400 15px');
-  g.fillText(`Apex Legends ${DATA_LABEL} / ${DATA_SOURCE}（${DATA_UPDATED}取得・全機種合算）/ 偏差値=正規分布写像の理論値`, 64, H-40);
+  /* ---------- 背景 ---------- */
+  g.fillStyle='#05060e'; g.fillRect(0,0,W,H);
+  let rg=g.createRadialGradient(W*.85,-60,0,W*.85,-60,700); rg.addColorStop(0,'rgba(123,92,255,.26)'); rg.addColorStop(1,'rgba(123,92,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  rg=g.createRadialGradient(-40,H*.75,0,-40,H*.75,650); rg.addColorStop(0,'rgba(0,229,255,.15)'); rg.addColorStop(1,'rgba(0,229,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(0,229,255,.055)'; g.lineWidth=1;
+  for(let x=0;x<=W;x+=44){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+  for(let y=0;y<=H;y+=44){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.strokeStyle='#1c2a4d'; g.lineWidth=2; g.strokeRect(24,24,W-48,H-48);
+  g.strokeStyle=CYAN; g.lineWidth=4;
+  g.beginPath(); g.moveTo(24,74); g.lineTo(24,24); g.lineTo(130,24); g.stroke();
+  g.strokeStyle=MAG;
+  g.beginPath(); g.moveTo(W-24,H-74); g.lineTo(W-24,H-24); g.lineTo(W-130,H-24); g.stroke();
+
+  /* ---------- ヘッダー ---------- */
+  g.textBaseline='alphabetic';
+  g.fillStyle=CYAN; g.font=CP('600 19px');
+  g.fillText('N E O N   G R I D   / /   R A N K   P O S I T I O N', 64, 78);
+  g.textAlign='right'; g.fillStyle=MAG; g.font=CP('700 20px');
+  g.shadowColor='rgba(255,46,126,.5)'; g.shadowBlur=12;
+  g.fillText(SHARE_SEASON, W-64, 78); g.shadowBlur=0; g.textAlign='left';
+
+  /* ---------- 見出し ---------- */
+  const tcol=BRIGHT[t.id]||t.c;
+  g.fillStyle=tcol; g.font=CP('700 70px');
+  g.shadowColor=tcol; g.shadowBlur=18;
+  g.fillText(t.en+divLabel(t), 64, 176); g.shadowBlur=0;
+  g.fillStyle=MUT; g.font=NJ('400 19px');
+  g.fillText(t.jp+divLabel(t), 66, 210);
+
+  g.textAlign='right';
+  g.fillStyle=MUT; g.font=NJ('400 22px'); g.fillText('上位', W-64, 136);
+  g.fillStyle='#ffffff'; g.font=CP('700 90px');
+  g.shadowColor='rgba(0,229,255,.55)'; g.shadowBlur=26;
+  g.fillText((topP<1?topP.toFixed(2):topP.toFixed(1))+'%', W-64, 224);
+  g.shadowBlur=0; g.textAlign='left';
+
+  /* ---------- 分布ビンを構築（下位→上位） ---------- */
+  const bins=[];
+  [...TIERS].reverse().forEach(tt=>{
+    const w=DIVW[tt.id];
+    if(tt.divs && w){                       // w は [I,II,III,IV] なので下位から並べ替え
+      for(let i=3;i>=0;i--) bins.push({id:tt.id, v:w[i]});
+    }else{
+      bins.push({id:tt.id, v:tt.pct});
+    }
+  });
+  let UIDX=0;
+  {
+    const first=bins.findIndex(b=>b.id===t.id);
+    UIDX = (t.divs && DIVW[t.id]) ? first+(3-div) : first;
+  }
+
+  const CX0=64, CX1=W-64, CY1=470, CH=200, CY0=CY1-CH;
+  const maxv=Math.max(...bins.map(b=>b.v), 0.001);
+  const n=bins.length, bw=(CX1-CX0)/n;
+  const sm=bins.map((b,i)=>(bins[Math.max(0,i-1)].v + 2*b.v + bins[Math.min(n-1,i+1)].v)/4);
+  const pts=sm.map((v,i)=>[CX0+bw*(i+0.5), CY1-(v/maxv)*CH]);
+
+  /* 曲線下の面 */
+  g.beginPath(); g.moveTo(CX0,CY1);
+  pts.forEach(([x,y])=>g.lineTo(x,y));
+  g.lineTo(CX1,CY1); g.closePath();
+  const ag=g.createLinearGradient(0,CY0,0,CY1);
+  ag.addColorStop(0,'rgba(0,229,255,.16)'); ag.addColorStop(1,'rgba(0,229,255,.02)');
+  g.fillStyle=ag; g.fill();
+  /* 曲線 */
+  g.beginPath(); pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));
+  g.strokeStyle='#82cdff'; g.lineWidth=3; g.shadowColor='rgba(130,205,255,.7)'; g.shadowBlur=14;
+  g.stroke(); g.shadowBlur=0;
+
+  /* バー */
+  bins.forEach((b,i)=>{
+    const x=CX0+bw*i+2, h=Math.max((b.v/maxv)*CH,2);
+    const base=BRIGHT[b.id]||'#8a93a6';
+    if(i===UIDX){ g.fillStyle=base; g.shadowColor=base; g.shadowBlur=22; }
+    else{ g.fillStyle=dim(base,0.42); g.shadowBlur=0; }
+    g.fillRect(x, CY1-h, bw-4, h);
+  });
+  g.shadowBlur=0;
+  g.strokeStyle='#2a3c66'; g.lineWidth=2;
+  g.beginPath(); g.moveTo(CX0,CY1); g.lineTo(CX1,CY1); g.stroke();
+
+  /* ティア目盛 */
+  let bi=0;
+  [...TIERS].reverse().forEach(tt=>{
+    const cnt=(tt.divs && DIVW[tt.id])?4:1;
+    const x0=CX0+bw*bi, x1=CX0+bw*(bi+cnt);
+    g.strokeStyle='#2e426e'; g.lineWidth=2;
+    g.beginPath(); g.moveTo(x0,CY1); g.lineTo(x0,CY1+8); g.stroke();
+    g.fillStyle=dim(BRIGHT[tt.id]||'#8a93a6',0.85);
+    const short={rookie:'RKY',bronze:'BRZ',silver:'SIL',gold:'GLD',plat:'PLA',dia:'DIA',master:'MAS',pred:'PRED'}[tt.id];
+    g.font=CP('600 '+(cnt===1?15:17)+'px');
+    if(tt.id==='pred'){ g.textAlign='right'; g.fillText(short, CX1, CY1+32); }
+    else if(tt.id==='master'){ g.textAlign='center'; g.fillText(short, x0-2, CY1+32); }
+    else { g.textAlign='center'; g.fillText(short, (x0+x1)/2, CY1+32); }
+    g.textAlign='left';
+    bi+=cnt;
+  });
+  g.strokeStyle='#2e426e'; g.beginPath(); g.moveTo(CX1,CY1); g.lineTo(CX1,CY1+8); g.stroke();
+
+  /* YOU マーカー */
+  const mx=CX0+bw*(UIDX+0.5);
+  g.strokeStyle=MAG; g.lineWidth=3; g.shadowColor=MAG; g.shadowBlur=14;
+  g.setLineDash([6,5]);
+  g.beginPath(); g.moveTo(mx,CY0-40); g.lineTo(mx,CY1); g.stroke();
+  g.setLineDash([]);
+  g.fillStyle=MAG;
+  g.beginPath(); g.moveTo(mx,CY0-40); g.lineTo(mx-11,CY0-60); g.lineTo(mx+11,CY0-60); g.closePath(); g.fill();
+  g.shadowBlur=0;
+  g.font=CP('700 25px'); g.textAlign='center'; g.fillText('YOU', mx, CY0-72); g.textAlign='left';
+
+  /* ---------- 下段 ---------- */
+  g.strokeStyle='#1a284a'; g.lineWidth=1;
+  g.beginPath(); g.moveTo(64,522); g.lineTo(W-64,522); g.stroke();
+  const stats=[
+    ['PERCENTILE',(p*100).toFixed(1)+' %tile',64,CP('700 28px')],
+    ['RARITY',peer.toLocaleString()+'人に1人',352,NJ('700 26px')],
+    ['DEVIATION',dev.toFixed(1),640,CP('700 28px')],
+  ];
+  stats.forEach(([k,v,x,f])=>{
+    g.fillStyle='#586c98'; g.font=CP('600 14px'); g.fillText(k,x,568);
+    g.fillStyle='#bacceE'; g.font=f; g.fillText(v,x,600);
+  });
+  g.textAlign='right';
+  g.fillStyle=CYAN; g.font=CP('700 22px'); g.fillText('apex-workbook.com', W-64, 568);
+  g.fillStyle='#788cb8'; g.font=CP('600 17px'); g.fillText('@apexwidgets', W-64, 598);
+  g.textAlign='left';
+  g.fillStyle='#46567e'; g.font=NJ('400 13px');
+  g.fillText(`Apex Legends ${DATA_LABEL} / 出典 ${DATA_SOURCE}（${DATA_UPDATED}取得・全機種合算）`, 64, H-42);
   return cv;
 }
 
