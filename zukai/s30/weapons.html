@@ -20,8 +20,9 @@
 <meta property="og:title" content="S30 武器早見（ティア表・赤アタッチメント） | APEX WORKBOOK">
 <meta property="og:description" content="Apex Legends シーズン30「マークド」の床落ち武器26挺のティア表と、赤（破損アタッチメント）5種の装着先・相性早見。">
 <meta property="og:url" content="https://apex-workbook.com/zukai/s30/weapons.html">
-<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta property="og:image" content="https://apex-workbook.com/ogp-s30-weapons.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://apex-workbook.com/ogp-s30-weapons.png">
 <meta name="twitter:site" content="@apexwidgets">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../shared.css">
@@ -94,6 +95,13 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   border-radius:2px;padding:3px 10px;font-size:12.5px}
 .bad{margin-top:8px;font-size:13px;color:var(--muted)}
 .bad::before{content:"✕ ";color:var(--pink)}
+.fix{border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.05);
+  border-radius:4px;padding:13px 15px;margin-top:14px}
+.fix .lb{font-family:'Chakra Petch';font-size:10px;letter-spacing:.18em;color:var(--amber)}
+.fix ul{list-style:none;margin-top:7px}
+.fix li{font-size:12.5px;color:#c4cbdd;padding-left:14px;position:relative;margin-bottom:5px}
+.fix li::before{content:"–";position:absolute;left:0;color:var(--amber)}
+.fix .d{font-family:'Chakra Petch';color:var(--muted);margin-right:8px}
 .next{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:16px}
 .next a{font-weight:700;text-decoration:none}
 /* 元ポストへのリンク */
@@ -125,6 +133,8 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .wrapup p{font-size:12.5px;color:#c4cbdd;margin-top:5px}
 
 </style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
 <nav class="gnav"><div class="inner">
@@ -145,6 +155,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     <a href="../../zukai/s30/meta.html">メタ（S30）</a>
     <a href="../../zukai/s30/rank.html">ランク（S30）</a>
     <a href="../../zukai/s30/weapons.html" class="on">武器（S30）</a>
+    <a href="../../zukai/s30/attachments.html">破損アタッチメント実数値（S30）</a>
     </div>
     <a href="../../roadmap.html">ロードマップ</a>
 </div></div>
@@ -156,9 +167,9 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   <h1>武器<span class="accent">早見</span></h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
-    <span class="upd">最終更新: 2026-08-13</span>
+    <span class="upd">最終更新: 2026-08-14</span>
   </div>
-<nav class="sib"><span>メタ（作成中）</span><span>ランク（作成中）</span><a class="on" href="./weapons.html">武器</a></nav>
+<nav class="sib"><span>メタ（作成中）</span><span>ランク（作成中）</span><a class="on" href="./weapons.html">武器</a><a href="./attachments.html">実数値</a></nav>
 </header>
 
 <section>
@@ -261,8 +272,11 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     </div>
     <div class="fx"><span class="up">腰撃ち精度</span><span class="up">リロード速度</span><span class="dn">反動制御</span></div>
     <div class="rec"><span class="lb">相性◎</span>
-      <span class="good">P2020</span><span class="good">R-99</span></div>
-    <div class="bad">ADS主体の運用</div>
+      <span class="good">プラウラー</span><span class="good">P2020</span></div>
+    <div class="bad">ADS主体の運用 / R-99</div>
+    <p class="note">腰撃ち中心のプラウラーが最も噛み合います。
+    リロードが速くなる分、2人目への対応も早い。
+    R-99はもともと反動制御が課題になりやすく、通常のレーザーサイトで足りるという声が多数でした。</p>
   </div>
 
   <div class="atk">
@@ -287,9 +301,26 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     <div class="bad">トリプルテイク</div>
   </div>
 
-  <p class="note">対応クラス・効果の方向はゲーム内表記に準拠。
-  実測値（マガジン数・発射速度の変化量）は計測でき次第このページに追記します。</p>
+  <p class="note">対応クラス・効果の方向はゲーム内表記に準拠。</p>
+  <div class="point" style="border-left-color:var(--cyan);margin-top:14px">
+    <div class="lb" style="color:var(--cyan)">DATA</div>
+    <div class="hd">実測値を14挺ぶん公開しました</div>
+    <p>装弾数・リロード・反動制御が紫から何ポイント動くかは
+    <a href="./attachments.html">破損アタッチメント 実数値一覧</a>にまとめています。
+    ストック系の装弾数減少がマガジンのランクで変わる点も検証しました。</p>
+  </div>
+  <div class="fix">
+    <div class="lb">UPDATED</div>
+    <ul>
+      <li><span class="d">2026-08-14</span>破損アタッチメントの実測値ページを公開。
+      効果の方向だけでなく、武器ごとの変化量を数値で掲載しました。</li>
+      <li><span class="d">2026-08-13</span>03 タクティカルレーザーの相性◎を
+      「P2020／R-99」から「プラウラー／P2020」に修正。R-99を相性×に移動しました。
+      反動制御が落ちる点について複数の指摘をいただき、内容を見直しています。</li>
+    </ul>
+  </div>
   <div class="post"><a href="https://x.com/apexwidgets/status/2087497352693346497" target="_blank" rel="noopener">元のポストを見る</a></div>
+  <p class="note">X で公開した画像版は03の推奨がR-99のままです。当ページの内容が最新となります。</p>
 </section>
 
 <section>
@@ -331,7 +362,9 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 <section>
   <h2>あわせて見る</h2>
   <div class="next">
-    <p style="font-size:13.5px">自分のランクが上位何％にあたるかは
+    <p style="font-size:13.5px">破損アタッチメントの変化量は
+    <a href="./attachments.html">実数値一覧</a>に掲載しています。
+    自分のランクが上位何％にあたるかは
     <a href="../../deviation.html">ランク偏差値</a>で確認できます。
     シーズン全体の分布は<a href="../../rank.html">ランク分布</a>、
     レジェンドの使用率は<a href="../../pickrate.html">ピック率</a>に掲載しています。</p>
