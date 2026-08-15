@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JT68JRBHLK');
+</script>
+<title>ランク偏差値 | APEX WORKBOOK</title>
+<meta name="description" content="自分の Apex Legends のランクが上位何%かを偏差値で可視化。ティア・ディビジョンを選ぶだけで判定でき、シェア画像も生成できます。">
+<link rel="canonical" href="https://apex-workbook.com/deviation.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="ランク偏差値 | APEX WORKBOOK">
+<meta property="og:description" content="自分の Apex Legends のランクが上位何%かを偏差値で可視化。ティア・ディビジョンを選ぶだけで判定でき、シェア画像も生成できます。">
+<meta property="og:url" content="https://apex-workbook.com/deviation.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<script src="./data.js?v=20260810"></script>
+<style>
+:root{
+  --bg:#05060e;
+  --panel:#0b1020;
+  --panel2:#0e1530;
+  --line:#1c2a4d;
+  --cyan:#00e5ff;
+  --magenta:#ff2e7e;
+  --violet:#7b5cff;
+  --text:#d7e4ff;
+  --dim:#7387b3;
+  --rookie:#8a93a6; --bronze:#c08a4e; --silver:#cfd6e2; --gold:#f5c542;
+  --plat:#4fe3c9; --dia:#6fa8ff; --master:#b36bff; --pred:#ff3b5c;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100%}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(123,92,255,.18), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(0,229,255,.10), transparent 55%),
+    radial-gradient(700px 700px at 110% 90%, rgba(255,46,126,.10), transparent 55%),
+    var(--bg);
+  overflow-x:hidden;
+}
+/* grid floor */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.05) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+}
+/* scanlines */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;
+  background:repeating-linear-gradient(180deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px);
+  mix-blend-mode:overlay;
+}
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:20px 16px 56px}
+
+/* ---------- header ---------- */
+header{padding:10px 0 22px}
+.eyebrow{
+  font-family:'Chakra Petch';font-size:11px;letter-spacing:.32em;color:var(--cyan);
+  text-transform:uppercase;display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before,.eyebrow::after{content:"";height:1px;background:linear-gradient(90deg,var(--cyan),transparent);flex:0 0 26px}
+.eyebrow::after{background:linear-gradient(90deg,transparent,var(--magenta));flex:1}
+h1{
+  font-family:'Chakra Petch';font-weight:700;font-size:clamp(30px,9vw,42px);
+  line-height:1.05;margin-top:10px;letter-spacing:.02em;
+  color:#fff;position:relative;display:inline-block;
+  text-shadow:0 0 18px rgba(0,229,255,.45);
+}
+h1 .jp{
+  background:linear-gradient(92deg,var(--cyan) 10%,#9be8ff 45%,var(--magenta) 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h1.glitch::before,h1.glitch::after{
+  content:attr(data-text);position:absolute;inset:0;overflow:hidden;pointer-events:none;
+}
+h1.glitch::before{color:var(--magenta);clip-path:inset(12% 0 62% 0);transform:translate(-2px,-1px);opacity:.7;animation:gl1 3.4s infinite steps(1)}
+h1.glitch::after{color:var(--cyan);clip-path:inset(68% 0 8% 0);transform:translate(2px,1px);opacity:.7;animation:gl2 2.9s infinite steps(1)}
+@keyframes gl1{0%,92%{opacity:0}93%{opacity:.8;clip-path:inset(10% 0 70% 0)}96%{clip-path:inset(40% 0 30% 0)}100%{opacity:0}}
+@keyframes gl2{0%,88%{opacity:0}89%{opacity:.8;clip-path:inset(70% 0 5% 0)}94%{clip-path:inset(20% 0 55% 0)}100%{opacity:0}}
+.sub{margin-top:8px;color:var(--dim);font-size:12.5px;line-height:1.7}
+
+/* ---------- panels ---------- */
+.panel{
+  position:relative;background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:4px;padding:16px 14px 18px;margin-top:18px;
+  clip-path:polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+.panel::before{
+  content:"";position:absolute;top:0;left:0;width:42px;height:2px;background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);
+}
+.ptitle{
+  font-family:'Chakra Petch';font-size:12px;letter-spacing:.24em;color:var(--dim);
+  text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline;
+}
+.ptitle b{color:var(--text);font-weight:600}
+.ptitle .idx{color:var(--magenta);font-size:11px}
+
+/* tier chips */
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tier{
+  --c:var(--dim);
+  font-family:'Chakra Petch';font-size:12px;font-weight:600;letter-spacing:.04em;
+  padding:11px 4px 9px;text-align:center;color:var(--c);
+  background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:3px;
+  cursor:pointer;user-select:none;transition:transform .12s, box-shadow .2s, background .2s;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+}
+.tier small{display:block;font-family:'Noto Sans JP';font-size:9.5px;font-weight:500;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+.tier.on{
+  color:#050810;background:var(--c);border-color:var(--c);
+  box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent), inset 0 0 0 1px rgba(255,255,255,.35);
+  transform:translateY(-1px);
+}
+.tier.on small{color:rgba(5,8,16,.75)}
+.tier:active{transform:scale(.96)}
+
+/* division segmented */
+.divs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.dv{
+  font-family:'Chakra Petch';font-weight:700;font-size:15px;padding:10px 0;text-align:center;
+  color:var(--dim);border:1px solid var(--line);border-radius:3px;background:rgba(255,255,255,.02);
+  cursor:pointer;transition:all .15s;
+}
+.dv.on{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 12px rgba(0,229,255,.35), inset 0 0 12px rgba(0,229,255,.12)}
+.dv.dis{opacity:.25;pointer-events:none}
+
+/* LP slider */
+.lp{margin-top:16px}
+.lp .row{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);font-family:'Chakra Petch';letter-spacing:.08em}
+.lp .val{color:var(--cyan);font-weight:700;font-size:13px;text-shadow:0 0 8px rgba(0,229,255,.6)}
+input[type=range]{
+  width:100%;margin-top:10px;appearance:none;height:4px;border-radius:2px;outline:none;
+  background:linear-gradient(90deg,var(--magenta),var(--cyan));
+}
+input[type=range]::-webkit-slider-thumb{
+  appearance:none;width:22px;height:22px;border-radius:2px;transform:rotate(45deg);
+  background:#0a0f1e;border:2px solid var(--cyan);box-shadow:0 0 12px var(--cyan);cursor:pointer;
+}
+input[type=range]:focus-visible{outline:2px solid var(--magenta);outline-offset:4px}
+
+/* ---------- result ---------- */
+.result{padding:22px 14px 20px;overflow:hidden}
+.hud{position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 0 2px}
+.gauge{position:relative;width:min(78vw,300px)}
+.gauge svg{width:100%;height:auto;display:block;overflow:visible}
+.gnum{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transform:translateY(6%);
+}
+.gnum .n{
+  font-family:'Chakra Petch';font-weight:700;font-size:clamp(52px,17vw,72px);line-height:1;
+  color:#fff;text-shadow:0 0 24px rgba(0,229,255,.8),0 0 60px rgba(255,46,126,.35);
+  font-variant-numeric:tabular-nums;
+}
+.gnum .l{font-family:'Chakra Petch';font-size:11px;letter-spacing:.34em;color:var(--cyan);margin-top:6px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:18px}
+.stat{
+  border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:rgba(255,255,255,.02);
+  clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.stat .k{font-family:'Chakra Petch';font-size:10px;letter-spacing:.2em;color:var(--dim)}
+.stat .v{font-family:'Chakra Petch';font-weight:700;font-size:20px;margin-top:3px;color:var(--text);font-variant-numeric:tabular-nums}
+.stat .v em{font-style:normal;font-size:12px;color:var(--dim);margin-left:2px}
+.stat.hot .v{color:var(--magenta);text-shadow:0 0 12px rgba(255,46,126,.55)}
+.verdict{
+  margin-top:14px;width:100%;text-align:center;font-size:13px;line-height:1.8;color:var(--text);
+  border-top:1px dashed var(--line);padding-top:12px;
+}
+.verdict b{color:var(--cyan)}
+
+/* distribution chart */
+.chart{margin-top:6px}
+.crow{display:grid;grid-template-columns:88px 1fr 46px;align-items:center;gap:8px;margin-top:8px}
+.crow .cl{font-family:'Chakra Petch';font-size:11px;letter-spacing:.04em;color:var(--dim)}
+.crow .bar{position:relative;height:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.crow .fill{position:absolute;inset:0 auto 0 0;width:0;background:var(--c,#555);box-shadow:0 0 10px color-mix(in srgb,var(--c) 60%,transparent);transition:width .9s cubic-bezier(.2,.9,.2,1)}
+.crow .cp{font-family:'Chakra Petch';font-size:11px;text-align:right;color:var(--dim);font-variant-numeric:tabular-nums}
+.crow.me .cl,.crow.me .cp{color:#fff;font-weight:700;text-shadow:0 0 8px var(--c)}
+.crow.me .bar{border-color:var(--c);box-shadow:0 0 12px color-mix(in srgb,var(--c) 45%,transparent)}
+.crow.me .cl::after{content:"◀ YOU";color:var(--magenta);font-size:9px;margin-left:5px;letter-spacing:.1em;animation:blink 1.2s infinite steps(1)}
+@keyframes blink{50%{opacity:.25}}
+
+footer{margin-top:26px;font-size:10.5px;line-height:1.8;color:var(--dim)}
+footer a{color:var(--cyan);text-decoration:none}
+
+/* share button */
+.share{
+  margin-top:16px;width:100%;padding:14px 0;cursor:pointer;
+  font-family:'Chakra Petch';font-weight:700;font-size:14px;letter-spacing:.18em;
+  color:#050810;background:linear-gradient(92deg,var(--cyan),#7be9ff);
+  border:none;border-radius:3px;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  box-shadow:0 0 18px rgba(0,229,255,.45);
+  transition:transform .12s, box-shadow .2s;
+}
+.share:active{transform:scale(.97)}
+.share.done{background:linear-gradient(92deg,var(--magenta),#ff7bb0);box-shadow:0 0 18px rgba(255,46,126,.45)}
+.sharehint{margin-top:8px;text-align:center;font-size:10.5px;color:var(--dim)}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html" class="on">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./pickrate.html">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Apex Workbook // Rank Analyzer</div>
+  <h1 class="glitch" data-text="APEX 偏差値">APEX <span class="jp">偏差値</span></h1>
+  <div class="sub">ランクを選ぶだけで、全プレイヤー分布の中でのあなたの偏差値と上位%を即時算出。<br><span id="dataline">DATA: —</span></div>
+</header>
+
+<section class="panel">
+  <div class="ptitle"><b>RANK SELECT</b><span class="idx">/ 現在のティアを選択</span></div>
+  <div class="tiers" id="tiers"></div>
+  <div class="divs" id="divs"></div>
+  <div class="lp" id="lpBox">
+    <div class="row"><span>DIV内 LP ポジション</span><span class="val" id="lpVal">—</span></div>
+    <input type="range" id="lp" min="0" max="100" value="50" aria-label="ディビジョン内のLP位置">
+  </div>
+</section>
+
+<section class="panel result">
+  <div class="ptitle"><b>ANALYSIS RESULT</b><span class="idx">/ 解析結果</span></div>
+  <div class="hud">
+    <div class="gauge">
+      <svg viewBox="0 0 200 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="gg" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff2e7e"/><stop offset="55%" stop-color="#7b5cff"/><stop offset="100%" stop-color="#00e5ff"/>
+          </linearGradient>
+        </defs>
+        <path d="M14 110 A 86 86 0 0 1 186 110" fill="none" stroke="#1c2a4d" stroke-width="8" stroke-linecap="round"/>
+        <path id="arc" d="M14 110 A 86 86 0 0 1 186 110" fill="none" stroke="url(#gg)" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="270" stroke-dashoffset="270" style="transition:stroke-dashoffset .9s cubic-bezier(.2,.9,.2,1)"/>
+        <g id="ticks" stroke="#2a3a66" stroke-width="1.5"></g>
+      </svg>
+      <div class="gnum"><div class="n" id="score">—</div><div class="l">HENSACHI</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat hot"><div class="k">TOP %</div><div class="v" id="top">—<em>%</em></div></div>
+      <div class="stat"><div class="k">PERCENTILE</div><div class="v" id="pct">—<em>%tile</em></div></div>
+      <div class="stat"><div class="k">推定順位</div><div class="v" id="rankN">—<em>位</em></div></div>
+      <div class="stat"><div class="k">同格プレイヤー</div><div class="v" id="peer">—<em>人に1人</em></div></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <button class="share" id="shareBtn">⬢ 結果を画像でシェア</button>
+    <div class="sharehint">Xの投稿に添付できる16:9カード（1200×675px・TLで見切れないサイズ）を生成します</div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ptitle"><b>POPULATION MAP</b><span class="idx">/ 全体分布</span></div>
+  <div class="chart" id="chart"></div>
+</section>
+
+<footer>
+  偏差値は分布を正規分布に写像した理論値（50=中央値、+10=1σ）。ディビジョン別の実測比率を使用し、Div内のLPのみ均等と仮定しています。<br>
+  <span id="footsrc">分布出典: apexlegendsstatus.com 全プラットフォーム合算</span><br>
+  <b style="color:var(--cyan)">判定はシーズン進行中の分布に基づきます。</b>母集団が上に伸びるにつれ、同じランクでも偏差値は下がっていきます。<br>
+  <a href="https://apex.tracker.gg/apex/leaderboards/stats/all/RankScore" target="_blank" rel="noopener">Tracker Network</a> 等でも分布を確認可。非公式ファンツール / EA・Respawnとは無関係です。<br>
+</footer>
+</div>
+
+<script>
+// ---- 既定値（data.js が読めなかった場合のフォールバック）
+let POP_EST = 616135, SHARE_SEASON = 'SEASON 30'; // 推定サンプル規模（プレデター=750×3機種 から逆算）
+const TIERS = [ // top -> bottom（全ティア実測値）
+  {id:'pred',   en:'PRED',   jp:'プレデター', pct:0.5,    col:'var(--pred)',   c:'#ff3b5c', divs:false},
+  {id:'master', en:'MASTER', jp:'マスター',   pct:2.008,  col:'var(--master)', c:'#b36bff', divs:false, lp:true},
+  {id:'dia',    en:'DIA',    jp:'ダイヤ',     pct:34.288, col:'var(--dia)',    c:'#6fa8ff', divs:true},
+  {id:'plat',   en:'PLAT',   jp:'プラチナ',   pct:27.295, col:'var(--plat)',   c:'#4fe3c9', divs:true},
+  {id:'gold',   en:'GOLD',   jp:'ゴールド',   pct:16.68,  col:'var(--gold)',   c:'#f5c542', divs:true},
+  {id:'silver', en:'SILVER', jp:'シルバー',   pct:11.442, col:'var(--silver)', c:'#cfd6e2', divs:true},
+  {id:'bronze', en:'BRONZE', jp:'ブロンズ',   pct:7.01,   col:'var(--bronze)', c:'#c08a4e', divs:true},
+  {id:'rookie', en:'ROOKIE', jp:'ルーキー',   pct:1.007,  col:'var(--rookie)', c:'#8a93a6', divs:false, lp:true},
+];
+// ---- data.js（APEX_DATA.rank）を単一の情報源として上書き。読めなければ上の既定値で動作
+const DIVW = {};
+let DATA_LABEL='', DATA_UPDATED='', DATA_SOURCE='apexlegendsstatus.com';
+try{
+  const R = APEX_DATA.rank;
+  TIERS.forEach((t,i)=>{
+    const r = R.tiers[i];
+    if(!r) return;
+    t.pct = r.pct;
+    if(t.divs && r.div) DIVW[t.id] = r.div;   // [I, II, III, IV]
+  });
+  DATA_LABEL = R.label; DATA_UPDATED = R.updated; DATA_SOURCE = R.source;
+  SHARE_SEASON = 'SEASON ' + R.seasonNo + ' // ' + R.updated.replace(/-/g,'.');
+  POP_EST = Math.round(2250 / (R.tiers[0].pct/100));   // Pred=750×3機種 から母数を逆算
+}catch(e){}
+
+const above = {}; let acc=0;
+TIERS.forEach(t=>{ above[t.id]=acc; acc+=t.pct; });
+
+// inverse normal CDF (Acklam)
+function normInv(p){
+  if(p<=0)p=1e-9; if(p>=1)p=1-1e-9;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425, ph=1-pl; let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p<=ph){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+
+// state
+let tier='dia', div=3; // div: 0=I(top) .. 3=IV
+let lpFrac=0.5; // 0=div bottom, 1=div top
+
+const $=id=>document.getElementById(id);
+const tiersEl=$('tiers'), divsEl=$('divs');
+
+// build tier chips
+TIERS.forEach(t=>{
+  const b=document.createElement('button');
+  b.className='tier'; b.style.setProperty('--c',t.c);
+  b.innerHTML=`${t.en}<small>${t.jp}</small>`;
+  b.onclick=()=>{tier=t.id; if(t.divs&&div==null)div=3; render();};
+  b.dataset.id=t.id; tiersEl.appendChild(b);
+});
+// division buttons
+['I','II','III','IV'].forEach((r,i)=>{
+  const b=document.createElement('button');
+  b.className='dv'; b.textContent=r;
+  b.onclick=()=>{div=i;render();};
+  b.dataset.i=i; divsEl.appendChild(b);
+});
+$('lp').oninput=e=>{lpFrac=e.target.value/100;render(false);};
+
+// build chart rows
+const chartEl=$('chart');
+TIERS.forEach(t=>{
+  const row=document.createElement('div');
+  row.className='crow'; row.dataset.id=t.id; row.style.setProperty('--c',t.c);
+  row.innerHTML=`<span class="cl">${t.en}</span><span class="bar"><span class="fill"></span></span><span class="cp">${t.pct.toFixed(t.pct<1?2:1)}%${t.est?'<i style="color:var(--magenta);font-style:normal">※</i>':''}</span>`;
+  chartEl.appendChild(row);
+});
+
+// gauge ticks
+(()=>{const g=document.getElementById('ticks');
+for(let i=0;i<=10;i++){const a=Math.PI*(1-i/10);const cx=100+94*Math.cos(a),cy=110-94*Math.sin(a);
+const cx2=100+100*Math.cos(a),cy2=110-100*Math.sin(a);
+g.innerHTML+=`<line x1="${cx}" y1="${cy}" x2="${cx2}" y2="${cy2}"/>`;}})();
+
+function fracFromTopInTier(t){
+  if(t.id==='pred') return 0.5;                    // midpoint of Predator band
+  if(!t.divs) return 1-lpFrac;                     // Master / Rookie: LP slider only
+  const w = DIVW[t.id];
+  if(w && t.pct>0){                                // 実測のディビジョン比率を使用
+    let acc2=0; for(let i=0;i<div;i++) acc2 += w[i];
+    return (acc2 + w[div]*(1-lpFrac)) / t.pct;
+  }
+  return (div + (1-lpFrac))/4;                     // フォールバック: Div均等
+}
+
+function verdictText(dev,topP){
+  if(topP<=0.5) return `頂点領域。<b>200人ロビーならほぼ最強格</b>のポジションです。`;
+  if(topP<=2)  return `全プレイヤーの<b>上位2%圏内</b>。60人ロビーで実力最上位クラス。`;
+  if(topP<=10) return `<b>10人に1人</b>の上位層。ロビーの中で明確に「強い側」です。`;
+  if(topP<=25) return `上位1/4に入るランク帯。<b>平均を大きく超えた実力</b>です。`;
+  if(topP<=55) return `プレイヤーの中央値付近。ここから<b>1ティア上げると偏差値が大きく動きます</b>。`;
+  return `伸びしろゾーン。中央値まではあと少し — <b>1シーズンで一気に追い抜けます</b>。`;
+}
+
+function render(anim=true){
+  const t=TIERS.find(x=>x.id===tier);
+  // tier chips
+  [...tiersEl.children].forEach(b=>b.classList.toggle('on',b.dataset.id===tier));
+  // divisions
+  [...divsEl.children].forEach(b=>{
+    b.classList.toggle('dis',!t.divs);
+    b.classList.toggle('on',t.divs&&+b.dataset.i===div);
+  });
+  // LP slider visibility
+  const lpBox=$('lpBox');
+  lpBox.style.display = t.id==='pred' ? 'none' : '';
+  $('lpVal').textContent = t.id==='pred' ? '—' : `${Math.round(lpFrac*100)}% ${lpFrac>0.66?'▲上寄り':lpFrac<0.34?'▼下寄り':'◆中間'}`;
+
+  // math
+  const topP = above[t.id] + fracFromTopInTier(t)*t.pct;   // top %
+  const p = 1 - topP/100;                                   // percentile from bottom
+  const dev = 50 + 10*normInv(p);
+  const rankN = Math.max(1,Math.round(POP_EST*topP/100));
+  const peer = Math.max(1,Math.round(100/topP));
+
+  $('score').textContent = dev.toFixed(1);
+  $('top').innerHTML = `${topP<1?topP.toFixed(2):topP.toFixed(1)}<em>%</em>`;
+  $('pct').innerHTML = `${(p*100).toFixed(1)}<em>%tile</em>`;
+  $('rankN').innerHTML = `${rankN.toLocaleString()}<em>位 / ${(POP_EST/10000).toFixed(0)}万</em>`;
+  $('peer').innerHTML = `${peer.toLocaleString()}<em>人に1人</em>`;
+  $('verdict').innerHTML = (t.pct===0
+    ? `<b style="color:var(--magenta)">${t.jp}はまだ到達者が集計されていません。</b>リセット直後のため、この判定は暫定です。<br>`
+    : '') + verdictText(dev,topP);
+
+  // gauge: map dev 30..90 to arc
+  const f=Math.min(1,Math.max(0,(dev-30)/60));
+  $('arc').style.strokeDashoffset = 270*(1-f);
+
+  // chart
+  const maxPct=Math.max(...TIERS.map(x=>x.pct));
+  [...chartEl.children].forEach(row=>{
+    const tt=TIERS.find(x=>x.id===row.dataset.id);
+    row.classList.toggle('me',tt.id===tier);
+    row.querySelector('.fill').style.width=(tt.pct/maxPct*100)+'%';
+  });
+}
+render();
+
+/* ================= SHARE CARD (1200x675, X TL safe 16:9) ================= */
+function currentCalc(){
+  const t=TIERS.find(x=>x.id===tier);
+  const topP = above[t.id] + fracFromTopInTier(t)*t.pct;
+  const p = 1 - topP/100;
+  return {t, topP, p, dev: 50 + 10*normInv(p), peer: Math.max(1,Math.round(100/topP))};
+}
+function divLabel(t){
+  if(!t.divs) return '';
+  return ' ' + ['I','II','III','IV'][div];
+}
+async function makeCard(){
+  if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  const {t, topP, p, dev, peer} = currentCalc();
+  const W=1200,H=675, cv=document.createElement('canvas');
+  cv.width=W; cv.height=H;
+  const g=cv.getContext('2d');
+  const CP=w=>`${w} 'Chakra Petch','Noto Sans JP',sans-serif`;
+  const NJ=w=>`${w} 'Noto Sans JP',sans-serif`;
+  const MUT='#7387b3', CYAN='#00e5ff', MAG='#ff2e7e';
+  /* 画像専用の明るめパレット（Apex公式ランクカラー準拠） */
+  const BRIGHT={rookie:'#BCC5D2',bronze:'#c08a4e',silver:'#cfd6e2',gold:'#f5c542',
+                plat:'#4CF0D5',dia:'#63B4FF',master:'#C97DFF',pred:'#FF4655'};
+  const dim=(hex,f)=>{
+    const n=parseInt(hex.slice(1),16);
+    return `rgb(${Math.round((n>>16&255)*f)},${Math.round((n>>8&255)*f)},${Math.round((n&255)*f)})`;
+  };
+
+  /* ---------- 背景 ---------- */
+  g.fillStyle='#05060e'; g.fillRect(0,0,W,H);
+  let rg=g.createRadialGradient(W*.85,-60,0,W*.85,-60,700); rg.addColorStop(0,'rgba(123,92,255,.26)'); rg.addColorStop(1,'rgba(123,92,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  rg=g.createRadialGradient(-40,H*.75,0,-40,H*.75,650); rg.addColorStop(0,'rgba(0,229,255,.15)'); rg.addColorStop(1,'rgba(0,229,255,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(0,229,255,.055)'; g.lineWidth=1;
+  for(let x=0;x<=W;x+=44){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+  for(let y=0;y<=H;y+=44){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  g.strokeStyle='#1c2a4d'; g.lineWidth=2; g.strokeRect(24,24,W-48,H-48);
+  g.strokeStyle=CYAN; g.lineWidth=4;
+  g.beginPath(); g.moveTo(24,74); g.lineTo(24,24); g.lineTo(130,24); g.stroke();
+  g.strokeStyle=MAG;
+  g.beginPath(); g.moveTo(W-24,H-74); g.lineTo(W-24,H-24); g.lineTo(W-130,H-24); g.stroke();
+
+  /* ---------- ヘッダー ---------- */
+  g.textBaseline='alphabetic';
+  g.fillStyle=CYAN; g.font=CP('600 19px');
+  g.fillText('N E O N   G R I D   / /   R A N K   P O S I T I O N', 64, 78);
+  g.textAlign='right'; g.fillStyle=MAG; g.font=CP('700 20px');
+  g.shadowColor='rgba(255,46,126,.5)'; g.shadowBlur=12;
+  g.fillText(SHARE_SEASON, W-64, 78); g.shadowBlur=0; g.textAlign='left';
+
+  /* ---------- 見出し ---------- */
+  const tcol=BRIGHT[t.id]||t.c;
+  g.fillStyle=tcol; g.font=CP('700 70px');
+  g.shadowColor=tcol; g.shadowBlur=18;
+  g.fillText(t.en+divLabel(t), 64, 176); g.shadowBlur=0;
+  g.fillStyle=MUT; g.font=NJ('400 19px');
+  g.fillText(t.jp+divLabel(t), 66, 210);
+
+  g.textAlign='right';
+  g.fillStyle=MUT; g.font=NJ('400 22px'); g.fillText('上位', W-64, 136);
+  g.fillStyle='#ffffff'; g.font=CP('700 90px');
+  g.shadowColor='rgba(0,229,255,.55)'; g.shadowBlur=26;
+  g.fillText((topP<1?topP.toFixed(2):topP.toFixed(1))+'%', W-64, 224);
+  g.shadowBlur=0; g.textAlign='left';
+
+  /* ---------- 分布ビンを構築（下位→上位） ---------- */
+  const bins=[];
+  [...TIERS].reverse().forEach(tt=>{
+    const w=DIVW[tt.id];
+    if(tt.divs && w){                       // w は [I,II,III,IV] なので下位から並べ替え
+      for(let i=3;i>=0;i--) bins.push({id:tt.id, v:w[i]});
+    }else{
+      bins.push({id:tt.id, v:tt.pct});
+    }
+  });
+  let UIDX=0;
+  {
+    const first=bins.findIndex(b=>b.id===t.id);
+    UIDX = (t.divs && DIVW[t.id]) ? first+(3-div) : first;
+  }
+
+  const CX0=64, CX1=W-64, CY1=470, CH=200, CY0=CY1-CH;
+  const maxv=Math.max(...bins.map(b=>b.v), 0.001);
+  const n=bins.length, bw=(CX1-CX0)/n;
+  const sm=bins.map((b,i)=>(bins[Math.max(0,i-1)].v + 2*b.v + bins[Math.min(n-1,i+1)].v)/4);
+  const pts=sm.map((v,i)=>[CX0+bw*(i+0.5), CY1-(v/maxv)*CH]);
+
+  /* 曲線下の面 */
+  g.beginPath(); g.moveTo(CX0,CY1);
+  pts.forEach(([x,y])=>g.lineTo(x,y));
+  g.lineTo(CX1,CY1); g.closePath();
+  const ag=g.createLinearGradient(0,CY0,0,CY1);
+  ag.addColorStop(0,'rgba(0,229,255,.16)'); ag.addColorStop(1,'rgba(0,229,255,.02)');
+  g.fillStyle=ag; g.fill();
+  /* 曲線 */
+  g.beginPath(); pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));
+  g.strokeStyle='#82cdff'; g.lineWidth=3; g.shadowColor='rgba(130,205,255,.7)'; g.shadowBlur=14;
+  g.stroke(); g.shadowBlur=0;
+
+  /* バー */
+  bins.forEach((b,i)=>{
+    const x=CX0+bw*i+2, h=Math.max((b.v/maxv)*CH,2);
+    const base=BRIGHT[b.id]||'#8a93a6';
+    if(i===UIDX){ g.fillStyle=base; g.shadowColor=base; g.shadowBlur=22; }
+    else{ g.fillStyle=dim(base,0.42); g.shadowBlur=0; }
+    g.fillRect(x, CY1-h, bw-4, h);
+  });
+  g.shadowBlur=0;
+  g.strokeStyle='#2a3c66'; g.lineWidth=2;
+  g.beginPath(); g.moveTo(CX0,CY1); g.lineTo(CX1,CY1); g.stroke();
+
+  /* ティア目盛 */
+  let bi=0;
+  [...TIERS].reverse().forEach(tt=>{
+    const cnt=(tt.divs && DIVW[tt.id])?4:1;
+    const x0=CX0+bw*bi, x1=CX0+bw*(bi+cnt);
+    g.strokeStyle='#2e426e'; g.lineWidth=2;
+    g.beginPath(); g.moveTo(x0,CY1); g.lineTo(x0,CY1+8); g.stroke();
+    g.fillStyle=dim(BRIGHT[tt.id]||'#8a93a6',0.85);
+    const short={rookie:'RKY',bronze:'BRZ',silver:'SIL',gold:'GLD',plat:'PLA',dia:'DIA',master:'MAS',pred:'PRED'}[tt.id];
+    g.font=CP('600 '+(cnt===1?15:17)+'px');
+    if(tt.id==='pred'){ g.textAlign='right'; g.fillText(short, CX1, CY1+32); }
+    else if(tt.id==='master'){ g.textAlign='center'; g.fillText(short, x0-2, CY1+32); }
+    else { g.textAlign='center'; g.fillText(short, (x0+x1)/2, CY1+32); }
+    g.textAlign='left';
+    bi+=cnt;
+  });
+  g.strokeStyle='#2e426e'; g.beginPath(); g.moveTo(CX1,CY1); g.lineTo(CX1,CY1+8); g.stroke();
+
+  /* YOU マーカー */
+  const mx=CX0+bw*(UIDX+0.5);
+  g.strokeStyle=MAG; g.lineWidth=3; g.shadowColor=MAG; g.shadowBlur=14;
+  g.setLineDash([6,5]);
+  g.beginPath(); g.moveTo(mx,CY0-40); g.lineTo(mx,CY1); g.stroke();
+  g.setLineDash([]);
+  g.fillStyle=MAG;
+  g.beginPath(); g.moveTo(mx,CY0-40); g.lineTo(mx-11,CY0-60); g.lineTo(mx+11,CY0-60); g.closePath(); g.fill();
+  g.shadowBlur=0;
+  g.font=CP('700 25px'); g.textAlign='center'; g.fillText('YOU', mx, CY0-72); g.textAlign='left';
+
+  /* ---------- 下段 ---------- */
+  g.strokeStyle='#1a284a'; g.lineWidth=1;
+  g.beginPath(); g.moveTo(64,522); g.lineTo(W-64,522); g.stroke();
+  const stats=[
+    ['PERCENTILE',(p*100).toFixed(1)+' %tile',64,CP('700 28px')],
+    ['RARITY',peer.toLocaleString()+'人に1人',352,NJ('700 26px')],
+    ['DEVIATION',dev.toFixed(1),640,CP('700 28px')],
+  ];
+  stats.forEach(([k,v,x,f])=>{
+    g.fillStyle='#586c98'; g.font=CP('600 14px'); g.fillText(k,x,568);
+    g.fillStyle='#bacceE'; g.font=f; g.fillText(v,x,600);
+  });
+  g.textAlign='right';
+  g.fillStyle=CYAN; g.font=CP('700 22px'); g.fillText('apex-workbook.com', W-64, 568);
+  g.fillStyle='#788cb8'; g.font=CP('600 17px'); g.fillText('@apexwidgets', W-64, 598);
+  g.textAlign='left';
+  g.fillStyle='#46567e'; g.font=NJ('400 13px');
+  g.fillText(`Apex Legends ${DATA_LABEL} / 出典 ${DATA_SOURCE}（${DATA_UPDATED}取得・全機種合算）`, 64, H-42);
+  return cv;
+}
+
+(function(){
+  const line = DATA_LABEL ? `DATA: ${DATA_LABEL} / ${DATA_SOURCE}（${DATA_UPDATED}取得・全機種合算）` : 'DATA: apexlegendsstatus.com';
+  const el=$('dataline'); if(el) el.textContent = line;
+  const f=$('footsrc'); if(f) f.textContent = `分布出典: ${DATA_SOURCE} 全プラットフォーム合算（${DATA_UPDATED}取得 / ${DATA_LABEL}）`;
+})();
+
+/* ---- 共有テキスト（画像に添えてXへ渡す） ---- */
+const SHARE_TAG = '#エペ早見帳';
+const SHARE_URL = 'https://apex-workbook.com/deviation.html?s=x';
+function buildShareText(){
+  const {t, topP} = currentCalc();
+  const rank = t.jp + divLabel(t);
+  const top  = topP<1 ? topP.toFixed(2) : topP.toFixed(1);
+  const sNo  = (SHARE_SEASON.match(/SEASON\s*(\d+)/)||[])[1];
+  const head = sNo ? ('S'+sNo+' ') : '';
+  return head + rank + '\n上位' + top + '%\n\n' + SHARE_TAG + '\n' + SHARE_URL;
+}
+
+const shareBtn=$('shareBtn');
+shareBtn.onclick=async()=>{
+  shareBtn.disabled=true; shareBtn.textContent='⬢ 生成中…';
+  try{
+    const cv=await makeCard();
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    const file=new File([blob],'apex-hensachi.png',{type:'image/png'});
+    const text=buildShareText();
+    /* 共有先がテキストを落とす実装に備えて、クリップボードにも入れておく */
+    try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); } }catch(e){}
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'APEX 偏差値',text:text});
+      if(window.gtag) gtag('event','share_card',{method:'web_share'});
+    }else{
+      if(window.gtag) gtag('event','share_card',{method:'download'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='apex-hensachi.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    }
+    shareBtn.classList.add('done'); shareBtn.textContent='⬢ 完了';
+  }catch(e){
+    shareBtn.textContent = (e && e.name==='AbortError') ? '⬢ 結果を画像でシェア' : '⬢ 失敗… もう一度タップ';
+  }finally{
+    shareBtn.disabled=false;
+    setTimeout(()=>{shareBtn.classList.remove('done');shareBtn.textContent='⬢ 結果を画像でシェア';},2500);
+  }
+};
+</script>
+<style>
+/* --- 共通ナビをこのページのレイアウト幅に合わせる --- */
+.gnav{z-index:60}
+.gnav .inner{max-width:520px}
+.drawer{z-index:55}
+.drawer .panelmenu{max-width:520px}
+.gnav .brand{font-family:'Chakra Petch'}
+</style>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>

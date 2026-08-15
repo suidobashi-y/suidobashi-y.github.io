@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JT68JRBHLK');
+</script>
+<title>レジェンドピック率 | APEX WORKBOOK</title>
+<link rel="canonical" href="https://apex-workbook.com/pickrate.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="レジェンドピック率 | APEX WORKBOOK">
+<meta property="og:description" content="Apex Legends のレジェンドピック率ランキング。使用率の高い順と、直近7日の上昇率・下落率で並べ替えられます。">
+<meta property="og:url" content="https://apex-workbook.com/pickrate.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<meta name="description" content="Apex Legends のレジェンドピック率ランキング。使用率の高い順と、直近7日の上昇率・下落率で並べ替えられます。">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<script src="./data.js"></script>
+<style>
+/* ===== 並べ替えタブ ===== */
+.vtabs{display:flex;gap:6px;margin-top:18px}
+.vtabs button{font-family:'Chakra Petch';font-size:12px;letter-spacing:.08em;color:var(--muted);
+  background:none;border:1px solid var(--line);padding:6px 14px;border-radius:2px;cursor:pointer}
+.vtabs button.on{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.07)}
+
+/* ===== ランキング ===== */
+.rows{padding:4px 16px}
+.row{display:grid;grid-template-columns:30px 1fr auto;gap:11px;align-items:center;
+  padding:11px 0;border-bottom:1px solid rgba(0,229,255,.08)}
+.row:last-child{border-bottom:none}
+.rk{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--muted);text-align:right}
+.rows.by-pct .row:nth-child(-n+3) .rk{color:var(--cyan)}
+.nm{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.nm b{font-size:14px;font-weight:700}
+.nm span{font-family:'Chakra Petch';font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.bar{height:6px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;background:var(--cyan);border-radius:2px;
+  box-shadow:0 0 10px rgba(0,229,255,.45);
+  transition:width .9s cubic-bezier(.2,.85,.25,1)}
+/* レジェンドごとのイメージカラー（--lc は描画時に付与） */
+.bar i[style*="--lc"]{background:var(--lc);box-shadow:0 0 10px -1px var(--lc)}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;align-self:center;
+  box-shadow:0 0 7px -1px currentColor}
+.rows:not(.by-pct) .bar{display:none}
+.val{text-align:right;min-width:80px}
+.rows:not(.by-pct) .val{min-width:96px}
+.lead{font-family:'Chakra Petch';font-size:17px;font-weight:700;line-height:1.2}
+.rows:not(.by-pct) .lead{font-size:20px}
+.lead span{font-size:.62em}
+.trail{font-family:'Chakra Petch';font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--muted)}
+.up{color:var(--green)}.dn{color:var(--pink)}.fl{color:var(--muted)}
+.spike{color:var(--amber)}
+
+/* ===== 崖 ===== */
+.cliff{display:flex;align-items:center;gap:10px;padding:9px 0;
+  font-family:'Chakra Petch';font-size:9.5px;letter-spacing:.16em;color:var(--amber)}
+.cliff::before,.cliff::after{content:"";flex:1;height:1px;background:rgba(255,176,32,.3)}
+
+/* ===== CTA ===== */
+.cta{display:block;margin-top:18px;text-decoration:none;
+  background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(255,45,120,.1));
+  border:1px solid var(--cyan);border-radius:4px;padding:14px 16px;color:inherit;text-align:center}
+.cta .t{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--cyan)}
+.cta .d{font-size:12px;color:var(--muted);margin-top:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./pickrate.html" class="on">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
+
+<div class="wrap">
+
+<div style="padding-top:20px">
+  <div class="eyebrow">Pick Rate</div>
+  <h1>レジェンド<span class="accent">ピック率</span></h1>
+  <p style="font-size:13.5px;color:var(--muted)" id="src">—</p>
+</div>
+
+<div class="vtabs">
+  <button id="v-pct"  class="on" onclick="setView('pct')">ピック率順</button>
+  <button id="v-up"   onclick="setView('up')">上昇率順</button>
+  <button id="v-down" onclick="setView('down')">下落率順</button>
+</div>
+
+<div class="panel" style="margin-top:10px;padding:0">
+  <div class="rows by-pct" id="rows"></div>
+</div>
+
+<p class="note" id="vnote" style="color:var(--amber)"></p>
+<p class="note">※ピック率は「直近にそのレジェンドを使っていたプレイヤーの割合」で、勝率や強さを直接示すものではありません。
+出典サイトが追跡しているプレイヤーに対する比率のため、ゲーム全体の実数とは差があります。</p>
+<p class="note">※上昇率・下落率は7日前との相対変化率（(現在−7日前)÷7日前×100）です。
+集計サンプルが入れ替わったタイミングでは極端な値になることがあります。</p>
+<p class="note">※点線は「崖」＝ピック率順で隣接する順位同士の差が最も大きくなる位置です。
+1位と2位の差は対象外としています（突出した1体がいると常にそこが最大になるため）。</p>
+
+<a class="cta" href="./rank.html">
+  <div class="t">ランク分布を見る →</div>
+  <div class="d">各ランク帯の人口比と累積上位%。自分の位置を数字で確認できます</div>
+</a>
+
+<footer>
+  <p>データ出典: <a href="https://apexlegendsstatus.com/game-stats/legends-pick-rates" target="_blank" rel="noopener">Apex Legends Status</a>（<span id="f-sample">—</span>）</p>
+  <p class="disc">非公式ファンサイトです。EA / Respawn Entertainment とは一切関係ありません。
+  Apex Legends is a trademark of Electronic Arts Inc.</p>
+</footer>
+
+</div>
+
+<script>
+var PR = APEX_DATA.pickrate;   /* データは data.js で一元管理 */
+var view = "pct";
+
+document.getElementById("src").textContent =
+  PR.label + "（" + PR.updated.replace(/-/g,"/") + " 時点 / 出典 " + PR.source + "）";
+document.getElementById("f-sample").textContent = "母数 " + PR.sample;
+
+function fmtDelta(d){
+  if(Math.abs(d) < 0.05) return { mark:"─", cls:"fl", txt:"0%" };
+  return {
+    mark: d > 0 ? "▲" : "▼",
+    cls:  Math.abs(d) >= 100 ? "spike" : (d > 0 ? "up" : "dn"),
+    txt:  Math.abs(d).toFixed(2) + "%"
+  };
+}
+
+function setView(v){
+  view = v;
+  ["pct","up","down"].forEach(function(k){
+    document.getElementById("v-" + k).classList.toggle("on", k === v);
+  });
+  render();
+}
+
+function render(){
+  var sorted = APEX_DATA.pickrateSorted();
+  var max    = sorted[0][2];
+  var cliff  = APEX_DATA.pickrateCliff();
+
+  var list = sorted;
+  if(view === "up")   list = PR.legends.slice().sort(function(a,b){ return b[3]-a[3]; });
+  if(view === "down") list = PR.legends.slice().sort(function(a,b){ return a[3]-b[3]; });
+
+  var box = document.getElementById("rows");
+  box.className = "rows" + (view === "pct" ? " by-pct" : "");
+
+  var html = "";
+  list.forEach(function(r, i){
+    var en = r[0], ja = r[1], pct = r[2], d = fmtDelta(r[3]);
+    var col = r[4] || getComputedStyle(document.documentElement).getPropertyValue('--cyan');
+    var val = (view === "pct")
+      ? '<div class="lead">' + pct.toFixed(1) + '<span>%</span></div>' +
+        '<div class="trail ' + d.cls + '">' + d.mark + d.txt + '</div>'
+      : '<div class="lead ' + d.cls + '">' + d.mark + d.txt + '</div>' +
+        '<div class="trail">ピック率 ' + pct.toFixed(1) + '%</div>';
+
+    html +=
+      '<div class="row">' +
+        '<div class="rk">' + (i+1) + '</div>' +
+        '<div>' +
+          '<div class="nm">' +
+            '<span class="dot" style="background:' + col + ';color:' + col + '"></span>' +
+            '<b>' + ja + '</b><span>' + en.toUpperCase() + '</span></div>' +
+          '<div class="bar"><i style="--lc:' + col + '" data-w="' + (pct/max*100).toFixed(1) + '"></i></div>' +
+        '</div>' +
+        '<div class="val">' + val + '</div>' +
+      '</div>';
+
+    /* 崖はピック率順のときだけ意味を持つ */
+    if(view === "pct" && i + 1 === cliff.cut){
+      html += '<div class="cliff">CLIFF −' + cliff.gap.toFixed(1) + 'pt</div>';
+    }
+  });
+  box.innerHTML = html;
+
+  /* バーはレンダリング後に伸ばす */
+  requestAnimationFrame(function(){
+    Array.prototype.forEach.call(box.querySelectorAll(".bar i"), function(el){
+      el.style.width = el.getAttribute("data-w") + "%";
+    });
+  });
+
+  var notes = [];
+  if(APEX_DATA.pickrateIsStale()){
+    notes.push("※現在はシーズン" + APEX_DATA.currentSeason().no +
+               "です。表示中はシーズン" + PR.seasonNo + "終了時点のピック率です");
+  }
+  document.getElementById("vnote").innerHTML = notes.join("<br>");
+}
+
+setView("pct");
+</script>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>

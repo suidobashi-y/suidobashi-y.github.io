@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JT68JRBHLK');
+</script>
+<title>エイムアシスト仕様 | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legends のエイムアシスト値、発動条件の変更履歴、デバイス規制の状況をまとめた早見ページ。公式発表とコミュニティ検証を区別して掲載しています。">
+<link rel="canonical" href="https://apex-workbook.com/assist.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="エイムアシスト仕様 | APEX WORKBOOK">
+<meta property="og:description" content="Apex Legends のエイムアシスト値、発動条件の変更履歴、デバイス規制の状況をまとめた早見ページ。公式発表とコミュニティ検証を区別して掲載しています。">
+<meta property="og:url" content="https://apex-workbook.com/assist.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<style>
+.eyebrow{font-family:'Chakra Petch';font-size:11px;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase}
+header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
+h1{font-family:'Chakra Petch';font-size:clamp(26px,6vw,38px);font-weight:700;line-height:1.2;margin:6px 0 10px}
+h1 .accent{color:var(--pink)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);font-family:'Chakra Petch'}
+.meta .upd{color:var(--green)}
+nav.tools{display:flex;gap:8px;margin:14px 0 0;flex-wrap:wrap}
+nav.tools a{
+  font-family:'Chakra Petch';font-size:12px;text-decoration:none;color:var(--muted);
+  border:1px solid var(--line);padding:5px 12px;border-radius:2px;letter-spacing:.08em}
+nav.tools a.on{color:var(--cyan);border-color:var(--cyan)}
+section{margin-top:36px}
+h2{font-family:'Chakra Petch';font-size:18px;letter-spacing:.06em;color:var(--cyan);
+  display:flex;align-items:center;gap:10px;margin-bottom:14px}
+h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  padding:18px 16px;position:relative;margin-bottom:12px}
+.panel::before,.panel::after{content:"";position:absolute;width:10px;height:10px;border-color:var(--cyan);border-style:solid}
+.panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.tag{font-family:'Chakra Petch';font-size:10px;letter-spacing:.15em;padding:2px 8px;border-radius:2px;vertical-align:2px}
+.tag.official{background:rgba(45,255,168,.12);color:var(--green);border:1px solid rgba(45,255,168,.4)}
+.tag.verify{background:rgba(255,176,32,.12);color:var(--amber);border:1px solid rgba(255,176,32,.4)}
+.tag.tbd{background:rgba(138,147,173,.12);color:var(--muted);border:1px solid rgba(138,147,173,.4)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+/* 通説値テーブル */
+.vals{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+.vals th,.vals td{padding:10px 8px;border-bottom:1px solid rgba(0,229,255,.1);text-align:left}
+.vals th{font-family:'Chakra Petch';font-size:11px;letter-spacing:.1em;color:var(--muted);font-weight:400}
+.vals .num{font-family:'Chakra Petch';font-size:20px;font-weight:700;color:var(--cyan)}
+/* スティック図 */
+.sticks{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:16px 0 4px}
+.stick{text-align:center;font-size:12px}
+.ring{width:110px;height:110px;border:2px solid var(--muted);border-radius:50%;
+  margin:0 auto 8px;position:relative;display:flex;align-items:center;justify-content:center}
+.ring .thresh{position:absolute;width:62px;height:62px;border:2px dashed var(--pink);border-radius:50%}
+.ring .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);position:absolute}
+.stick .lbl{font-family:'Chakra Petch';letter-spacing:.05em}
+.ok{color:var(--green)} .ng{color:var(--pink)}
+/* changelog */
+.log{list-style:none;border-left:1px solid var(--line);margin-left:6px}
+.log li{position:relative;padding:0 0 22px 20px}
+.log li::before{content:"";position:absolute;left:-5px;top:8px;width:9px;height:9px;
+  background:var(--bg);border:2px solid var(--cyan);border-radius:50%}
+.log li.hot::before{border-color:var(--pink);box-shadow:0 0 8px rgba(255,45,120,.7)}
+.log .d{font-family:'Chakra Petch';font-size:12px;color:var(--muted);letter-spacing:.08em}
+.log .t{font-weight:700;margin:2px 0}
+.log p{font-size:13.5px;color:#c4cbdd}
+.src{font-size:11px;color:var(--muted)}
+footer{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}
+@media(prefers-reduced-motion:no-preference){
+  .ring .thresh{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 12px rgba(255,45,120,.5)}}
+}
+
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./pickrate.html">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html" class="on">エイムアシスト</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Apex Workbook // Intel</div>
+  <h1>エイムアシスト<span class="accent">仕様まとめ</span></h1>
+  <div class="meta">
+    <span>SEASON 29 → 30</span><span>|</span>
+    <span class="upd">最終更新: 2026-08-02</span>
+  </div>
+</header>
+
+<section>
+  <h2>現在のアシスト値(通説)</h2>
+  <div class="panel">
+    <table class="vals">
+      <tr><th>マッチ環境</th><th>値</th><th>根拠</th></tr>
+      <tr><td>コンソール同士</td><td class="num">0.6</td><td><span class="tag official">推定/過去公式</span></td></tr>
+      <tr><td>PC(PADのみ)</td><td class="num">0.4</td><td><span class="tag official">S21パッチ</span></td></tr>
+      <tr><td>クロスプレイ混成</td><td class="num">0.3</td><td><span class="tag official">S22パッチ</span></td></tr>
+    </table>
+    <p class="note">※公式は現行の具体値を公表していません。上記はパッチノートの弱体化幅から
+    コミュニティが逆算している「通説値」で、現行PC値を0.3とする説もあります。
+    数値はRotational(追尾)側のみで、Slow-down(減速)側は弱体化の対象外とされています。</p>
+  </div>
+</section>
+
+<section>
+  <h2>2026年7月末の仕様変更 <span class="tag verify">検証ベース</span></h2>
+  <div class="panel">
+    <p><strong>弱体化というより「発動条件の変更」。</strong>アシストの強さ(数値)は据え置きのまま、
+    <strong style="color:var(--pink)">一定以上スティックを倒さないとアシストが発動しない</strong>仕様になったと、複数プレイヤーの検証で報告されています。</p>
+    <div class="sticks">
+      <div class="stick">
+        <div class="ring"><div class="dot" style="top:22px;right:26px"></div></div>
+        <div class="lbl">変更前</div><div class="ok">微入力でもアシストON</div>
+      </div>
+      <div class="stick">
+        <div class="ring"><div class="thresh"></div><div class="dot" style="top:38px;right:40px"></div></div>
+        <div class="lbl">変更後</div><div class="ng">発動ライン未満はOFF</div>
+      </div>
+    </div>
+    <p style="font-size:13.5px">影響が大きいのは<strong>リニア×微入力で追いエイムするスタイル</strong>。
+    細かい視点調整で当てていた人ほど「当て感」が低下します。大きく倒す操作は従来どおり。</p>
+    <p style="font-size:13.5px;margin-top:8px"><strong style="color:var(--green)">対策:</strong>
+    追いエイム時に発動ラインまでしっかりスティックを倒す意識を。デッドゾーン・反応曲線の見直しも有効です。</p>
+    <p class="note">※2026年7月末時点・プレイヤー検証ベースの情報(公式パッチノート未記載)。続報あり次第更新します。</p>
+  </div>
+</section>
+
+<section>
+  <h2>デバイス・類似機能の規制状況</h2>
+  <div class="panel">
+    <table class="vals">
+      <tr><th>対象</th><th>現在の扱い</th><th>根拠</th></tr>
+      <tr><td>コンバーター<br><span style="font-size:11px;color:var(--muted)">XIM / Cronus / Strikepack / Titan等</span></td>
+        <td style="color:var(--pink);font-weight:700">検知次第、即永久BAN</td>
+        <td><span class="tag official">公式</span></td></tr>
+      <tr><td>ジッターエイム</td>
+        <td style="color:var(--pink);font-weight:700">チート行為と認定</td>
+        <td><span class="tag official">公式</span></td></tr>
+      <tr><td>RCフィルター<br><span style="font-size:11px;color:var(--muted)">アシスト悪用・リコイル抑制目的</span></td>
+        <td style="color:var(--pink);font-weight:700">チート行為と認定 / BAN対象</td>
+        <td><span class="tag official">公式</span></td></tr>
+      <tr><td>RCフィルター<br><span style="font-size:11px;color:var(--muted)">ノイズ低減目的の通常使用</span></td>
+        <td style="color:var(--amber)">技術自体は否定されず</td>
+        <td><span class="tag official">開発者言及</span></td></tr>
+    </table>
+    <p class="note">※2026年7月10日付の公式発表では「エイムアシストの仕組みを悪用する目的、
+    またはリコイルを抑制・無効化する目的」での使用がチート認定の条件。
+    RCフィルターというスティックのノイズ低減技術そのものの禁止ではない点に注意。
+    ALGS(競技シーン)ではそれに先行して、RCフィルター調整可能なコントローラー自体が使用禁止になっています。</p>
+  </div>
+</section>
+
+<section>
+  <h2>変更履歴</h2>
+  <ul class="log">
+    <li class="hot">
+      <div class="d">2026-08-05(予定)</div>
+      <div class="t">シーズン30「Marked」開幕 <span class="tag tbd">記載有無を確認中</span></div>
+      <p>パッチノートにアシスト関連の記載があるか開幕後に確認し、本ページへ反映します。</p>
+    </li>
+    <li class="hot">
+      <div class="d">2026-07下旬</div>
+      <div class="t">発動条件の変更(サイレント) <span class="tag verify">検証ベース</span></div>
+      <p>微入力ではアシストが発動しない仕様に。アシスト値自体は据え置き。</p>
+      <div class="src">出典: プレイヤー検証(@apexwidgets まとめ)</div>
+    </li>
+    <li class="hot">
+      <div class="d">2026-07-10</div>
+      <div class="t">ジッターエイム / RCフィルター悪用をチート認定 <span class="tag official">公式</span></div>
+      <p>アシスト悪用・リコイル抑制/無効化目的での使用を明確にチート行為と認定、BAN対象に。
+      発表日以降の行為が対象で、それ以前のクリップは対応外と開発者が明言。</p>
+      <div class="src">出典: Apex Legends公式コミュニティ(X) / Respawn開発者ポスト</div>
+    </li>
+    <li>
+      <div class="d">2026-05-02</div>
+      <div class="t">ALGSでRCフィルター搭載コントローラーが使用禁止 <span class="tag official">公式(競技)</span></div>
+      <p>プロリーグにおいて、RCフィルターを調整可能なコントローラーの使用を禁止。
+      一般マッチへの規制はこの時点では未実施(→7月に上記の形で拡大)。</p>
+    </li>
+    <li>
+      <div class="d">2026-02中旬</div>
+      <div class="t">XIM使用者2,000超を一斉永久BAN / コンバーター即永久BAN方針を明文化 <span class="tag official">公式</span></div>
+      <p>Strikepack・Cronus・XIM等「入力動作を操作する第三者製ハードウェア」は
+      検知次第、即座に永久BANとする方針を公式声明で明確化。</p>
+    </li>
+    <li>
+      <div class="d">2026-01</div>
+      <div class="t">Titan使用者1,000超を永久BAN <span class="tag official">公式</span></div>
+      <p>コンバーター検知システム強化後の大規模BAN第一弾。</p>
+    </li>
+    <li>
+      <div class="d">2024 / シーズン22</div>
+      <div class="t">クロスプレイ混成マッチで0.3に <span class="tag official">公式</span></div>
+      <p>PC版PADがキーマウ混在マッチに入った際、0.4→0.3へ低下する調整。</p>
+    </li>
+    <li>
+      <div class="d">2024 / シーズン21</div>
+      <div class="t">PC版 0.6 → 0.4 <span class="tag official">公式</span></div>
+      <p>PC版コントローラーのRotational Aim Assistを弱体化。コンソール同士は0.6のまま維持。</p>
+    </li>
+  </ul>
+</section>
+
+<footer>
+  <p>本ページは公式発表・パッチノート・コミュニティ検証を区別して掲載しています。
+  タグの意味 — <span class="tag official">公式</span> パッチノート等に記載 /
+  <span class="tag verify">検証ベース</span> プレイヤー検証(未公式) /
+  <span class="tag tbd">未確定</span> 続報待ち。</p>
+  <p style="margin-top:8px">誤りの指摘・掲載に関するご連絡: X @apexwidgets</p>
+</footer>
+
+</div>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>
