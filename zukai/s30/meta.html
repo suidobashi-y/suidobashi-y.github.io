@@ -11,14 +11,14 @@
   gtag('js', new Date());
   gtag('config', 'G-JT68JRBHLK');
 </script>
-<title>S30 メタ早見 | APEX WORKBOOK</title>
-<meta name="description" content="Apex Legends シーズン30「マークド」のメタ図解。レジェンド構成とピック傾向のまとめ（準備中）。">
+<title>S30 メタ早見（ランク帯別ピック率） | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legends シーズン30「マークド」のメタ。ランク帯を上げるほど選ばれるレジェンドと、下位帯だけで人気のレジェンドを、シルバー／プラチナ／ダイヤ／マスター帯のピック率で比較しています。">
 <link rel="canonical" href="https://apex-workbook.com/zukai/s30/meta.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="APEX WORKBOOK">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:title" content="S30 メタ早見 | APEX WORKBOOK">
-<meta property="og:description" content="Apex Legends シーズン30「マークド」のメタ図解。レジェンド構成とピック傾向のまとめ（準備中）。">
+<meta property="og:title" content="S30 メタ早見（ランク帯別ピック率） | APEX WORKBOOK">
+<meta property="og:description" content="ランク帯を上げるほど選ばれるレジェンドと、下位帯だけで人気のレジェンド。シルバー／プラチナ／ダイヤ／マスター帯のピック率で比較。">
 <meta property="og:url" content="https://apex-workbook.com/zukai/s30/meta.html">
 <meta property="og:image" content="https://apex-workbook.com/ogp.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -43,15 +43,114 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .sib span{opacity:.45}
 .sib a.on{color:var(--cyan);border-color:var(--cyan)}
 
-.soonbox{background:var(--panel);border:1px solid var(--line);border-radius:4px;
-  padding:26px 18px;text-align:center}
-.soonbox .lb{font-family:'Chakra Petch';font-size:12px;letter-spacing:.24em;color:var(--amber)}
-.soonbox p{font-size:13.5px;color:#c4cbdd;margin-top:10px}
-.soonbox .go{display:inline-block;margin-top:16px;font-family:'Chakra Petch';font-size:12px;
-  letter-spacing:.08em;text-decoration:none;color:var(--cyan);
-  border:1px solid var(--cyan);padding:8px 16px;border-radius:2px}
+/* リード */
+.lead{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--pink);
+  border-radius:4px;padding:15px 16px}
+.lead .lb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--pink)}
+.lead .hd{font-size:19px;font-weight:700;line-height:1.4;margin:5px 0 8px}
+.lead p{font-size:13px;color:#c4cbdd}
 
+/* 2列比較 */
+.vs{display:flex;gap:10px}
+.vs>div{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:12px 11px}
+.vs .cap{font-family:'Chakra Petch';font-size:10.5px;letter-spacing:.12em;
+  padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line);line-height:1.5}
+.vs .a .cap{color:var(--muted)}
+.vs .b .cap{color:var(--cyan)}
+.vs ol{list-style:none;counter-reset:n}
+.vs li{counter-increment:n;display:flex;align-items:baseline;gap:6px;
+  font-size:12.5px;padding:4px 0}
+.vs li::before{content:counter(n);font-family:'Chakra Petch';font-size:11px;
+  color:var(--muted);flex:0 0 14px}
+.vs li .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs li .p{font-family:'Chakra Petch';font-weight:700;font-size:12.5px}
+.vs li.bh{background:rgba(255,45,120,.12);margin:0 -6px;padding:4px 6px;border-radius:2px}
+.vs li.bh .n,.vs li.bh .p{color:var(--pink)}
+.vs li.sr{background:rgba(0,229,255,.12);margin:0 -6px;padding:4px 6px;border-radius:2px}
+.vs li.sr .n,.vs li.sr .p{color:var(--cyan)}
+
+/* ランク帯別テーブル */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border:1px solid var(--line);border-radius:4px;background:var(--panel)}
+table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px}
+.tiers th,.tiers td{padding:7px 6px;text-align:right;
+  border-bottom:1px solid rgba(0,229,255,.08);white-space:nowrap}
+.tiers th{font-family:'Chakra Petch';font-size:10.5px;letter-spacing:.06em;
+  color:var(--muted);font-weight:400}
+.tiers td:first-child,.tiers th:first-child{text-align:left;padding-left:11px}
+.tiers thead th{background:var(--panel2)}
+.tiers tbody tr:last-child td{border-bottom:none}
+.tiers td.v{font-family:'Chakra Petch';font-weight:700}
+.tiers td.hi{color:var(--cyan)}
+.tiers td.lo{color:var(--muted)}
+.tiers tr.up td:first-child{border-left:2px solid var(--cyan)}
+.tiers tr.dn td:first-child{border-left:2px solid var(--pink)}
+.tiers td:last-child{padding-right:11px}
+.tiers .x{font-family:'Chakra Petch';font-weight:700}
+.tiers .x.p{color:var(--cyan)}
+.tiers .x.m{color:var(--pink)}
+
+/* 分類 */
+.split{display:flex;flex-direction:column;gap:10px}
+.grp{border:1px solid var(--line);border-radius:4px;padding:13px 15px;background:var(--panel)}
+.grp.u{border-left:3px solid var(--cyan)}
+.grp.d{border-left:3px solid var(--pink)}
+.grp .t{font-size:14.5px;font-weight:700;line-height:1.4}
+.grp.u .t{color:var(--cyan)}
+.grp.d .t{color:var(--pink)}
+.grp .s{font-size:12px;color:var(--muted);margin:3px 0 10px}
+.grp ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.grp li{font-size:12.5px;border:1px solid var(--line);border-radius:2px;padding:4px 9px;
+  color:#dbe2f0;white-space:nowrap}
+.grp li b{font-family:'Chakra Petch';margin-left:6px;font-size:11.5px}
+.grp.u li b{color:var(--cyan)}
+.grp.d li b{color:var(--pink)}
+
+/* 時系列レール */
+.rail{position:relative;padding-left:20px}
+.rail::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(180deg,rgba(0,229,255,.45),rgba(255,45,120,.45))}
+.ent{position:relative;margin-bottom:20px}
+.ent:last-child{margin-bottom:0}
+.ent::before{content:"";position:absolute;left:-20px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--bg);border:2px solid var(--cyan)}
+.ent.hi::before{border-color:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+.ent .day{font-family:'Chakra Petch';font-size:12px;letter-spacing:.12em;color:var(--cyan)}
+.ent.hi .day{color:var(--pink)}
+.ent .day i{font-style:normal;color:var(--muted);margin-left:9px;letter-spacing:.06em}
+.ent .t{font-size:15.5px;font-weight:700;line-height:1.4;margin:3px 0 7px}
+.ent p{font-size:13px;color:#c4cbdd}
+.mv{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 4px}
+.mv span{font-size:12.5px;border:1px solid var(--line);border-radius:2px;padding:4px 9px;
+  white-space:nowrap;color:#dbe2f0}
+.mv span b{font-family:'Chakra Petch';font-weight:700;margin-left:6px}
+.mv span.up{border-color:rgba(45,255,168,.35)}
+.mv span.up b{color:var(--green)}
+.mv span.dn{border-color:rgba(255,45,120,.4)}
+.mv span.dn b{color:var(--pink)}
+.mv span.fl{border-color:rgba(138,147,173,.35)}
+.mv span.fl b{color:var(--muted)}
+.post{margin-top:10px;font-size:12px}
+.post a{font-family:'Chakra Petch';letter-spacing:.06em;text-decoration:none;
+  border:1px solid var(--line);border-radius:2px;padding:5px 11px;display:inline-block;
+  color:var(--muted)}
+.post a:hover{color:var(--cyan);border-color:var(--cyan)}
+.post a::before{content:"𝕏  ";font-family:'Noto Sans JP'}
+
+/* 注記 */
+.warn{border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.05);
+  border-radius:4px;padding:13px 15px}
+.warn .lb{font-family:'Chakra Petch';font-size:10px;letter-spacing:.18em;color:var(--amber)}
+.warn p{font-size:12.5px;color:#c4cbdd;margin-top:9px}
+.next{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:16px}
+.next a{font-weight:700;text-decoration:none}
+@media(max-width:430px){
+  .vs{flex-direction:column}
+}
 </style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body>
 <nav class="gnav"><div class="inner">
@@ -66,14 +165,14 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     <a href="../../rank.html">ランク分布</a>
     <a href="../../pickrate.html">ピック率</a>
     <a href="../../streamers.html">ライブ配信</a>
-    <div class="grp">図解 / ZUKAI</div>
-    <div class="grpbox">
     <a href="../../assist.html">エイムアシスト</a>
-    <a href="../../zukai/s30/meta.html" class="on">メタ（S30）</a>
-    <a href="../../zukai/s30/rank.html">ランク（S30）</a>
-    <a href="../../zukai/s30/weapons.html">武器（S30）</a>
-    </div>
     <a href="../../roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="../../zukai/s30/meta.html" class="on">メタ</a>
+    <a href="../../zukai/s30/rank.html">ランク</a>
+    <a href="../../zukai/s30/weapons.html">武器</a>
+    </div>
 </div></div>
 
 <div class="wrap">
@@ -81,20 +180,200 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 <header>
   <div class="eyebrow">Zukai // Season 30</div>
   <h1>メタ<span class="accent">早見</span></h1>
-  <div class="meta"><span>SEASON 30「マークド」</span><span>|</span><span>準備中</span></div>
+  <div class="meta">
+    <span>SEASON 30「マークド」</span><span>|</span>
+    <span class="upd">最終更新: 2026-08-15</span>
+  </div>
 <nav class="sib"><a class="on" href="./meta.html">メタ</a><span>ランク（作成中）</span><a href="./weapons.html">武器</a></nav>
 </header>
 
 <section>
-  <div class="soonbox">
-    <div class="lb">COMING SOON</div>
-    <p>シーズン30のレジェンド構成とピック傾向をまとめた図解を準備しています。</p>
-    <a class="go" href="./weapons.html">武器の図解を見る</a>
+  <h2>ピック率とメタは別物</h2>
+  <div class="lead">
+    <div class="lb">POINT</div>
+    <div class="hd">全体ピック率は「人気」。メタは「上位帯で何が選ばれているか」。</div>
+    <p>全体のピック率は未ランクからプレデターまでを全部足した数字なので、
+    人数の多い下位帯の好みがそのまま出ます。
+    メタを見たいならランク帯を分けて比べる必要があり、
+    同じシーズンでも帯によって選ばれるレジェンドは別物です。</p>
+  </div>
+
+  <div class="vs" style="margin-top:14px">
+    <div class="a">
+      <div class="cap">全体・全ランク帯<br>2026-08-13</div>
+      <ol>
+        <li><span class="n">ローバ</span><span class="p">10.3%</span></li>
+        <li><span class="n">アクセル</span><span class="p">9.6%</span></li>
+        <li><span class="n">パスファインダー</span><span class="p">8.7%</span></li>
+        <li><span class="n">マッドマギー</span><span class="p">6.6%</span></li>
+        <li><span class="n">オクタン</span><span class="p">5.7%</span></li>
+        <li class="bh"><span class="n">ブラッドハウンド</span><span class="p">5.7%</span></li>
+        <li><span class="n">レイス</span><span class="p">5.2%</span></li>
+        <li><span class="n">ヒューズ</span><span class="p">5.1%</span></li>
+        <li><span class="n">バンガロール</span><span class="p">4.8%</span></li>
+        <li><span class="n">ライフライン</span><span class="p">3.5%</span></li>
+      </ol>
+    </div>
+    <div class="b">
+      <div class="cap">マスター / プレデター<br>2026-08-15</div>
+      <ol>
+        <li><span class="n">アクセル</span><span class="p">24.5%</span></li>
+        <li><span class="n">ローバ</span><span class="p">17.8%</span></li>
+        <li><span class="n">パスファインダー</span><span class="p">10.5%</span></li>
+        <li class="sr"><span class="n">シア</span><span class="p">8.3%</span></li>
+        <li><span class="n">マッドマギー</span><span class="p">4.9%</span></li>
+        <li><span class="n">レヴナント</span><span class="p">3.9%</span></li>
+        <li><span class="n">オクタン</span><span class="p">3.4%</span></li>
+        <li><span class="n">オルター</span><span class="p">3.3%</span></li>
+        <li><span class="n">ホライゾン</span><span class="p">3.0%</span></li>
+        <li><span class="n">バンガロール</span><span class="p">2.7%</span></li>
+      </ol>
+    </div>
+  </div>
+  <p class="note">全体では6位のブラッドハウンドが、マスター帯では28体中26位・0.3%。
+  逆にシアは全体で10位圏外ながら、マスター帯では4位に入ります。
+  ライフライン・レイス・ヒューズも上位帯の表からは消えます。</p>
+</section>
+
+<section>
+  <h2>ランク帯別ピック率</h2>
+  <div class="tw">
+  <table class="tiers">
+    <thead>
+      <tr><th>レジェンド</th><th>シルバー</th><th>プラチナ</th><th>ダイヤ</th><th>マスター</th><th>倍率</th></tr>
+    </thead>
+    <tbody>
+      <tr class="up"><td>アクセル</td><td class="v lo">6.5%</td><td class="v">14.4%</td><td class="v">20.6%</td><td class="v hi">24.5%</td><td class="x p">×3.8</td></tr>
+      <tr class="up"><td>シア</td><td class="v lo">2.7%</td><td class="v">3.4%</td><td class="v">5.7%</td><td class="v hi">8.3%</td><td class="x p">×3.1</td></tr>
+      <tr class="up"><td>ホライゾン</td><td class="v lo">1.3%</td><td class="v">1.4%</td><td class="v">1.8%</td><td class="v hi">3.0%</td><td class="x p">×2.3</td></tr>
+      <tr class="up"><td>レヴナント</td><td class="v lo">1.8%</td><td class="v">1.7%</td><td class="v">2.6%</td><td class="v hi">3.9%</td><td class="x p">×2.2</td></tr>
+      <tr class="up"><td>ローバ</td><td class="v lo">8.3%</td><td class="v">12.5%</td><td class="v">14.5%</td><td class="v hi">17.8%</td><td class="x p">×2.1</td></tr>
+      <tr class="up"><td>パスファインダー</td><td class="v lo">6.6%</td><td class="v">11.2%</td><td class="v">11.3%</td><td class="v hi">10.5%</td><td class="x p">×1.6</td></tr>
+      <tr class="up"><td>オルター</td><td class="v lo">2.4%</td><td class="v">3.2%</td><td class="v">3.5%</td><td class="v hi">3.3%</td><td class="x p">×1.4</td></tr>
+      <tr><td>マッドマギー</td><td class="v">5.6%</td><td class="v">8.8%</td><td class="v">7.5%</td><td class="v">4.9%</td><td class="x">×0.9</td></tr>
+      <tr class="dn"><td>バンガロール</td><td class="v">4.4%</td><td class="v">4.6%</td><td class="v">4.5%</td><td class="v lo">2.7%</td><td class="x m">×0.6</td></tr>
+      <tr class="dn"><td>レイス</td><td class="v">5.3%</td><td class="v">4.1%</td><td class="v">3.2%</td><td class="v lo">2.6%</td><td class="x m">×0.5</td></tr>
+      <tr class="dn"><td>オクタン</td><td class="v">7.1%</td><td class="v">4.2%</td><td class="v">3.3%</td><td class="v lo">3.4%</td><td class="x m">×0.5</td></tr>
+      <tr class="dn"><td>ヴァルキリー</td><td class="v">4.1%</td><td class="v">2.4%</td><td class="v">1.9%</td><td class="v lo">1.5%</td><td class="x m">×0.4</td></tr>
+      <tr class="dn"><td>ヒューズ</td><td class="v">5.7%</td><td class="v">5.0%</td><td class="v">2.9%</td><td class="v lo">1.3%</td><td class="x m">×0.2</td></tr>
+      <tr class="dn"><td>アッシュ</td><td class="v">3.1%</td><td class="v">1.6%</td><td class="v">1.1%</td><td class="v lo">0.6%</td><td class="x m">×0.2</td></tr>
+      <tr class="dn"><td>ライフライン</td><td class="v">3.8%</td><td class="v">1.6%</td><td class="v">1.1%</td><td class="v lo">0.4%</td><td class="x m">×0.1</td></tr>
+      <tr class="dn"><td>ブラッドハウンド</td><td class="v">7.3%</td><td class="v">1.5%</td><td class="v">0.6%</td><td class="v lo">0.3%</td><td class="x m">×0.04</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">シルバーではブラッドハウンドがシアの約2.7倍、マスターではシアがブラッドハウンドの約28倍。
+  同じ索敵役でも、帯を上げると完全に入れ替わります。<br>
+  倍率 = マスター帯 ÷ シルバー帯。1.0より大きいほど「上位帯で選ばれている」。
+  表は横スクロールできます。出典: apexlegendsstatus.com（2026-08-15 取得 / 34.1M players）。</p>
+</section>
+
+<section>
+  <h2>上がる組 と 下がる組</h2>
+  <div class="split">
+    <div class="grp u">
+      <div class="t">帯を上げるほど選ばれる</div>
+      <div class="s">S30のメタはこちら側。編成を考えるならまずこの中から。</div>
+      <ul>
+        <li>アクセル<b>×3.8</b></li>
+        <li>シア<b>×3.1</b></li>
+        <li>ホライゾン<b>×2.3</b></li>
+        <li>レヴナント<b>×2.2</b></li>
+        <li>ローバ<b>×2.1</b></li>
+        <li>パスファインダー<b>×1.6</b></li>
+        <li>オルター<b>×1.4</b></li>
+      </ul>
+    </div>
+    <div class="grp d">
+      <div class="t">下位帯だけで人気</div>
+      <div class="s">全体ピック率では上位に見えても、上位帯ではほぼ使われていない。</div>
+      <ul>
+        <li>ブラッドハウンド<b>×0.04</b></li>
+        <li>ライフライン<b>×0.1</b></li>
+        <li>アッシュ<b>×0.2</b></li>
+        <li>ヒューズ<b>×0.2</b></li>
+        <li>ヴァルキリー<b>×0.4</b></li>
+        <li>オクタン<b>×0.5</b></li>
+        <li>レイス<b>×0.5</b></li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">アクセル・ローバ・パスファインダーの3体はどの帯でも上位、かつ帯を上げるほど伸びます。
+  S30の中核はこの3体、そこに上位帯限定でシアが加わる形です。</p>
+</section>
+
+<section>
+  <h2>人気の推移（全体ピック率）</h2>
+  <div class="rail">
+
+    <div class="ent">
+      <div class="day">08 / 07 <i>開幕3日目</i></div>
+      <div class="t">ブラッドハウンドが単独1位で走り出す</div>
+      <p>リワークを受けたブラッドハウンドが10.6%まで伸び、2位のローバに1.3ptの差をつける。開幕直後の「新しくなったキャラを触る」動きがそのまま数字に出た局面。</p>
+      <div class="mv">
+        <span class="fl">ブラッドハウンド<b>10.6%</b></span>
+        <span class="fl">ローバ<b>9.3%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">08 / 08 <i>開幕4日目</i></div>
+      <div class="t">1日でピークアウト、差が0.3ptまで詰まる</div>
+      <p>ブラッドハウンドが1日で0.9pt下落。一方ローバは微増し、首位争いがほぼ横並びに。この時点で使用者層の差も出ていて、ブラッドハウンドは平均シルバー3、シアは平均ゴールド3だった。</p>
+      <div class="mv">
+        <span class="dn">ブラッドハウンド<b>9.7% / −0.9pt</b></span>
+        <span class="up">ローバ<b>9.4% / +0.1pt</b></span>
+      </div>
+      <div class="post"><a href="https://x.com/apexwidgets/status/2086108239410921483" target="_blank" rel="noopener">この回のポストを見る</a></div>
+    </div>
+
+    <div class="ent hi">
+      <div class="day">08 / 13 <i>DAY 9</i></div>
+      <div class="t">ローバが1位に浮上、ブラッドハウンドは6位へ</div>
+      <p>ローバが10.3%で単独トップ。8/08計測から+0.9ptの上積み。ブラッドハウンドは9.7%→5.7%と急落し、開幕1位から6位まで後退した。9日間で−4.9pt。触ってみた人と使い続ける人の差が、ここで確定した。</p>
+      <div class="mv">
+        <span class="up">ローバ<b>10.3% / +0.9pt</b></span>
+        <span class="dn">ブラッドハウンド<b>5.7% / −4.0pt</b></span>
+        <span class="dn">順位<b>1位 → 6位</b></span>
+      </div>
+      <div class="post"><a href="https://x.com/apexwidgets/status/2087921236731138313" target="_blank" rel="noopener">この回のポストを見る</a></div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>数値の読み方</h2>
+  <div class="warn">
+    <div class="lb">CAUTION</div>
+    <p><b>マスター/プレデター帯はサンプル数が少ない。</b>
+    出典元にも精度に関する注意書きが出ています。単独の数字を鵜呑みにせず、
+    シルバー→プラチナ→ダイヤ→マスターと一貫して増える／減るという
+    傾向のほうを見てください。</p>
+    <p><b>ゴールド帯は掲載していません。</b>
+    出典元のゴールド帯ページが古いスナップショットのまま更新されておらず、
+    他の帯と同じ時点のデータとして扱えないためです。復旧しだい追加します。</p>
+    <p><b>全体ピック率とランク帯別は取得日が異なります。</b>
+    全体は8/13、ランク帯別は8/15の取得です。
+    また出典元の▲▼は7日前比で、8/12より前は比較窓がシーズン29にかかっていたため
+    極端な値が出ていました。このページでは増減率ではなく実数（%）を軸にしています。</p>
+  </div>
+</section>
+
+<section>
+  <h2>あわせて見る</h2>
+  <div class="next">
+    <p style="font-size:13.5px">全体ピック率の最新値と全28レジェンドの順位は
+    <a href="../../pickrate.html">ピック率</a>に掲載しています。
+    武器側の環境は<a href="./weapons.html">武器早見</a>、
+    自分のランクが上位何％かは<a href="../../deviation.html">ランク偏差値</a>で確認できます。</p>
   </div>
 </section>
 
 <footer>
-  <p>公開のお知らせは X @apexwidgets で行います。</p>
+  <p>掲載内容は @apexwidgets で公開した図解をもとに再構成しています。
+  ピック率の出典は apexlegendsstatus.com。数値はシーズン中の調整で変動します。</p>
+  <p style="margin-top:8px">誤りの指摘・掲載に関するご連絡: X @apexwidgets</p>
 </footer>
 
 </div>
