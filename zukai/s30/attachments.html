@@ -112,14 +112,15 @@ tbody tr:hover{background:rgba(0,229,255,.03)}
     <a href="../../rank.html">ランク分布</a>
     <a href="../../pickrate.html">ピック率</a>
     <a href="../../streamers.html">ライブ配信</a>
-    <a href="../../assist.html">エイムアシスト</a>
-    <a href="../../roadmap.html">ロードマップ</a>
-    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grp">図解 / ZUKAI</div>
     <div class="grpbox">
-    <a href="../../zukai/s30/meta.html">メタ</a>
-    <a href="../../zukai/s30/rank.html">ランク</a>
-    <a href="../../zukai/s30/weapons.html">武器</a>
+    <a href="../../assist.html">エイムアシスト</a>
+    <a href="../../zukai/s30/meta.html">メタ（S30）</a>
+    <a href="../../zukai/s30/rank.html">ランク（S30）</a>
+    <a href="../../zukai/s30/weapons.html">武器（S30）</a>
+    <a href="../../zukai/s30/attachments.html" class="on">破損アタッチメント実数値（S30）</a>
     </div>
+    <a href="../../roadmap.html">ロードマップ</a>
 </div></div>
 
 <div class="wrap">
@@ -131,20 +132,12 @@ tbody tr:hover{background:rgba(0,229,255,.03)}
     <span>SEASON 30「マークド」</span><span>|</span>
     <span class="upd">計測日: 2026-08-14</span>
   </div>
-<nav class="sib"><a href="./weapons.html">← 武器（S30）に戻る</a></nav>
+<nav class="sib"><a href="./meta.html">メタ</a><a href="./rank.html">ランク</a><a href="./weapons.html">武器</a><a class="on" href="./attachments.html">実数値</a></nav>
 </header>
 
 <section>
-  <p class="note" style="margin-top:16px">射撃訓練場で全紫構成を基準にして、1スロットだけ破損アタッチメントへ差し替えて計測しました。掲載は14挺。効果の方向だけを知りたい場合は<a href="./weapons.html">武器早見</a>のほうが早いです。</p>
+  <p class="note" style="margin-top:16px">射撃訓練場で全紫構成を基準にして、1スロットだけ破損アタッチメントへ差し替えて計測しました。掲載は14挺。効果の方向だけを知りたい場合は<a href="./weapons.html">武器早見</a>のほうが早いです。数値の読み方に注意点が2つあるので、<a href="#caution">読むときの注意</a>もあわせてどうぞ。</p>
 
-  <div class="point">
-    <div class="lb">CAUTION</div>
-    <div class="hd">ゲーム内表示をそのまま読むと間違えます</div>
-    <p>武器画面の取り消し線つきの数値は「素の武器」の値で、紫装着時の値ではありません。
-    リロード速度を縮めているのは標準ストックです。R-301にオーバーフローマガジンを付けると
-    画面には「3.2秒→3.9秒」と出ますが、紫標準ストックを装備していれば基準は2.9秒なので、
-    実際の増加は +1.0秒。本ページの数値はすべて紫基準の差分です。</p>
-  </div>
 </section>
 
 <section>
@@ -254,13 +247,6 @@ tbody tr:hover{background:rgba(0,229,255,.03)}
 </section>
 
 <section>
-  <div class="point">
-    <div class="lb">CAUTION</div>
-    <div class="hd">ストック系の装弾数減少は、装着中のマガジンによって変わります</div>
-    <p>アジャイル標準ストックとラピッドスナイパーストックの装弾数ペナルティは固定値ではなく、
-    その時点の装弾数に対して掛かります。上の04・05の数値は紫拡張マガジン併用時のものです。</p>
-  </div>
-
   <h2>06 マガジンランクによる違い</h2>
   <p class="note" style="margin-top:0">C.A.R. SMGでアジャイル標準ストックを装着したまま、マガジンだけ入れ替えて計測しました。</p>
   <p class="cap">C.A.R. SMG／アジャイル標準ストック装着時</p>
@@ -283,6 +269,27 @@ tbody tr:hover{background:rgba(0,229,255,.03)}
   <h2>07 共通する仕組み</h2>
   <p class="note" style="margin-top:0">計測した項目のうち、<b>増減の方向が一方向のものはおおむね2割前後で安定</b>しています。腰撃ち精度の低下、連射速度の上昇、装弾数の増加、反動制御の低下がこれにあたります。リロードの短縮だけは約4割と、他より大きく動きます。</p>
   <p class="note">一方、ストック系の装弾数ペナルティだけは他スロットの装備内容に依存するため、単独の数値では表せません。この一点だけ、他と設計が異なります。</p>
+</section>
+
+<section>
+  <h2 id="caution">08 読むときの注意</h2>
+
+  <div class="point">
+    <div class="lb">CAUTION 01</div>
+    <div class="hd">ゲーム内表示をそのまま読むと間違えます</div>
+    <p>武器画面の取り消し線つきの数値は「素の武器」の値で、紫装着時の値ではありません。
+    リロード速度を縮めているのは標準ストックです。R-301にオーバーフローマガジンを付けると
+    画面には「3.2秒→3.9秒」と出ますが、紫標準ストックを装備していれば基準は2.9秒なので、
+    実際の増加は +1.0秒。本ページの数値はすべて紫基準の差分です。</p>
+  </div>
+
+  <div class="point">
+    <div class="lb">CAUTION 02</div>
+    <div class="hd">ストック系の装弾数減少は、装着中のマガジンによって変わります</div>
+    <p>アジャイル標準ストックとラピッドスナイパーストックの装弾数ペナルティは固定値ではなく、
+    その時点の装弾数に対して掛かります。04・05の数値は紫拡張マガジン併用時のものです。
+    詳しくは<a href="#stock-interaction">06 マガジンランクによる違い</a>。</p>
+  </div>
 </section>
 
 <section>
