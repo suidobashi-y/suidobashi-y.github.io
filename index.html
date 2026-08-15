@@ -192,15 +192,14 @@ a.lvmore:hover{border-style:solid}
     <a href="./rank.html">ランク分布</a>
     <a href="./pickrate.html">ピック率</a>
     <a href="./streamers.html">ライブ配信</a>
-    <div class="grp">図解 / ZUKAI</div>
-    <div class="grpbox">
     <a href="./assist.html">エイムアシスト</a>
-    <a href="./zukai/s30/meta.html">メタ（S30）</a>
-    <a href="./zukai/s30/rank.html">ランク（S30）</a>
-    <a href="./zukai/s30/weapons.html">武器（S30）</a>
-    <a href="./zukai/s30/attachments.html">破損アタッチメント実数値（S30）</a>
-    </div>
     <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
 </div></div>
 
 <div class="wrap">
@@ -272,6 +271,12 @@ a.lvmore:hover{border-style:solid}
       <div class="d">配信のタイプから配信者を探せます。配信中の人もひと目で分かります。</div>
     </a>
 
+    <a class="tool" href="./assist.html">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+      <div class="t">エイムアシスト</div>
+      <div class="d">現在のアシスト値、発動条件の変更履歴、デバイス規制の状況。</div>
+    </a>
+
     <a class="tool" href="./roadmap.html">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18h18M6 18V9M12 18V5M18 18v-7"/><circle cx="6" cy="9" r="1.6"/><circle cx="12" cy="5" r="1.6"/><circle cx="18" cy="11" r="1.6"/></svg>
       <div class="t">開発ロードマップ</div>
@@ -283,12 +288,6 @@ a.lvmore:hover{border-style:solid}
 <section>
   <h2>図解</h2>
   <div class="tools">
-
-    <a class="tool" href="./assist.html">
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
-      <div class="t">エイムアシスト</div>
-      <div class="d">現在のアシスト値、発動条件の変更履歴、デバイス規制の状況。</div>
-    </a>
 
     <a class="tool" href="./zukai/s30/meta.html">
       <div class="badge">NEW</div>
@@ -311,16 +310,10 @@ a.lvmore:hover{border-style:solid}
       <div class="d">床落ち26挺のティア表、赤アタッチメント5種、おすすめ構成。</div>
     </a>
 
-    <a class="tool" href="./zukai/s30/attachments.html">
-      <div class="badge">NEW</div>
-      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h12M3 18h7"/><circle cx="19" cy="15" r="2.5"/></svg>
-      <div class="t">破損アタッチメント実数値（S30）</div>
-      <div class="d">赤5種を14挺ぶん計測。装弾数・リロード・反動制御の変化量を紫基準の差分で掲載。</div>
-    </a>
-
   </div>
-  <p class="note" style="margin-top:12px">過去シーズンの図解は
-  <a href="./zukai/index.html">図解アーカイブ</a>からたどれます。</p>
+  <p class="note" style="margin-top:12px">赤アタッチメントの実測値は
+  <a href="./zukai/s30/weapons.html">武器（S30）</a>の中から辿れます。
+  過去シーズンの図解は<a href="./zukai/index.html">図解アーカイブ</a>へ。</p>
 </section>
 
 <section>
@@ -328,6 +321,7 @@ a.lvmore:hover{border-style:solid}
   <div class="panel">
     <ul class="updates">
       <li><span class="d">08-15</span><span>S30ランクの図解を公開。リセットが表示ランクではなくMMRで決まる仕組みを整理しました</span></li>
+      <li><span class="d">08-15</span><span>図解にメタページを公開。ランク帯別ピック率で、上位帯ほど選ばれるレジェンドを比較しています</span></li>
       <li><span class="d">08-14</span><span>破損アタッチメントの実測値ページを公開。赤5種の変化量を武器別に14挺ぶん掲載しました</span></li>
       <li><span class="d">08-13</span><span>タクティカルレーザーの推奨をプラウラーに修正。R-99は相性×へ変更しました</span></li>
       <li><span class="d">08-13</span><span>図解ページを公開。S30の武器ティア・赤アタッチメント・おすすめ構成をまとめました</span></li>
@@ -336,10 +330,10 @@ a.lvmore:hover{border-style:solid}
       <li><span class="d">08-03</span><span>ランク分布を最新データに更新。ディビジョン別表示を追加</span></li>
       <li><span class="d">08-02</span><span>ライブ配信ページを公開。タグで配信者を絞り込めます</span></li>
       <li><span class="d">08-02</span><span>開発ロードマップページを図解化。S31・S32の公式ロードマップを反映</span></li>
-      <li><span class="d">08-02</span><span>エイムアシスト仕様ページを公開。デバイス規制の履歴を追加</span></li>
-      <li><span class="d">08-01</span><span>マップローテーション / ランク分布ページを追加</span></li>
     </ul>
   </div>
+  <p class="note" style="margin-top:12px">それ以前の更新は
+  <a href="./updates.html">更新履歴アーカイブ</a>に掲載しています。</p>
 </section>
 
 <footer>
