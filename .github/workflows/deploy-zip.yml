@@ -1,1 +1,93 @@
+name: Deploy from ZIP
 
+# ルート直下、または _upload/ に .zip を置くと自動で展開・配置します。
+on:
+  push:
+    paths:
+      - '*.zip'
+      - '_upload/*.zip'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-zip
+  cancel-in-progress: false
+
+jobs:
+  unpack:
+    # 自分自身のコミットで無限ループしないようにする
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ZIP を探す
+        id: find
+        run: |
+          shopt -s nullglob
+          zips=( *.zip _upload/*.zip )
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "ZIP が見つかりません。処理をスキップします。"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # 複数あれば更新が最も新しいものを採用
+          newest=$(ls -t "${zips[@]}" | head -1)
+          echo "採用: $newest"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "zip=$newest" >> "$GITHUB_OUTPUT"
+
+      - name: 中身を検証する
+        if: steps.find.outputs.found == 'true'
+        run: |
+          ZIP="${{ steps.find.outputs.zip }}"
+          echo "── 収録ファイル ──"
+          unzip -Z1 "$ZIP"
+          echo "──────────────────"
+
+          # 危険なパスを弾く（絶対パス / 親ディレクトリ参照 / ワークフロー自身の上書き）
+          if unzip -Z1 "$ZIP" | grep -Eq '^/|(^|/)\.\.(/|$)'; then
+            echo "::error::絶対パスまたは '..' を含むため中止しました。"
+            exit 1
+          fi
+          if unzip -Z1 "$ZIP" | grep -q '^\.github/'; then
+            echo "::error::.github/ を含むため中止しました。ワークフローは手動で更新してください。"
+            exit 1
+          fi
+
+      - name: 展開して配置する
+        if: steps.find.outputs.found == 'true'
+        run: |
+          ZIP="${{ steps.find.outputs.zip }}"
+          TMP=$(mktemp -d)
+          unzip -q -o "$ZIP" -d "$TMP"
+
+          # macOS / Windows が付ける不要ファイルを除去
+          find "$TMP" -name '__MACOSX' -type d -prune -exec rm -rf {} + 2>/dev/null || true
+          find "$TMP" \( -name '.DS_Store' -o -name 'Thumbs.db' \) -delete 2>/dev/null || true
+
+          # リポジトリ直下へ上書きコピー
+          cp -rv "$TMP"/. .
+          rm -rf "$TMP"
+          rm -f "$ZIP"
+
+      - name: コミットして反映する
+        if: steps.find.outputs.found == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "差分がないため何もしません。"
+            exit 0
+          fi
+          echo "── 反映されるファイル ──"
+          git diff --cached --name-status
+          git commit -m "Deploy from ${{ steps.find.outputs.zip }} [skip ci]"
+          git push
