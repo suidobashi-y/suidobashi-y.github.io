@@ -88,6 +88,31 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   .snap{grid-template-columns:1fr}
   .step .ttl{font-size:15.5px}
 }
+
+/* 分布の推移タイムライン */
+.rail{position:relative;padding-left:20px;margin-top:14px}
+.rail::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(180deg,rgba(0,229,255,.45),rgba(255,45,120,.45))}
+.ent{position:relative;margin-bottom:20px}
+.ent:last-child{margin-bottom:0}
+.ent::before{content:"";position:absolute;left:-20px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--bg);border:2px solid var(--cyan)}
+.ent.hi::before{border-color:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+.ent .day{font-family:'Chakra Petch';font-size:12px;letter-spacing:.12em;color:var(--cyan)}
+.ent.hi .day{color:var(--pink)}
+.ent .day i{font-style:normal;color:var(--muted);margin-left:9px;letter-spacing:.06em}
+.ent .t{font-size:15.5px;font-weight:700;line-height:1.4;margin:3px 0 7px}
+.ent p{font-size:13px;color:#c4cbdd}
+.mv{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 4px}
+.mv span{font-size:12.5px;border:1px solid var(--line);border-radius:2px;padding:4px 9px;
+  white-space:nowrap;color:#dbe2f0}
+.mv span b{font-family:'Chakra Petch';font-weight:700;margin-left:6px}
+.mv span.up{border-color:rgba(45,255,168,.35)}
+.mv span.up b{color:var(--green)}
+.mv span.dn{border-color:rgba(255,45,120,.4)}
+.mv span.dn b{color:var(--pink)}
+.mv span.fl{border-color:rgba(138,147,173,.35)}
+.mv span.fl b{color:var(--muted)}
 </style>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -122,7 +147,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   <h1>リセットは、<span class="accent">表示ランク</span>を見ていない</h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
-    <span class="upd">最終更新: 2026-08-15</span>
+    <span class="upd">最終更新: 2026-08-17</span>
   </div>
 <nav class="sib"><a href="./meta.html">メタ</a><a class="on" href="./rank.html">ランク</a><a href="./weapons.html">武器</a></nav>
 </header>
@@ -196,7 +221,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 
 <section>
   <h2>S30の分布スナップショット</h2>
-  <p class="note" style="margin-top:0">開幕6日目・2026年8月10日時点。全ランク帯／全機種合算。</p>
+  <p class="note" style="margin-top:0">開幕13日目・2026年8月17日時点。全ランク帯／全機種合算。</p>
   <div class="snap">
     <div class="box">
       <div class="k">最も人が多いランク</div>
@@ -205,17 +230,17 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     </div>
     <div class="box">
       <div class="k">ちょうど真ん中</div>
-      <div class="v">G4</div>
-      <div class="s">ゴールド IV ／ 上位50.6%</div>
+      <div class="v">G3</div>
+      <div class="s">ゴールド III ／ 上位57.2%</div>
     </div>
   </div>
 
   <div class="bar">
     <div style="font-size:12px;color:var(--muted)">ダイヤ以上の割合</div>
     <div class="row">
-      <div class="lb">S30 / 8.10</div>
-      <div class="tr"><div class="fl" style="width:17%;background:var(--cyan)"></div></div>
-      <div class="nm" style="color:var(--cyan)">6.5%</div>
+      <div class="lb">S30 / 8.17</div>
+      <div class="tr"><div class="fl" style="width:16%;background:var(--cyan)"></div></div>
+      <div class="nm" style="color:var(--cyan)">6.1%</div>
     </div>
     <div class="row">
       <div class="lb">S29 FINAL</div>
@@ -224,12 +249,56 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     </div>
   </div>
 
-  <p class="note">シーズン終盤の38.2%に対して、開幕6日目は6.5%。
-  <b>ダイヤ以上がまだ全体の15分の1ほど</b>しかいない状態です。
-  この数字はシーズンの進行とともに戻っていくので、時点を追って更新していきます。</p>
+  <p class="note">シーズン終盤の38.2%に対して、開幕13日目は6.1%。
+  <b>ダイヤ以上がまだ全体の16分の1ほど</b>しかいない状態です。
+  この数字はシーズンの進行とともに戻っていきます。</p>
   <p class="note">最新の分布と、自分が上位何％にいるかは
   <a href="../../rank.html">ランク分布</a>と<a href="../../deviation.html">ランク偏差値</a>で確認できます。</p>
-  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.08.10 取得</p>
+  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.08.17 取得</p>
+</section>
+
+<section>
+  <h2>分布の推移</h2>
+  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月15日まで。</p>
+  <div class="rail">
+
+    <div class="ent">
+      <div class="day">08 / 10 <i>開幕6日目</i></div>
+      <div class="t">リセット直後、山はゴールドに押し戻された</div>
+      <p>全員がリセットを受けた直後の分布。最多はゴールドIIIで10.4%、中央値はゴールドIV。
+      ダイヤ以上は6.5%しかなく、S29最終の38.2%と比べると6分の1以下まで縮んでいた。
+      マスター帯はまだ到達者ゼロ。</p>
+      <div class="mv">
+        <span class="fl">最多<b>ゴールドIII 10.4%</b></span>
+        <span class="fl">中央値<b>ゴールドIV</b></span>
+        <span class="fl">ダイヤ以上<b>6.5%</b></span>
+        <span class="fl">マスター<b>0.00%</b></span>
+      </div>
+    </div>
+
+    <div class="ent hi">
+      <div class="day">08 / 17 <i>開幕13日目</i></div>
+      <div class="t">中央値が一段上昇、プラチナIIIに二つ目の山</div>
+      <p>中央値がゴールドIVからゴールドIIIへ一段上がった。最多は変わらずゴールドIIIで10.4%。
+      注目はプラチナIIIで、ゴールドI 8.2% → プラチナIV 7.1% と一度凹んでから
+      プラチナIII 7.8% で盛り返す<b>二峰構造</b>が出ている。
+      これはS29最終（プラチナII 6.4% → プラチナIII 7.0%）と同じ形。</p>
+      <p>マスターが0.23%で立ち上がった一方、ダイヤ帯は6.46%→5.55%に減り、
+      ダイヤ以上の合計は6.5%→6.1%とわずかに縮んだ。
+      ダイヤからマスターへ抜けた分と、母集団の変動が混ざった結果と見られる。</p>
+      <div class="mv">
+        <span class="up">中央値<b>ゴールドIV → III</b></span>
+        <span class="up">プラチナIII<b>7.76%</b></span>
+        <span class="up">マスター<b>0.00% → 0.23%</b></span>
+        <span class="dn">ダイヤ以上<b>6.5% → 6.1%</b></span>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="note">S29最終のダイヤ以上は38.2%。今のゴールドI以上が上位37.8%で、
+  ほぼ同じ位置にあたります。<b>ゴールドI付近にいるなら、今期のダイヤは射程圏内</b>です。
+  ただしこれはS30もS29と同程度にランクが緩む前提の目安で、RP調整が入れば到達率は変わります。</p>
 </section>
 
 <section>
