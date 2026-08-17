@@ -65,3 +65,11 @@ section{margin-top:36px}
 .mono{font-family:'Chakra Petch'}
 footer{margin-top:52px;border-top:1px solid var(--line);padding-top:16px;font-size:12px;color:var(--muted)}
 footer .disc{margin-top:8px}
+/* 関連ページ（全ページ共通の回遊導線） */
+.rel{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.rel a{display:block;text-decoration:none;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;padding:14px;transition:border-color .15s,transform .15s}
+.rel a:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.rel .k{font-family:'Chakra Petch';font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.rel .n{font-weight:700;color:var(--cyan);margin:4px 0;font-size:15px}
+.rel .s{font-size:12px;color:#c4cbdd;line-height:1.55}
