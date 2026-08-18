@@ -102,8 +102,6 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .fix li{font-size:12.5px;color:#c4cbdd;padding-left:14px;position:relative;margin-bottom:5px}
 .fix li::before{content:"–";position:absolute;left:0;color:var(--amber)}
 .fix .d{font-family:'Chakra Petch';color:var(--muted);margin-right:8px}
-.next{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:16px}
-.next a{font-weight:700;text-decoration:none}
 /* 元ポストへのリンク */
 .post{margin-top:12px;font-size:12px}
 .post a{font-family:'Chakra Petch';letter-spacing:.06em;text-decoration:none;
@@ -359,14 +357,28 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 </section>
 
 <section>
-  <h2>あわせて見る</h2>
-  <div class="next">
-    <p style="font-size:13.5px">破損アタッチメントの変化量は
-    <a href="./attachments.html">実数値一覧</a>に掲載しています。
-    自分のランクが上位何％にあたるかは
-    <a href="../../deviation.html">ランク偏差値</a>で確認できます。
-    シーズン全体の分布は<a href="../../rank.html">ランク分布</a>、
-    レジェンドの使用率は<a href="../../pickrate.html">ピック率</a>に掲載しています。</p>
+  <h2>関連ページ</h2>
+  <div class="rel">
+    <a href="./attachments.html">
+      <div class="k">Zukai</div>
+      <div class="n">破損アタッチメント実数値</div>
+      <div class="s">赤アタッチメント5種の変化量を武器別に実測。紫基準の差分。</div>
+    </a>
+    <a href="./meta.html">
+      <div class="k">Zukai</div>
+      <div class="n">S30 メタ早見</div>
+      <div class="s">ランク帯別のピック率比較。上位帯で選ばれるレジェンドの傾向。</div>
+    </a>
+    <a href="../../pickrate.html">
+      <div class="k">Weekly</div>
+      <div class="n">レジェンド ピック率</div>
+      <div class="s">毎週水曜更新。現環境で実際に使われているレジェンドの構成比。</div>
+    </a>
+    <a href="../../deviation.html">
+      <div class="k">Tool</div>
+      <div class="n">ランク偏差値</div>
+      <div class="s">今のRPが全プレイヤーの中で上位何％か。自分の帯を数値で確認。</div>
+    </a>
   </div>
 </section>
 
