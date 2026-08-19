@@ -113,6 +113,23 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .mv span.dn b{color:var(--pink)}
 .mv span.fl{border-color:rgba(138,147,173,.35)}
 .mv span.fl b{color:var(--muted)}
+
+/* ヒエラルキーの形（26ディビジョン・同一スケール） */
+.shape{margin:11px 0 2px;border:1px solid var(--line);border-radius:3px;
+  padding:11px 12px 8px;background:rgba(255,255,255,.015)}
+.shape .bars{display:flex;align-items:flex-end;gap:2px;height:78px}
+.shape .bars i{flex:1;background:var(--c);height:calc(var(--h) * 1%);
+  border-radius:1px 1px 0 0;opacity:.88}
+.shape .bars i.p1{opacity:1;box-shadow:0 0 9px rgba(255,204,77,.75)}
+.shape .bars i.p2{opacity:1;box-shadow:0 0 9px rgba(63,211,200,.75)}
+.shape .ax{display:flex;gap:2px;margin-top:6px;font-family:'Chakra Petch';
+  font-size:10.5px;letter-spacing:.08em;color:var(--muted)}
+.shape .ax span{flex:4;text-align:center}
+.shape .ax span:nth-child(7),.shape .ax span:nth-child(8){flex:1}
+.shape .cap{margin-top:7px;font-size:11.5px;color:var(--muted)}
+.shape .cap b{font-weight:700}
+.shape .cap b.g{color:#ffcc4d}
+.shape .cap b.p{color:#3fd3c8}
 </style>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -259,7 +276,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 
 <section>
   <h2>分布の推移</h2>
-  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月15日まで。</p>
+  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月15日まで。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。</p>
   <div class="rail">
 
     <div class="ent">
@@ -268,6 +285,38 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <p>全員がリセットを受けた直後の分布。最多はゴールドIIIで10.4%、中央値はゴールドIV。
       ダイヤ以上は6.5%しかなく、S29最終の38.2%と比べると6分の1以下まで縮んでいた。
       マスター帯はまだ到達者ゼロ。</p>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:4;--c:#9aa3b8"></i>
+      <i style="--h:36;--c:#c58b52"></i>
+      <i style="--h:27;--c:#c58b52"></i>
+      <i style="--h:34;--c:#c58b52"></i>
+      <i style="--h:40;--c:#c58b52"></i>
+      <i style="--h:65;--c:#b9c3d4"></i>
+      <i style="--h:74;--c:#b9c3d4"></i>
+      <i style="--h:73;--c:#b9c3d4"></i>
+      <i style="--h:71;--c:#b9c3d4"></i>
+      <i style="--h:87;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:100;--c:#ffcc4d"></i>
+      <i style="--h:77;--c:#ffcc4d"></i>
+      <i style="--h:58;--c:#ffcc4d"></i>
+      <i style="--h:48;--c:#3fd3c8"></i>
+      <i style="--h:47;--c:#3fd3c8"></i>
+      <i style="--h:28;--c:#3fd3c8"></i>
+      <i style="--h:21;--c:#3fd3c8"></i>
+      <i style="--h:22;--c:#69b7ff"></i>
+      <i style="--h:23;--c:#69b7ff"></i>
+      <i style="--h:10;--c:#69b7ff"></i>
+      <i style="--h:7;--c:#69b7ff"></i>
+      <i style="--h:1.5;--c:#b06bff"></i>
+      <i style="--h:2;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 山は<b class="g">ゴールドIII</b>のひとつだけ</div>
+  </div>
       <div class="mv">
         <span class="fl">最多<b>ゴールドIII 10.4%</b></span>
         <span class="fl">中央値<b>ゴールドIV</b></span>
@@ -286,6 +335,38 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <p>マスターが0.23%で立ち上がった一方、ダイヤ帯は6.46%→5.55%に減り、
       ダイヤ以上の合計は6.5%→6.1%とわずかに縮んだ。
       ダイヤからマスターへ抜けた分と、母集団の変動が混ざった結果と見られる。</p>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:7;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:4;--c:#9aa3b8"></i>
+      <i style="--h:25;--c:#c58b52"></i>
+      <i style="--h:23;--c:#c58b52"></i>
+      <i style="--h:27;--c:#c58b52"></i>
+      <i style="--h:30;--c:#c58b52"></i>
+      <i style="--h:43;--c:#b9c3d4"></i>
+      <i style="--h:55;--c:#b9c3d4"></i>
+      <i style="--h:59;--c:#b9c3d4"></i>
+      <i style="--h:60;--c:#b9c3d4"></i>
+      <i style="--h:77;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:99;--c:#ffcc4d"></i>
+      <i style="--h:86;--c:#ffcc4d"></i>
+      <i style="--h:79;--c:#ffcc4d"></i>
+      <i style="--h:68;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:74;--c:#3fd3c8"></i>
+      <i style="--h:49;--c:#3fd3c8"></i>
+      <i style="--h:34;--c:#3fd3c8"></i>
+      <i style="--h:26;--c:#69b7ff"></i>
+      <i style="--h:18;--c:#69b7ff"></i>
+      <i style="--h:6;--c:#69b7ff"></i>
+      <i style="--h:3;--c:#69b7ff"></i>
+      <i style="--h:2;--c:#b06bff"></i>
+      <i style="--h:3;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ <b class="g">ゴールドIII</b>のあと、<b class="p">プラチナIII</b>にもうひとつ</div>
+  </div>
       <div class="mv">
         <span class="up">中央値<b>ゴールドIV → III</b></span>
         <span class="up">プラチナIII<b>7.76%</b></span>
