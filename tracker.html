@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- テスト運用中：検索・回遊ともに導線なし。公開時に下記2行を削除する -->
+<meta name="robots" content="noindex,nofollow">
+<title>RPトラッカー（テスト）| APEX WORKBOOK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ===== RPトラッカー専用 ===== */
+.tw{max-width:760px;margin:0 auto;padding:0 16px 72px}
+.thead{padding:18px 0 6px}
+.thead .brand{font-family:'Chakra Petch';font-weight:700;font-size:15px;letter-spacing:.1em;color:var(--text)}
+.thead .brand span{color:var(--pink)}
+.tt{font-family:'Chakra Petch';font-size:26px;font-weight:700;margin:14px 0 2px}
+.tt em{font-style:normal;font-size:11px;letter-spacing:.14em;color:var(--amber);vertical-align:6px;margin-left:8px}
+.tsub{font-size:12px;color:var(--muted)}
+.c{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px;margin-top:14px}
+.c.flat{background:var(--panel2)}
+.ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.ch b{font-size:14px;font-weight:700}
+.ch span{font-size:11px;color:var(--muted)}
+.streak{display:flex;align-items:center;gap:10px;background:#12101e;border:1px solid #3c2249;
+  border-left:3px solid var(--pink);border-radius:3px;padding:10px 12px;margin-top:14px;font-size:12px;color:var(--muted)}
+.streak b{font-family:'Chakra Petch';font-size:20px;color:var(--pink)}
+.streak .r{margin-left:auto;color:var(--amber);font-size:11px}
+.streak .r.done{color:var(--green)}
+.rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
+.rpbox input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--cyan);
+  font-family:'Chakra Petch';font-weight:700;font-size:30px;letter-spacing:.02em;-moz-appearance:textfield}
+.rpbox input::-webkit-outer-spin-button,.rpbox input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.rpbox .u{font-size:12px;color:var(--muted)}
+.stp{display:flex;gap:6px}
+.stp button{width:38px;height:38px;background:#101a2c;border:1px solid var(--line);border-radius:2px;
+  color:var(--cyan);font-size:17px;cursor:pointer;font-family:'Chakra Petch'}
+.brow{display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;padding:11px 8px;border-radius:3px;font-family:'Noto Sans JP';font-weight:700;font-size:13px;
+  cursor:pointer;border:1.5px solid var(--cyan);background:#003c4e;color:var(--cyan)}
+.btn.ghost{background:#101a2c;border-color:var(--line);color:var(--muted);font-weight:500}
+.btn.sub{flex:0 0 42%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pink{background:#2e0a1a;border-color:var(--pink);color:var(--pink)}
+.meta{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--muted)}
+.meta .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:0 0 auto}
+.meta .dot.off{background:#3c4560}
+.meta a{margin-left:auto;color:var(--cyan);cursor:pointer;text-decoration:none}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 4px;text-align:center}
+.kpi span{display:block;font-size:10px;color:var(--muted)}
+.kpi b{display:block;font-family:'Chakra Petch';font-size:19px;margin-top:3px}
+.up{color:var(--green)}.dn{color:var(--pink)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{padding:4px 10px;border-radius:2px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--muted);font-size:11px;cursor:pointer;font-family:'Noto Sans JP'}
+.tabs button.on{background:#003240;border-color:var(--cyan);color:var(--cyan)}
+canvas{display:block;width:100%;height:auto}
+.legend{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:5px}
+.legend i.man{background:transparent;border:1.5px solid var(--amber)}
+.goal{background:#141109;border:1px solid #5c4010}
+.goal .big{font-family:'Chakra Petch';font-size:34px;font-weight:700;color:var(--amber);line-height:1}
+.goal .u{font-size:13px;color:var(--text);margin-left:5px}
+.bar{height:10px;border-radius:5px;background:#1e1a10;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:var(--amber)}
+.bl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .d{font-size:10px;color:var(--muted);text-align:center}
+.cal .cell{aspect-ratio:1;border-radius:3px;background:#1b2438}
+.cal .cell.future{background:#131a2a}
+.cal .cell.today{outline:1.5px solid var(--cyan)}
+.warn{background:#1c1608;border:1px solid #5c4010;border-left:3px solid var(--amber);border-radius:3px;padding:10px 12px;margin-top:14px}
+.warn b{display:block;font-size:12px;color:var(--amber);margin-bottom:4px}
+.warn p{font-size:11px;color:var(--muted);line-height:1.6}
+.code{background:#08101a;border:1px solid var(--line);border-radius:3px;padding:9px 10px;
+  font-family:'Chakra Petch';font-size:11px;color:#78c8dc;word-break:break-all;max-height:56px;overflow:hidden}
+.ta{width:100%;background:var(--panel2);border:1px solid #28344c;border-radius:3px;color:var(--text);
+  padding:9px 10px;font-family:'Chakra Petch';font-size:11px;resize:vertical;min-height:52px;outline:none}
+.sheet{position:fixed;inset:0;z-index:80;background:rgba(4,6,14,.78);display:none}
+.sheet.open{display:block}
+.sheet .in{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:760px;background:var(--panel);
+  border-top:1px solid var(--line);border-radius:12px 12px 0 0;padding:14px 16px 26px;max-height:88vh;overflow:auto}
+.grab{width:40px;height:4px;border-radius:2px;background:#303a50;margin:0 auto 14px}
+.lb{font-size:10px;color:var(--muted);margin:14px 0 6px}
+.ti{width:100%;background:var(--panel2);border:1px solid #28344c;border-radius:3px;color:var(--text);
+  padding:10px 12px;font-size:15px;outline:none}
+.ti:focus{border-color:var(--cyan)}
+.pf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.pf button{padding:9px 0;border-radius:3px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--muted);font-size:12px;cursor:pointer;font-family:'Chakra Petch'}
+.pf button.on{background:#003240;border-color:var(--cyan);color:var(--cyan)}
+.hr{height:1px;background:#1c2438;margin:18px 0}
+.empty{text-align:center;padding:6px 0 4px}
+.empty h3{font-size:15px;margin-top:10px}
+.empty p{font-size:11px;color:var(--muted);margin-top:6px}
+.feat{margin:16px 0 0;padding:0;list-style:none;text-align:left}
+.feat li{font-size:11px;color:var(--muted);padding:5px 0 5px 16px;position:relative}
+.feat li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--cyan)}
+.feat b{color:var(--text);font-size:11px;margin-right:6px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:90;
+  background:#0d1626;border:1px solid var(--cyan);border-radius:3px;padding:10px 18px;font-size:12px;
+  color:var(--text);opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.warn2{border-color:var(--amber)}
+.hide{display:none !important}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="tw">
+  <div class="thead"><div class="brand">APEX <span>WORKBOOK</span></div></div>
+
+  <h1 class="tt">RPトラッカー<em>TEST</em></h1>
+  <p class="tsub">毎日のランクポイントを記録して、伸びを可視化</p>
+
+  <!-- 空の状態 -->
+  <div id="empty" class="c hide">
+    <div class="empty">
+      <canvas id="ghost" width="640" height="220" aria-hidden="true"></canvas>
+      <h3>まだ記録がありません</h3>
+      <p>今日のRPを1回入れると、明日から推移が出ます</p>
+      <ul class="feat">
+        <li><b>連続記録</b>毎日の記録日数を数えます</li>
+        <li><b>スプリット合計</b>期間中に稼いだ総RPが出ます</li>
+        <li><b>次ティアまで</b>到達予想日を表示します</li>
+      </ul>
+    </div>
+    <div class="brow"><button class="btn" id="startBtn">今日のRPを記録する</button></div>
+    <div class="brow"><button class="btn ghost" id="restoreBtn">バックアップコードから復元</button></div>
+  </div>
+
+  <!-- 連続記録 -->
+  <div id="streak" class="streak hide">
+    連続記録 <b id="stDays">0</b>日 <span class="r" id="stMsg">今日はまだ未記録</span>
+  </div>
+
+  <!-- 推移 -->
+  <div class="c">
+    <div class="ch"><b>RP推移</b><span id="splitLabel">-</span></div>
+    <div class="tabs" id="splitTabs"></div>
+    <canvas id="line" width="720" height="400" style="margin-top:12px"></canvas>
+    <div class="legend"><span><i></i>自動取得</span><span><i class="man"></i>手入力</span></div>
+  </div>
+
+  <!-- 入力 -->
+  <div class="c" id="inputCard">
+    <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
+    <div class="rpbox">
+      <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="今日のRP">
+      <span class="u">RP</span>
+      <div class="stp"><button id="minus" aria-label="50減らす">−</button><button id="plus" aria-label="50増やす">＋</button></div>
+    </div>
+    <div class="brow">
+      <button class="btn sub" id="fetchBtn">自動取得</button>
+      <button class="btn" id="saveBtn">記録する</button>
+    </div>
+    <div class="meta">
+      <span class="dot off" id="pdot"></span><span id="pname">取得元は未設定</span>
+      <a id="openCfg">設定</a>
+    </div>
+  </div>
+
+  <div class="kpi" id="kpi">
+    <div><span>現在RP</span><b id="kNow">-</b></div>
+    <div><span>今日の増減</span><b id="kToday">-</b></div>
+    <div><span>直近7日</span><b id="kWeek">-</b></div>
+  </div>
+
+  <!-- 目標 -->
+  <div class="c goal" id="goalCard">
+    <div class="ch"><b id="goalTitle" style="color:var(--amber)">-</b><span>GOAL</span></div>
+    <div><span class="big" id="goalRp">-</span><span class="u">RP</span></div>
+    <div class="bar"><i id="goalBar" style="width:0%"></i></div>
+    <div class="bl"><span id="goalFrom">-</span><span id="goalPace">-</span></div>
+  </div>
+
+  <!-- 増減 -->
+  <div class="c">
+    <div class="ch"><b>1日ごとの増減</b><span id="avgDelta">-</span></div>
+    <canvas id="bars" width="720" height="300"></canvas>
+    <div class="note" id="barNote" style="margin-top:8px"></div>
+  </div>
+
+  <!-- カレンダー -->
+  <div class="c">
+    <div class="ch"><b>記録カレンダー</b><span>直近3週間</span></div>
+    <div class="cal" id="calHead"></div>
+    <div class="cal" id="cal" style="margin-top:6px"></div>
+    <div class="note">色が濃いほどRPの伸びが大きい日 / 濃いグレーは未記録</div>
+  </div>
+
+  <!-- 共有 -->
+  <div class="c flat">
+    <div class="ch"><b>スプリット成績を画像で共有</b></div>
+    <div class="kpi" style="margin-top:0">
+      <div><span>スプリット合計</span><b id="sTotal">-</b></div>
+      <div><span>記録日数</span><b id="sDays">-</b></div>
+      <div><span>最高RP</span><b id="sPeak">-</b></div>
+    </div>
+    <div class="brow">
+      <button class="btn pink" id="imgBtn">画像を作る</button>
+      <button class="btn ghost" id="bkBtn">バックアップ</button>
+    </div>
+  </div>
+
+  <div class="warn">
+    <b>7日以上開かないと記録が消えることがあります</b>
+    <p>iPhoneのSafariの仕様です。ときどき「バックアップ」からコードをコピーして、メモなどに残しておいてください。</p>
+  </div>
+
+  <div class="note" style="margin-top:18px">記録はこの端末内にのみ保存されます（ログイン不要）</div>
+</div>
+
+<!-- 設定シート -->
+<div class="sheet" id="sheet"><div class="in">
+  <div class="grab"></div>
+  <div class="ch"><b style="font-size:15px">設定</b><span id="closeCfg" style="cursor:pointer;color:var(--cyan)">閉じる</span></div>
+
+  <div class="lb">EA名（自動取得に使用）</div>
+  <input class="ti" id="cfgName" placeholder="大文字・小文字も一致させてください" autocomplete="off">
+  <div class="lb">プラットフォーム</div>
+  <div class="pf" id="cfgPf">
+    <button data-pf="PC">PC</button><button data-pf="PS4">PS</button><button data-pf="X1">Xbox</button>
+  </div>
+  <div class="brow"><button class="btn" id="cfgSave">保存する</button></div>
+
+  <div class="hr"></div>
+
+  <div class="ch"><b style="font-size:14px">バックアップ</b></div>
+  <p class="note" style="margin:0 0 8px">コードをコピーしておけば、別の端末でも復元できます</p>
+  <div class="code" id="bkCode">-</div>
+  <div class="brow"><button class="btn ghost" id="copyCode">コードをコピー</button></div>
+
+  <div class="lb">コードから復元</div>
+  <textarea class="ta" id="bkIn" placeholder="コードを貼り付け" spellcheck="false"></textarea>
+  <div class="brow"><button class="btn" id="loadCode">読み込む</button></div>
+
+  <div class="hr"></div>
+  <div class="brow"><button class="btn ghost" id="wipe" style="color:var(--pink);border-color:#5a1e33">すべての記録を削除</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   RPトラッカー v1（テスト運用・導線なし）
+   保存先: localStorage のみ / 自動取得のみ Worker を使用
+   ========================================================= */
+const KEY = "apexwb_rp_v1";
+const API = "https://apex-map-streamer.suidobashi-y.workers.dev"; // ← 本番ドメインに差し替え可
+
+/* ---- スプリット定義（data.js へ移す想定） ---- */
+const SPLITS = [
+  { id:"s30-1", season:30, label:"S30 スプリット1",
+    start:"2026-08-05T02:00+09:00", end:"2026-09-16T02:00+09:00", confirmed:true },
+  { id:"s30-2", season:30, label:"S30 スプリット2",
+    start:"2026-09-16T02:00+09:00", end:"2026-11-04T02:00+09:00", confirmed:false }
+];
+
+/* ---- ティア境界（S30で変更があれば要更新） ---- */
+const TIERS = [
+  {n:"ルーキー",   rp:0},
+  {n:"ブロンズIV", rp:1000},{n:"ブロンズIII",rp:1500},{n:"ブロンズII",rp:2000},{n:"ブロンズI",rp:2500},
+  {n:"シルバーIV", rp:3000},{n:"シルバーIII",rp:3750},{n:"シルバーII",rp:4500},{n:"シルバーI",rp:5250},
+  {n:"ゴールドIV", rp:6000},{n:"ゴールドIII",rp:7000},{n:"ゴールドII",rp:8000},{n:"ゴールドI",rp:9000},
+  {n:"プラチナIV", rp:10000},{n:"プラチナIII",rp:11250},{n:"プラチナII",rp:12500},{n:"プラチナI",rp:13750},
+  {n:"ダイヤIV",   rp:15000},{n:"ダイヤIII",  rp:16250},{n:"ダイヤII",  rp:17500},{n:"ダイヤI",  rp:18750},
+  {n:"マスター",   rp:20000}
+];
+
+/* ---- 日付ユーティリティ（Apexの日境界は 02:00 JST） ---- */
+const DAY = 86400000;
+function apexDate(d = new Date()){
+  return new Date(d.getTime() - 2*3600*1000)
+    .toLocaleDateString("sv-SE", { timeZone:"Asia/Tokyo" });
+}
+const parseD = s => new Date(s + "T12:00:00+09:00");
+const addD   = (s,n) => apexDate(new Date(parseD(s).getTime() + n*DAY + 2*3600*1000));
+const diffD  = (a,b) => Math.round((parseD(a)-parseD(b))/DAY);
+function splitOf(dateStr){
+  const t = parseD(dateStr).getTime();
+  return SPLITS.find(s => t >= new Date(s.start).getTime() && t < new Date(s.end).getTime()) || null;
+}
+function currentSplit(){ return splitOf(apexDate()) || SPLITS[SPLITS.length-1]; }
+const fmt  = n => n.toLocaleString("en-US");
+const sign = n => (n>0?"+":"") + fmt(n);
+
+/* ---- 保存 ---- */
+let DB = { v:1, profile:{ name:"", platform:"X1" }, records:{} };
+let viewSplit = currentSplit().id;
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if (raw) DB = Object.assign(DB, JSON.parse(raw));
+  }catch(e){ toast("保存データを読めませんでした", true); }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ toast("保存できませんでした。空き容量を確認してください", true); }
+}
+
+/* ---- 抽出 ---- */
+function entries(splitId){
+  const sp = SPLITS.find(s=>s.id===splitId);
+  return Object.keys(DB.records).sort()
+    .filter(d => !sp || (parseD(d) >= new Date(sp.start) && parseD(d) < new Date(sp.end)))
+    .map(d => ({ date:d, ...DB.records[d] }));
+}
+/* デルタ: スプリット内で前の記録がある日のみ算出 */
+function withDelta(list){
+  return list.map((e,i)=> ({ ...e, delta: i===0 ? null : e.rp - list[i-1].rp }));
+}
+function streak(){
+  const all = Object.keys(DB.records).sort();
+  if (!all.length) return { n:0, today:false };
+  const t = apexDate();
+  const today = !!DB.records[t];
+  let cur = today ? t : addD(t,-1), n = 0;
+  while (DB.records[cur]) { n++; cur = addD(cur,-1); }
+  return { n, today };
+}
+function tierAt(rp){
+  let i = 0;
+  for (let k=0;k<TIERS.length;k++) if (rp >= TIERS[k].rp) i = k;
+  return { cur:TIERS[i], next:TIERS[i+1] || null };
+}
+
+/* ---- 描画 ---- */
+function render(){
+  const cur = entries(viewSplit);
+  const all = Object.keys(DB.records).length;
+  document.getElementById("today").textContent = apexDate().replace(/-/g,"/");
+  document.getElementById("empty").classList.toggle("hide", all>0);
+  ["streak","kpi","goalCard"].forEach(id=>document.getElementById(id));
+
+  const hasAny = all>0;
+  document.getElementById("streak").classList.toggle("hide", !hasAny);
+  document.querySelectorAll(".c.goal, .kpi").forEach(el=>el.classList.toggle("hide", !hasAny));
+  document.querySelectorAll(".tw > .c").forEach(el=>{
+    if (el.id==="empty" || el.id==="inputCard") return;
+    el.classList.toggle("hide", !hasAny);
+  });
+  document.querySelector(".warn").classList.toggle("hide", !hasAny);
+
+  const p = DB.profile;
+  document.getElementById("pdot").className = "dot" + (p.name ? "" : " off");
+  document.getElementById("pname").textContent = p.name
+    ? p.name + " / " + ({PC:"PC",PS4:"PS",X1:"Xbox"}[p.platform]||p.platform)
+    : "取得元は未設定";
+
+  const st = streak();
+  document.getElementById("stDays").textContent = st.n;
+  const sm = document.getElementById("stMsg");
+  sm.textContent = st.today ? "今日は記録済み" : "今日はまだ未記録";
+  sm.className = "r" + (st.today ? " done" : "");
+
+  tabs();
+  if (!hasAny) { drawGhost(); return; }
+
+  const d = withDelta(cur);
+  const last = d[d.length-1];
+  document.getElementById("kNow").textContent = last ? fmt(last.rp) : "-";
+  const td = last && last.date===apexDate() ? last.delta : null;
+  const kT = document.getElementById("kToday");
+  kT.textContent = td===null ? "—" : sign(td);
+  kT.className = td===null ? "" : (td>=0?"up":"dn");
+  const wk = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null)
+              .reduce((a,e)=>a+e.delta, 0);
+  const kW = document.getElementById("kWeek");
+  kW.textContent = d.length>1 ? sign(wk) : "—";
+  kW.className = wk>=0?"up":"dn";
+
+  goal(last, d);
+  drawLine(d);
+  drawBars(d);
+  calendar();
+  summary(d);
+}
+
+function tabs(){
+  const w = document.getElementById("splitTabs");
+  w.innerHTML = "";
+  SPLITS.forEach(s=>{
+    const b = document.createElement("button");
+    b.textContent = s.label.replace("S30 ","") + (s.confirmed?"":"（予定）");
+    b.className = s.id===viewSplit ? "on" : "";
+    b.onclick = ()=>{ viewSplit = s.id; render(); };
+    w.appendChild(b);
+  });
+  const sp = SPLITS.find(s=>s.id===viewSplit);
+  document.getElementById("splitLabel").textContent =
+    sp.start.slice(5,10).replace("-","/") + "〜" + sp.end.slice(5,10).replace("-","/");
+}
+
+function goal(last, d){
+  if (!last) return;
+  const { cur, next } = tierAt(last.rp);
+  const g = document.getElementById("goalCard");
+  if (!next){
+    document.getElementById("goalTitle").textContent = "マスター到達";
+    document.getElementById("goalRp").textContent = fmt(last.rp);
+    document.getElementById("goalBar").style.width = "100%";
+    document.getElementById("goalFrom").textContent = cur.n;
+    document.getElementById("goalPace").textContent = "";
+    return;
+  }
+  const rest = next.rp - last.rp;
+  const span = next.rp - cur.rp;
+  document.getElementById("goalTitle").textContent = next.n + "まで";
+  document.getElementById("goalRp").textContent = fmt(rest);
+  document.getElementById("goalBar").style.width = Math.max(2, (1-rest/span)*100) + "%";
+  document.getElementById("goalFrom").textContent = cur.n;
+  const recent = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null);
+  const pace = recent.length ? recent.reduce((a,e)=>a+e.delta,0)/recent.length : 0;
+  document.getElementById("goalPace").textContent =
+    pace > 0 ? "直近7日ペースなら あと" + Math.ceil(rest/pace) + "日" : "直近7日は伸びていません";
+}
+
+/* ---- Canvas ---- */
+function ctx2(id){
+  const c = document.getElementById(id);
+  const w = c.parentElement.clientWidth - 28;
+  const r = window.devicePixelRatio || 1;
+  const h = +c.getAttribute("height") / (+c.getAttribute("width")/w);
+  c.width = w*r; c.height = h*r; c.style.height = h + "px";
+  const x = c.getContext("2d"); x.scale(r,r);
+  return { x, w, h };
+}
+const CSSV = n => getComputedStyle(document.body).getPropertyValue(n).trim();
+
+function drawGhost(){
+  const c = document.getElementById("ghost");
+  const w = c.parentElement.clientWidth - 28, h = 150, r = window.devicePixelRatio||1;
+  c.width = w*r; c.height = h*r; c.style.height = h+"px";
+  const x = c.getContext("2d"); x.scale(r,r);
+  const v = [.08,.2,.14,.32,.4,.34,.52,.6,.56,.7,.8,.76,.9,1];
+  x.beginPath();
+  v.forEach((p,i)=>{ const px = 10+i*(w-20)/13, py = h-14-(h-40)*p; i?x.lineTo(px,py):x.moveTo(px,py); });
+  x.strokeStyle = "rgba(0,229,255,.28)"; x.lineWidth = 2; x.stroke();
+  x.lineTo(w-10,h-14); x.lineTo(10,h-14); x.closePath();
+  x.fillStyle = "rgba(0,229,255,.07)"; x.fill();
+  x.font = "600 11px 'Chakra Petch'"; x.fillStyle = "#3c4e68";
+  x.textAlign = "center"; x.fillText("S A M P L E", w/2, h/2);
+}
+
+function drawLine(d){
+  const { x, w, h } = ctx2("line");
+  if (!d.length) return;
+  const L = 42, R = 10, T = 16, B = 26;
+  const vs = d.map(e=>e.rp);
+  let lo = Math.min(...vs), hi = Math.max(...vs);
+  const { cur, next } = tierAt(vs[vs.length-1]);
+  if (next) hi = Math.max(hi, next.rp);
+  lo = Math.min(lo, cur.rp);
+  const pad = Math.max(200,(hi-lo)*.15); lo -= pad; hi += pad;
+  const px = i => L + (d.length===1 ? (w-L-R)/2 : i*(w-L-R)/(d.length-1));
+  const py = v => h-B - (v-lo)/(hi-lo)*(h-T-B);
+
+  const step = (hi-lo) > 6000 ? 2000 : 1000;
+  x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
+  for (let g = Math.ceil(lo/step)*step; g < hi; g += step){
+    x.strokeStyle = "#141e30"; x.beginPath(); x.moveTo(L,py(g)); x.lineTo(w-R,py(g)); x.stroke();
+    x.fillStyle = "#5c6884"; x.fillText((g/1000)+"k", L-6, py(g)+3);
+  }
+  /* 面 + 線 */
+  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(px(i),py(e.rp)):x.moveTo(px(i),py(e.rp)));
+  const st = x.strokeStyle;
+  x.save(); x.lineTo(px(d.length-1), h-B); x.lineTo(px(0), h-B); x.closePath();
+  const gr = x.createLinearGradient(0,T,0,h-B);
+  gr.addColorStop(0,"rgba(0,229,255,.22)"); gr.addColorStop(1,"rgba(0,229,255,.02)");
+  x.fillStyle = gr; x.fill(); x.restore();
+  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(px(i),py(e.rp)):x.moveTo(px(i),py(e.rp)));
+  x.strokeStyle = CSSV("--cyan"); x.lineWidth = 2; x.lineJoin = "round"; x.stroke();
+
+  /* ティア線 */
+  x.setLineDash([5,5]); x.lineWidth = 1; x.textAlign = "left";
+  [[next, CSSV("--amber")],[cur, "#8a6bd6"]].forEach(([t,col])=>{
+    if (!t || py(t.rp) < T || py(t.rp) > h-B) return;
+    x.strokeStyle = col; x.beginPath(); x.moveTo(L,py(t.rp)); x.lineTo(w-R,py(t.rp)); x.stroke();
+    x.fillStyle = col; x.font = "500 9px 'Noto Sans JP'";
+    x.fillText(t.n+" "+fmt(t.rp), L+3, py(t.rp)-5);
+  });
+  x.setLineDash([]);
+
+  /* 点 */
+  d.forEach((e,i)=>{
+    if (e.src === "manual"){
+      x.beginPath(); x.arc(px(i),py(e.rp),3.5,0,7);
+      x.fillStyle = "#0a0e1a"; x.fill();
+      x.strokeStyle = CSSV("--amber"); x.lineWidth = 1.5; x.stroke();
+    } else if (i === d.length-1){
+      x.beginPath(); x.arc(px(i),py(e.rp),4,0,7); x.fillStyle = CSSV("--cyan"); x.fill();
+    }
+  });
+
+  x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'";
+  x.textAlign = "left";  x.fillText(d[0].date.slice(5).replace("-","/"), L, h-8);
+  if (d.length>1){ x.textAlign = "right"; x.fillText(d[d.length-1].date.slice(5).replace("-","/"), w-R, h-8); }
+}
+
+function drawBars(d){
+  const { x, w, h } = ctx2("bars");
+  const ds = d.filter(e=>e.delta!==null);
+  const note = document.getElementById("barNote");
+  if (!ds.length){ x.clearRect(0,0,w,h); note.textContent = "2日目から表示されます"; return; }
+  const mx = Math.max(...ds.map(e=>Math.abs(e.delta)), 100);
+  const L = 36, R = 8, zy = h*0.62, bw = (w-L-R)/ds.length;
+  x.strokeStyle = "#1c2438"; x.beginPath(); x.moveTo(L-6,zy); x.lineTo(w-R,zy); x.stroke();
+  x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
+  x.fillText("0", L-10, zy+3);
+  ds.forEach((e,i)=>{
+    const cx = L + i*bw + bw/2, hh = Math.abs(e.delta)/mx*(h*0.32);
+    x.fillStyle = e.delta>=0 ? CSSV("--cyan") : CSSV("--pink");
+    x.fillRect(cx-bw*0.3, e.delta>=0 ? zy-hh : zy, bw*0.6, hh);
+  });
+  const up = ds.filter(e=>e.delta>0).length, dn = ds.filter(e=>e.delta<0).length;
+  const auto = d.filter(e=>e.src==="api").length, man = d.length-auto;
+  const best = ds.reduce((a,e)=>e.delta>a.delta?e:a, ds[0]);
+  note.textContent = `プラス${up}日 / マイナス${dn}日　最高 ${sign(best.delta)} (${best.date.slice(5).replace("-","/")})　自動取得${auto} / 手入力${man}`;
+  const avg = Math.round(ds.reduce((a,e)=>a+e.delta,0)/ds.length);
+  document.getElementById("avgDelta").textContent = "平均 " + sign(avg) + " / 日";
+}
+
+function calendar(){
+  const head = document.getElementById("calHead"), body = document.getElementById("cal");
+  head.innerHTML = ""; body.innerHTML = "";
+  ["月","火","水","木","金","土","日"].forEach(d=>{
+    const e = document.createElement("div"); e.className = "d"; e.textContent = d; head.appendChild(e);
+  });
+  const t = apexDate();
+  const dow = (parseD(t).getDay() + 6) % 7;      // 月曜=0
+  const start = addD(t, -(dow + 14));
+  const dd = withDelta(entries(null));
+  const map = {}; dd.forEach(e=>map[e.date] = e.delta);
+  const mx = Math.max(100, ...dd.filter(e=>e.delta>0).map(e=>e.delta));
+  for (let i=0;i<21;i++){
+    const day = addD(start, i);
+    const c = document.createElement("div");
+    c.className = "cell" + (day===t ? " today" : "");
+    c.title = day;
+    if (day > t){ c.classList.add("future"); }
+    else if (DB.records[day]){
+      const v = map[day];
+      const a = v===null||v===undefined ? .45 : Math.min(1, Math.max(.3, v/mx));
+      c.style.background = `rgba(0,229,255,${a.toFixed(2)})`;
+    }
+    body.appendChild(c);
+  }
+}
+
+function summary(d){
+  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
+  const el = document.getElementById("sTotal");
+  el.textContent = d.length>1 ? sign(gain) : "—";
+  el.className = gain>=0 ? "up":"dn";
+  document.getElementById("sDays").textContent = d.length + "日";
+  document.getElementById("sPeak").textContent = d.length ? fmt(Math.max(...d.map(e=>e.rp))) : "-";
+}
+
+/* ---- 記録 ---- */
+function record(rp, src){
+  if (!Number.isFinite(rp) || rp < 0 || rp > 100000){ toast("RPの値を確認してください", true); return; }
+  const t = apexDate();
+  const dup = !!DB.records[t];
+  DB.records[t] = { rp: Math.round(rp), src };
+  save();
+  const sp = splitOf(t);
+  if (sp && sp.id !== viewSplit) viewSplit = sp.id;
+  render();
+  toast(dup ? "今日の記録を更新しました" : "記録しました");
+}
+
+/* ---- 自動取得 ---- */
+let cooling = false;
+async function autoFetch(){
+  const p = DB.profile;
+  if (!p.name){ openSheet(); toast("先にEA名を設定してください", true); return; }
+  if (cooling){ toast("少し時間をおいてください", true); return; }
+  const b = document.getElementById("fetchBtn");
+  b.disabled = true; b.textContent = "取得中…";
+  try{
+    const r = await fetch(`${API}/rp?player=${encodeURIComponent(p.name)}&platform=${p.platform}`);
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    if (j.rp === null || j.rp === undefined) throw new Error("no-rp");
+    document.getElementById("rp").value = j.rp;
+    toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
+    cooling = true; setTimeout(()=>cooling=false, 60000);
+  }catch(e){
+    toast("取得できませんでした。EA名を確認するか、手入力で記録してください", true);
+  }finally{
+    b.disabled = false; b.textContent = "自動取得";
+  }
+}
+
+/* ---- バックアップ ---- */
+const enc = o => "awb1." + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,"");
+function dec(s){
+  s = s.trim();
+  if (!s.startsWith("awb1.")) throw new Error("format");
+  return JSON.parse(decodeURIComponent(escape(atob(s.slice(5)))));
+}
+function loadCode(){
+  const raw = document.getElementById("bkIn").value;
+  let o;
+  try{ o = dec(raw); }catch(e){ toast("コードの形式が違います", true); return; }
+  if (!o || typeof o.records !== "object"){ toast("コードの中身を読めません", true); return; }
+  const keys = Object.keys(o.records);
+  const over = keys.filter(k=>DB.records[k]).length;
+  const msg = `${keys.length}日分の記録が入っています。\n新しく追加：${keys.length-over}日\nいまの記録を置き換え：${over}日\n\n読み込みますか？`;
+  if (over){
+    try{ navigator.clipboard.writeText(enc(DB)); }catch(e){}
+  }
+  if (!confirm(msg)) return;
+  DB.records = Object.assign({}, DB.records, o.records);
+  if (o.profile && o.profile.name && !DB.profile.name) DB.profile = o.profile;
+  save(); render(); closeSheet();
+  toast("読み込みました");
+}
+
+/* ---- 共有画像 ---- */
+function shareImage(){
+  const d = withDelta(entries(viewSplit));
+  if (!d.length){ toast("記録がありません", true); return; }
+  const sp = SPLITS.find(s=>s.id===viewSplit);
+  const W = 1200, H = 675, c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  x.fillStyle = "#0a0e1a"; x.fillRect(0,0,W,H);
+  x.strokeStyle = "rgba(0,229,255,.05)";
+  for (let i=0;i<W;i+=40){ x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke(); }
+  for (let i=0;i<H;i+=40){ x.beginPath();x.moveTo(0,i);x.lineTo(W,i);x.stroke(); }
+
+  x.font = "700 26px 'Chakra Petch'"; x.fillStyle = "#e8ecf5";
+  x.fillText("APEX ", 56, 74);
+  const bw2 = x.measureText("APEX ").width;
+  x.fillStyle = "#ff2d78"; x.fillText("WORKBOOK", 56+bw2, 74);
+  x.font = "700 20px 'Noto Sans JP'"; x.fillStyle = "#8a93ad";
+  x.fillText(sp.label, 56, 112);
+
+  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
+  x.font = "700 96px 'Chakra Petch'"; x.fillStyle = gain>=0 ? "#2dffa8" : "#ff2d78";
+  x.fillText(sign(gain), 56, 220);
+  x.font = "500 22px 'Noto Sans JP'"; x.fillStyle = "#8a93ad";
+  x.fillText("スプリット合計RP", 56, 258);
+
+  [["現在RP", fmt(d[d.length-1].rp)],["記録日数", d.length+"日"],["最高RP", fmt(Math.max(...d.map(e=>e.rp)))]]
+  .forEach(([k,v],i)=>{
+    const bx = 56 + i*250;
+    x.font = "500 18px 'Noto Sans JP'"; x.fillStyle = "#8a93ad"; x.fillText(k, bx, 320);
+    x.font = "700 40px 'Chakra Petch'"; x.fillStyle = "#e8ecf5"; x.fillText(v, bx, 366);
+  });
+
+  const L=56, R=56, T=410, B=560;
+  const vs = d.map(e=>e.rp), lo = Math.min(...vs)-200, hi = Math.max(...vs)+200;
+  const gx = i => L + (d.length===1 ? (W-L-R)/2 : i*(W-L-R)/(d.length-1));
+  const gy = v => B - (v-lo)/(hi-lo||1)*(B-T);
+  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(gx(i),gy(e.rp)):x.moveTo(gx(i),gy(e.rp)));
+  x.strokeStyle = "#00e5ff"; x.lineWidth = 4; x.lineJoin="round"; x.stroke();
+  x.lineTo(gx(d.length-1),B); x.lineTo(gx(0),B); x.closePath();
+  x.fillStyle = "rgba(0,229,255,.14)"; x.fill();
+
+  x.font = "500 20px 'Chakra Petch'"; x.fillStyle = "#5c6884";
+  x.fillText(d[0].date.replace(/-/g,"/") + " 〜 " + d[d.length-1].date.replace(/-/g,"/"), 56, 610);
+  x.textAlign = "right"; x.fillText("apex-workbook.com", W-56, 610);
+
+  c.toBlob(b=>{
+    const u = URL.createObjectURL(b), a = document.createElement("a");
+    a.href = u; a.download = `apexwb-${sp.id}-${apexDate()}.png`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(u), 4000);
+    toast("画像を保存しました");
+  });
+}
+
+/* ---- UI ---- */
+let toastT;
+function toast(m, warn){
+  const t = document.getElementById("toast");
+  t.textContent = m; t.className = "toast on" + (warn?" warn2":"");
+  clearTimeout(toastT); toastT = setTimeout(()=>t.className="toast"+(warn?" warn2":""), 3200);
+}
+function openSheet(){
+  document.getElementById("cfgName").value = DB.profile.name || "";
+  document.querySelectorAll("#cfgPf button").forEach(b=>
+    b.classList.toggle("on", b.dataset.pf === DB.profile.platform));
+  document.getElementById("bkCode").textContent = enc(DB);
+  document.getElementById("sheet").classList.add("open");
+}
+const closeSheet = ()=> document.getElementById("sheet").classList.remove("open");
+
+document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById("rp"); r.value = (+r.value||0)+50; };
+document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-50); };
+document.getElementById("saveBtn").onclick  = ()=> record(parseInt(document.getElementById("rp").value,10), "manual");
+document.getElementById("fetchBtn").onclick = autoFetch;
+document.getElementById("startBtn").onclick = ()=> document.getElementById("rp").focus();
+document.getElementById("restoreBtn").onclick = ()=>{ openSheet(); document.getElementById("bkIn").focus(); };
+document.getElementById("openCfg").onclick  = openSheet;
+document.getElementById("closeCfg").onclick = closeSheet;
+document.getElementById("sheet").onclick = e => { if (e.target.id === "sheet") closeSheet(); };
+document.querySelectorAll("#cfgPf button").forEach(b => b.onclick = ()=>{
+  document.querySelectorAll("#cfgPf button").forEach(o=>o.classList.remove("on"));
+  b.classList.add("on");
+});
+document.getElementById("cfgSave").onclick = ()=>{
+  DB.profile.name = document.getElementById("cfgName").value.trim();
+  const on = document.querySelector("#cfgPf button.on");
+  DB.profile.platform = on ? on.dataset.pf : "X1";
+  save(); render(); toast("保存しました");
+};
+document.getElementById("copyCode").onclick = ()=>{
+  navigator.clipboard.writeText(enc(DB))
+    .then(()=>toast("コードをコピーしました"))
+    .catch(()=>toast("コピーできませんでした。長押しで選択してください", true));
+};
+document.getElementById("loadCode").onclick = loadCode;
+document.getElementById("bkBtn").onclick = openSheet;
+document.getElementById("imgBtn").onclick = shareImage;
+document.getElementById("wipe").onclick = ()=>{
+  if (!confirm("すべての記録を削除します。取り消せません。よろしいですか？")) return;
+  navigator.clipboard.writeText(enc(DB)).catch(()=>{});
+  DB.records = {}; save(); render(); closeSheet(); toast("削除しました");
+};
+document.getElementById("rp").addEventListener("keydown", e=>{ if (e.key === "Enter") document.getElementById("saveBtn").click(); });
+let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(render, 180); });
+
+load();
+document.fonts && document.fonts.ready.then(render);
+render();
+</script>
+</body>
+</html>
