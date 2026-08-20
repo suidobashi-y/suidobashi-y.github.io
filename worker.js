@@ -7,6 +7,7 @@
  *   GET /maprotation → マップローテーション（Apex Legends Status）
  *   GET /live        → 配信中のTwitchチャンネル一覧 {"live":["name",...]}
  *   GET /feed        → 配信トレンド（Apex配信中のタイトルからモード・話題語を集計）
+ *   GET /rp          → 指定プレイヤーの現在RP（RPトラッカーの自動取得用）
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -51,10 +52,11 @@ export default {
       if (url.pathname === "/live")        return cors(await live(env, ctx), origin);
       if (url.pathname === "/discover")    return cors(await discover(env, url), origin);
       if (url.pathname === "/feed")        return cors(await feed(request, env, ctx), origin);
+      if (url.pathname === "/rp")          return cors(await playerRp(env, url), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover", "/feed"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
         twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定"
       }), origin);
@@ -76,6 +78,39 @@ async function mapRotation(env, ctx) {
 
   const data = await res.json();
   return json(data, 200, 60);
+}
+
+/* ---------- プレイヤーの現在RP（RPトラッカー用） ---------- */
+/* 例: /rp?player=Zume&platform=X1  →  {"rp":14820,"tier":"Platinum","div":1,"at":...} */
+const RP_PLATFORMS = ["PC", "PS4", "X1"];
+
+async function playerRp(env, url) {
+  if (!env.APEX_API_KEY) return json({ error: "APEX_API_KEY が未設定です" }, 500);
+
+  const player   = (url.searchParams.get("player") || "").trim();
+  const platform = url.searchParams.get("platform") || "X1";
+
+  if (!player || player.length > 40 || !RP_PLATFORMS.includes(platform)) {
+    return json({ error: "player と platform を確認してください" }, 400);
+  }
+
+  // 90秒キャッシュ（連打を上流まで飛ばさない）
+  const upstream = "https://api.mozambiquehe.re/bridge?auth=" + env.APEX_API_KEY +
+                   "&player=" + encodeURIComponent(player) +
+                   "&platform=" + platform;
+  const res = await fetch(upstream, { cf: { cacheTtl: 90, cacheEverything: true } });
+  if (!res.ok) return json({ error: "upstream " + res.status }, 502);
+
+  const data = await res.json();
+  if (data && data.Error) return json({ error: "not-found" }, 404);
+
+  const rank = data && data.global && data.global.rank;
+  return json({
+    rp:   rank && typeof rank.rankScore === "number" ? rank.rankScore : null,
+    tier: rank ? (rank.rankName || null) : null,
+    div:  rank ? (rank.rankDiv  ?? null) : null,
+    at:   Date.now()
+  }, 200, 90);
 }
 
 /* ---------- 配信中のTwitchチャンネル ----------
