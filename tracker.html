@@ -138,6 +138,12 @@ canvas{display:block;width:100%;height:auto}
   border-top:1px solid var(--line);border-radius:12px 12px 0 0;padding:14px 16px 26px;max-height:88vh;overflow:auto}
 .grab{width:40px;height:4px;border-radius:2px;background:#303a50;margin:0 auto 14px}
 .lb{font-size:10px;color:var(--muted);margin:14px 0 6px}
+.help{margin-top:9px}
+.help a{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--cyan);
+  text-decoration:none;border-bottom:1px solid rgba(0,229,255,.4);padding-bottom:1px}
+.help a i{font-style:normal;font-size:10px}
+.help p{margin-top:8px;font-size:10.5px;line-height:1.7;color:var(--muted)}
+.help p b{color:var(--text)}
 .ti{width:100%;background:var(--panel2);border:1px solid #28344c;border-radius:3px;color:var(--text);
   padding:10px 12px;font-size:15px;outline:none}
 .ti:focus{border-color:var(--cyan)}
@@ -359,6 +365,12 @@ canvas{display:block;width:100%;height:auto}
 
   <div class="lb">EA名 / UID（自動取得に使用）</div>
   <input class="ti" id="cfgName" placeholder="EA名 または UID（数字）" autocomplete="off">
+  <div class="help">
+    <a href="https://myaccount.ea.com/cp-ui/aboutme/index" target="_blank" rel="noopener">
+      EA名がわからない場合はこちら<i>↗</i></a>
+    <p>EAアカウントにログインし、「About Me」の<b>EA ID</b>が入力する名前です。<br>
+       PS / Xbox でプレイしている場合は、そのプラットフォームのオンラインID（PSN ID・ゲーマータグ）を入れてください。</p>
+  </div>
   <div class="lb">プラットフォーム</div>
   <div class="pf" id="cfgPf">
     <button data-pf="PC">PC</button><button data-pf="PS4">PS</button><button data-pf="X1">Xbox</button>
@@ -872,7 +884,7 @@ async function autoFetch(){
     toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
     cooling = true; setTimeout(()=>cooling=false, 60000);
   }catch(e){
-    toast(String(e.message || e).slice(0,80) + "（手入力で記録できます）", true);
+    toast(String(e.message || e).slice(0,60) + "。設定からEA名を確認できます", true);
   }finally{
     b.disabled = false; b.textContent = "自動取得";
   }
