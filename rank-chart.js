@@ -5,6 +5,8 @@
    - Apex の日付境界（02:00 JST）とスプリット定義
    - RP推移チャートの描画
    前提: data.js を先に読み込むこと
+   注意: このファイルの最上位宣言はページ側と名前が衝突しないこと。
+         index.html は独自に var SEASON を持つため、ここでは RW_SEASON を使う。
    ========================================================= */
 const KEY = "apexwb_rp_v1";
 const SUM_KEY = "apexwb_rp_summary_v1";
@@ -26,17 +28,17 @@ function loadDB(){
 function recordCount(){ return Object.keys(DB.records || {}).length; }
 
 /* ---- スプリット定義（data.js の season / nextSeason から生成） ---- */
-const SEASON = (typeof APEX_DATA !== "undefined" && APEX_DATA.currentSeason)
+const RW_SEASON = (typeof APEX_DATA !== "undefined" && APEX_DATA.currentSeason)
   ? APEX_DATA.currentSeason()
   : { no:30, name:"MARKED", start:"2026-08-05T02:00:00+09:00",
       splitStart:"2026-09-16T02:00:00+09:00", end:"2026-11-04T02:00:00+09:00",
       nextName:"TBA", estimated:true };
 
 const SPLITS = [
-  { id:`s${SEASON.no}-1`, season:SEASON.no, label:`S${SEASON.no} スプリット1`,
-    start:SEASON.start,      end:SEASON.splitStart, confirmed:true },
-  { id:`s${SEASON.no}-2`, season:SEASON.no, label:`S${SEASON.no} スプリット2`,
-    start:SEASON.splitStart, end:SEASON.end,        confirmed:!SEASON.estimated }
+  { id:`s${RW_SEASON.no}-1`, season:RW_SEASON.no, label:`S${RW_SEASON.no} スプリット1`,
+    start:RW_SEASON.start,      end:RW_SEASON.splitStart, confirmed:true },
+  { id:`s${RW_SEASON.no}-2`, season:RW_SEASON.no, label:`S${RW_SEASON.no} スプリット2`,
+    start:RW_SEASON.splitStart, end:RW_SEASON.end,        confirmed:!RW_SEASON.estimated }
 ];
 
 /* シーズン進捗の見出し（index.html のシーズンカードと同じ表示） */
@@ -44,12 +46,12 @@ function seasonHead(ids){
   const q = { no:"sNo", name:"sName", sp:"sSp", left:"sLeft", pct:"sPct" };
   Object.assign(q, ids || {});
   const $ = k => document.getElementById(q[k]);
-  const st = new Date(SEASON.start).getTime(),
-        en = new Date(SEASON.end).getTime(),
-        sp = new Date(SEASON.splitStart).getTime(),
+  const st = new Date(RW_SEASON.start).getTime(),
+        en = new Date(RW_SEASON.end).getTime(),
+        sp = new Date(RW_SEASON.splitStart).getTime(),
         now = Date.now();
-  $("no").textContent   = "S" + SEASON.no;
-  $("name").textContent = " " + (SEASON.name || "");
+  $("no").textContent   = "S" + RW_SEASON.no;
+  $("name").textContent = " " + (RW_SEASON.name || "");
 
   const inSp1 = now < sp;
   $("sp").textContent = inSp1 ? "SPLIT 1" : "SPLIT 2";
@@ -70,7 +72,7 @@ function seasonHead(ids){
   elL.innerHTML = "残り <b>" + d + "</b>日 " + h + "時間";
 
   const sd = Math.floor(seasonLeft/86400000);
-  const est = SEASON.estimated ? "予測" : "";
+  const est = RW_SEASON.estimated ? "予測" : "";
   elP.textContent = inSp1
     ? "（シーズン全体 残り" + sd + "日" + (est ? " / " + est : "") + "）"
     : "（シーズン終了まで" + (est ? "・" + est : "") + "）";

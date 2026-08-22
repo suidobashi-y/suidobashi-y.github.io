@@ -639,9 +639,9 @@ var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シー
           card.style.display = "";
           var head = function(){
             seasonHead({ no:"rw-no", name:"rw-name", sp:"rw-sp", left:"rw-left", pct:"rw-pct" });
-            var st = new Date(SEASON.start).getTime(),
-                en = new Date(SEASON.end).getTime(),
-                sp = new Date(SEASON.splitStart).getTime(),
+            var st = new Date(RW_SEASON.start).getTime(),
+                en = new Date(RW_SEASON.end).getTime(),
+                sp = new Date(RW_SEASON.splitStart).getTime(),
                 pct = Math.max(0, Math.min(100, (Date.now()-st)/(en-st)*100));
             document.getElementById("rw-bar").style.width = pct + "%";
             document.getElementById("rw-head").style.left = pct + "%";
