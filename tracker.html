@@ -169,9 +169,10 @@ canvas{display:block;width:100%;height:auto}
 .modal.open{display:flex}
 .modal .box{width:100%;max-width:560px}
 .modal img{width:100%;border-radius:3px;border:1px solid var(--line);display:block}
-.tdSum{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
-.tdSum b{font-family:'Chakra Petch';font-size:26px;font-weight:700;line-height:1.1}
-.tdSum span{font-size:11px;color:var(--muted)}
+.tdBig b{font-family:'Chakra Petch';font-size:27px;font-weight:700;line-height:1}
+.tdBig em{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px}
+#todayCard .ch{align-items:baseline;margin-bottom:6px}
+#todayCard .ch #todayCount{margin-left:auto}
 .rel{display:flex;align-items:baseline;gap:10px;padding:10px 2px;border-bottom:1px solid #182036;
   text-decoration:none;color:var(--text)}
 .rel:last-child{border-bottom:0}
@@ -281,9 +282,12 @@ canvas{display:block;width:100%;height:auto}
   </div>
 
   <div class="c pk hide" id="todayCard">
-    <div class="ch"><b>今日の増減</b><span id="todayCount">-</span></div>
-    <div class="tdSum"><b id="todaySum">-</b><span>RP</span></div>
-    <canvas id="todayChart" width="720" height="230" style="margin-top:2px"></canvas>
+    <div class="ch">
+      <b>今日の増減</b>
+      <span class="tdBig"><b id="todaySum">-</b><em>RP</em></span>
+      <span id="todayCount">-</span>
+    </div>
+    <canvas id="todayChart" width="720" height="340" style="margin-top:0"></canvas>
     <i class="pulse hide" id="tdPulse" aria-hidden="true"></i>
     <div class="divp hide" id="hDiv">
       <div class="drow">
@@ -451,6 +455,13 @@ function render(){
   const kW = document.getElementById("kWeek");
   kW.textContent = d.length>1 ? sign(wk) : "—";
   kW.className = wk>=0?"up":"dn";
+
+  // 入力欄が空なら、直近の記録を初期値として入れておく
+  const rpIn = document.getElementById("rp");
+  if (!rpIn.value && !rpIn.dataset.touched){
+    const latestKey = Object.keys(DB.records).sort().pop();
+    if (latestKey) rpIn.value = DB.records[latestKey].rp;
+  }
 
   // ---- ヒーロー ----
   const st = streak();
@@ -621,10 +632,10 @@ function drawToday(baseRp, log, animate){
   const cc = ctx2("todayChart");
   if (!cc) return;
   const { x, w, h } = cc;
-  const L = 46, R = 12, T = 20, B = 24;
+  const L = 46, R = 12, T = 16, B = 26;
   const vals = (baseRp === null ? [] : [baseRp]).concat(log.map(e=>e.rp));
   let lo = Math.min(...vals), hi = Math.max(...vals);
-  const pad = Math.max(60, (hi-lo)*0.35);
+  const pad = Math.max(40, (hi-lo)*0.22);
   lo -= pad; hi += pad;
   const n  = log.length;
   const sw = (w-L-R)/Math.max(1,n);                     // 1更新ぶんの横幅
@@ -797,6 +808,9 @@ function record(rp, src){
   save();
   const sp = splitOf(t);
   if (sp && sp.id !== viewSplit) viewSplit = sp.id;
+  const rpEl = document.getElementById("rp");
+  rpEl.dataset.touched = "";
+  rpEl.value = "";              // render() が最新値を入れ直す
   window.__tdAnimate = true;
   render();
   toast(dup ? "今日の記録を更新しました" : "記録しました");
@@ -1023,6 +1037,11 @@ document.getElementById("wipe").onclick = ()=>{
   render(); closeSheet(); toast("削除しました");
 };
 document.getElementById("rp").addEventListener("keydown", e=>{ if (e.key === "Enter") document.getElementById("saveBtn").click(); });
+document.getElementById("rp").addEventListener("input", e=>{
+  // 自分で空にしたら、以降は自動補完しない（記録すると解除）
+  e.target.dataset.touched = e.target.value === "" ? "1" : "";
+});
+document.getElementById("rp").addEventListener("focus", e=>{ e.target.select(); });
 let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(render, 180); });
 
 load();
