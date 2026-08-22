@@ -8,6 +8,7 @@
  *   GET /live        → 配信中のTwitchチャンネル一覧 {"live":["name",...]}
  *   GET /feed        → 配信トレンド（Apex配信中のタイトルからモード・話題語を集計）
  *   GET /rp          → 指定プレイヤーの現在RP（RPトラッカーの自動取得用）
+ *                       ?player=名前 または ?uid=数値 ＋ &platform=PC|PS4|X1
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -81,34 +82,59 @@ async function mapRotation(env, ctx) {
 }
 
 /* ---------- プレイヤーの現在RP（RPトラッカー用） ---------- */
-/* 例: /rp?player=Zume&platform=X1  →  {"rp":14820,"tier":"Platinum","div":1,"at":...} */
+/* 例: /rp?player=Zume&platform=X1          → 名前で検索
+ *     /rp?uid=2535428181264092&platform=X1 → UIDで検索（名前変更に強い）
+ * 応答: {"rp":14820,"tier":"Platinum","div":1,"uid":"...","at":...}
+ */
 const RP_PLATFORMS = ["PC", "PS4", "X1"];
 
 async function playerRp(env, url) {
   if (!env.APEX_API_KEY) return json({ error: "APEX_API_KEY が未設定です" }, 500);
 
   const player   = (url.searchParams.get("player") || "").trim();
+  const uid      = (url.searchParams.get("uid") || "").trim();
   const platform = url.searchParams.get("platform") || "X1";
 
-  if (!player || player.length > 40 || !RP_PLATFORMS.includes(platform)) {
-    return json({ error: "player と platform を確認してください" }, 400);
+  if (!RP_PLATFORMS.includes(platform)) {
+    return json({ error: "platform は PC / PS4 / X1 のいずれかです" }, 400);
+  }
+  if (!player && !uid) return json({ error: "player または uid が必要です" }, 400);
+  if (player.length > 40 || uid.length > 40) return json({ error: "指定が長すぎます" }, 400);
+
+  const q = uid
+    ? "uid=" + encodeURIComponent(uid)
+    : "player=" + encodeURIComponent(player);
+
+  const upstream = "https://api.mozambiquehe.re/bridge?version=5&auth=" + env.APEX_API_KEY +
+                   "&platform=" + platform + "&" + q;
+
+  const res  = await fetch(upstream, { cf: { cacheTtl: 90, cacheEverything: true } });
+  const text = await res.text();
+
+  let data = null;
+  try { data = JSON.parse(text); } catch (e) { /* JSONでない応答 */ }
+
+  // 上流エラーは中身をそのまま見せる（原因切り分け用）
+  if (!res.ok || (data && data.Error)) {
+    return json({
+      error:  res.status === 404 ? "not-found" : "upstream",
+      status: res.status,
+      detail: (data && (data.Error || data.message)) || text.slice(0, 200),
+      hint:   "EA名（PCはEAアカウント名、PS/Xboxはオンラインで表示される名前）とplatformの組み合わせを確認してください"
+    }, res.status === 404 ? 404 : 502);
   }
 
-  // 90秒キャッシュ（連打を上流まで飛ばさない）
-  const upstream = "https://api.mozambiquehe.re/bridge?auth=" + env.APEX_API_KEY +
-                   "&player=" + encodeURIComponent(player) +
-                   "&platform=" + platform;
-  const res = await fetch(upstream, { cf: { cacheTtl: 90, cacheEverything: true } });
-  if (!res.ok) return json({ error: "upstream " + res.status }, 502);
-
-  const data = await res.json();
-  if (data && data.Error) return json({ error: "not-found" }, 404);
-
   const rank = data && data.global && data.global.rank;
+  if (!rank) {
+    return json({ error: "no-rank", detail: "ランク情報が含まれていません", raw: Object.keys(data || {}) }, 404);
+  }
+
   return json({
-    rp:   rank && typeof rank.rankScore === "number" ? rank.rankScore : null,
-    tier: rank ? (rank.rankName || null) : null,
-    div:  rank ? (rank.rankDiv  ?? null) : null,
+    rp:   typeof rank.rankScore === "number" ? rank.rankScore : null,
+    tier: rank.rankName || null,
+    div:  rank.rankDiv ?? null,
+    uid:  (data.global && data.global.uid) || null,
+    name: (data.global && data.global.name) || null,
     at:   Date.now()
   }, 200, 90);
 }

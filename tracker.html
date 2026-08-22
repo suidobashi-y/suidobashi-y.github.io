@@ -3,32 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- テスト運用中：検索・回遊ともに導線なし。公開時に下記2行を削除する -->
-<meta name="robots" content="noindex,nofollow">
-<title>RPトラッカー（テスト）| APEX WORKBOOK</title>
+<title>ランクワークブック｜ApexのRPを毎日記録して推移を可視化 | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legendsのランクポイント（RP）を毎日記録して、推移グラフ・ティア・偏差値・スプリット合計を自動表示。ログイン不要、端末内保存のRP記録ツール。">
+<link rel="canonical" href="https://apex-workbook.com/tracker.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
+<script src="data.js"></script>
+<script src="rank-chart.js"></script>
 <style>
 /* ===== RPトラッカー専用 ===== */
-.tw{max-width:760px;margin:0 auto;padding:0 16px 72px}
-.thead{padding:18px 0 6px}
-.thead .brand{font-family:'Chakra Petch';font-weight:700;font-size:15px;letter-spacing:.1em;color:var(--text)}
-.thead .brand span{color:var(--pink)}
-.tt{font-family:'Chakra Petch';font-size:26px;font-weight:700;margin:14px 0 2px}
+.tw{max-width:760px;margin:0 auto;padding:20px 16px 72px}
+.tt{font-family:'Chakra Petch';font-size:26px;font-weight:700;letter-spacing:.06em;
+  color:var(--text);margin:14px 0 2px;white-space:nowrap}
+.tt span{color:var(--pink);text-shadow:0 0 14px rgba(255,45,120,.5)}
 .tt em{font-style:normal;font-size:11px;letter-spacing:.14em;color:var(--amber);vertical-align:6px;margin-left:8px}
+.ttja{font-family:'Noto Sans JP';font-size:11px;letter-spacing:.22em;color:var(--muted);margin-top:1px}
 .tsub{font-size:12px;color:var(--muted)}
-.c{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px;margin-top:14px}
+.c{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:3px;padding:14px;margin-top:14px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%)}
+.c::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--line)}
+.c.cy::before{background:linear-gradient(90deg,var(--cyan),rgba(0,229,255,.15));box-shadow:0 0 10px rgba(0,229,255,.45)}
+.c.pk::before{background:linear-gradient(90deg,var(--pink),rgba(255,45,120,.15));box-shadow:0 0 10px rgba(255,45,120,.45)}
+.c.am::before{background:linear-gradient(90deg,var(--amber),rgba(255,176,32,.15));box-shadow:0 0 10px rgba(255,176,32,.45)}
 .c.flat{background:var(--panel2)}
 .ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
 .ch b{font-size:14px;font-weight:700}
 .ch span{font-size:11px;color:var(--muted)}
-.streak{display:flex;align-items:center;gap:10px;background:#12101e;border:1px solid #3c2249;
-  border-left:3px solid var(--pink);border-radius:3px;padding:10px 12px;margin-top:14px;font-size:12px;color:var(--muted)}
-.streak b{font-family:'Chakra Petch';font-size:20px;color:var(--pink)}
-.streak .r{margin-left:auto;color:var(--amber);font-size:11px}
-.streak .r.done{color:var(--green)}
+.hero{padding:13px 14px 14px}
+.hero::before{background:linear-gradient(90deg,var(--tc,var(--cyan)),var(--pink));
+  box-shadow:0 0 12px var(--tc,var(--cyan))}
+.hero::after{content:"";position:absolute;right:-38px;top:-38px;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,var(--tc,var(--cyan)) 0%,transparent 70%);opacity:.10;pointer-events:none}
+.eyeb{font-family:'Chakra Petch';font-size:10.5px;letter-spacing:.2em;color:var(--muted);margin-bottom:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snm{font-family:'Chakra Petch';font-size:19px;font-weight:700;line-height:1.3;letter-spacing:.02em;
+  margin:2px 0 1px;white-space:nowrap;color:var(--text)}
+.snm b{color:var(--cyan);font-weight:700;margin-right:2px}
+.snm em{font-style:normal;font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;
+  color:var(--bg);background:var(--cyan);padding:2px 7px;border-radius:2px;
+  vertical-align:4px;margin-left:8px;font-weight:700}
+.ssec{font-family:'Chakra Petch';font-size:12px;color:var(--muted);margin-bottom:8px}
+.ssec b{color:var(--green)}
+.ssec .dim{color:var(--muted);margin-left:8px}
+.heroTop{display:flex;align-items:center;gap:10px}
+.tierName{font-family:'Chakra Petch','Noto Sans JP';font-size:22px;font-weight:700;line-height:1.15;color:var(--tc,var(--text));text-shadow:0 0 18px var(--tc,transparent)}
+.chip{margin-left:auto;font-size:10px;padding:3px 9px;border-radius:2px;
+  background:#12101e;border:1px solid #3c2249;color:var(--pink);white-space:nowrap}
+.chip.todo{background:#1c1608;border-color:#5c4010;color:var(--amber)}
+.heroGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:9px}
+.heroGrid div{text-align:left}
+.heroGrid span{display:block;font-size:10px;color:var(--muted);line-height:1.5}
+.heroGrid b{font-family:'Chakra Petch';font-size:21px;font-weight:700}
+.heroGrid b.acc{color:var(--tc,var(--cyan))}
+.heroGrid b em{font-style:normal;font-size:11px;color:var(--muted);margin-left:2px}
 .rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
 .rpbox input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--cyan);
   font-family:'Chakra Petch';font-weight:700;font-size:30px;letter-spacing:.02em;-moz-appearance:textfield}
@@ -48,10 +77,10 @@
 .meta .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:0 0 auto}
 .meta .dot.off{background:#3c4560}
 .meta a{margin-left:auto;color:var(--cyan);cursor:pointer;text-decoration:none}
-.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-.kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 4px;text-align:center}
-.kpi span{display:block;font-size:10px;color:var(--muted)}
-.kpi b{display:block;font-family:'Chakra Petch';font-size:19px;margin-top:3px}
+.kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+.kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:11px 6px 12px;text-align:center}
+.kpi span{display:block;font-size:11px;color:var(--muted)}
+.kpi b{display:block;font-family:'Chakra Petch';font-size:26px;font-weight:700;line-height:1.15;margin-top:4px}
 .up{color:var(--green)}.dn{color:var(--pink)}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{padding:4px 10px;border-radius:2px;background:var(--panel2);border:1px solid var(--line);
@@ -61,11 +90,19 @@ canvas{display:block;width:100%;height:auto}
 .legend{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:5px}
 .legend i.man{background:transparent;border:1.5px solid var(--amber)}
-.goal{background:#141109;border:1px solid #5c4010}
-.goal .big{font-family:'Chakra Petch';font-size:34px;font-weight:700;color:var(--amber);line-height:1}
-.goal .u{font-size:13px;color:var(--text);margin-left:5px}
-.bar{height:10px;border-radius:5px;background:#1e1a10;overflow:hidden;margin-top:12px}
-.bar i{display:block;height:100%;background:var(--amber)}
+.goal{padding:11px 14px 12px}
+.goal::before{background:linear-gradient(90deg,var(--gt,var(--amber)),rgba(255,255,255,.06));
+  box-shadow:0 0 10px var(--gt,var(--amber))}
+.goal::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle,var(--gt,var(--amber)) 0%,transparent 70%);opacity:.09;pointer-events:none}
+.goal .grow{display:flex;align-items:baseline;gap:7px}
+.goal .big{font-family:'Chakra Petch';font-size:24px;font-weight:700;color:var(--gt,var(--amber));line-height:1.1;text-shadow:0 0 16px var(--gt,transparent)}
+.goal .u{font-size:11px;color:var(--muted)}
+.goal .gto{margin-left:auto;font-size:12px;color:var(--gt,var(--text));font-weight:700}
+.goal a.set{font-size:11px;color:var(--cyan);cursor:pointer;margin-left:auto}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:9px}
+.bar i{display:block;height:100%;background:var(--gt,var(--amber));box-shadow:0 0 8px var(--gt,var(--amber));
+  transition:width .9s cubic-bezier(.22,1,.36,1)}
 .bl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .cal .d{font-size:10px;color:var(--muted);text-align:center}
@@ -92,6 +129,10 @@ canvas{display:block;width:100%;height:auto}
 .pf button{padding:9px 0;border-radius:3px;background:var(--panel2);border:1px solid var(--line);
   color:var(--muted);font-size:12px;cursor:pointer;font-family:'Chakra Petch'}
 .pf button.on{background:#003240;border-color:var(--cyan);color:var(--cyan)}
+.chipRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chipRow button{padding:7px 11px;border-radius:3px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--muted);font-size:12px;cursor:pointer;font-family:'Noto Sans JP'}
+.chipRow button.on{border-color:var(--gc,var(--cyan));color:var(--gc,var(--cyan));background:rgba(255,255,255,.04)}
 .hr{height:1px;background:#1c2438;margin:18px 0}
 .empty{text-align:center;padding:6px 0 4px}
 .empty h3{font-size:15px;margin-top:10px}
@@ -105,15 +146,60 @@ canvas{display:block;width:100%;height:auto}
   color:var(--text);opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.warn2{border-color:var(--amber)}
+.shareBtn{position:absolute;top:11px;right:12px;width:34px;height:30px;border-radius:3px;
+  background:#101a2c;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.shareBtn svg{width:15px;height:15px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.modal{position:fixed;inset:0;z-index:85;background:rgba(4,6,14,.86);display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modal .box{width:100%;max-width:560px}
+.modal img{width:100%;border-radius:3px;border:1px solid var(--line);display:block}
+.tdSum{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.tdSum b{font-family:'Chakra Petch';font-size:26px;font-weight:700;line-height:1.1}
+.tdSum span{font-size:11px;color:var(--muted)}
+.rel{display:flex;align-items:baseline;gap:10px;padding:10px 2px;border-bottom:1px solid #182036;
+  text-decoration:none;color:var(--text)}
+.rel:last-child{border-bottom:0}
+.rel b{font-size:13px}
+.rel span{font-size:11px;color:var(--muted)}
+.rel::after{content:">";margin-left:auto;color:var(--cyan);font-family:'Chakra Petch'}
 .hide{display:none !important}
-@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tw > .c, .tw > .kpi{animation:rise .5s cubic-bezier(.22,1,.36,1) both}
+.tw > .c:nth-of-type(2){animation-delay:.05s}
+.tw > .c:nth-of-type(3){animation-delay:.10s}
+.tw > .c:nth-of-type(4){animation-delay:.15s}
+.tw > .kpi{animation-delay:.20s}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
-<div class="tw">
-  <div class="thead"><div class="brand">APEX <span>WORKBOOK</span></div></div>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./tracker.html" class="on">ランクワークブック</a>
+    <a href="./pickrate.html">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
 
-  <h1 class="tt">RPトラッカー<em>TEST</em></h1>
+<div class="tw">
+
+  <h1 class="tt">RANK <span>WORKBOOK</span><em>BETA</em></h1>
+  <div class="ttja">ランクワークブック</div>
   <p class="tsub">毎日のランクポイントを記録して、伸びを可視化</p>
 
   <!-- 空の状態 -->
@@ -132,21 +218,35 @@ canvas{display:block;width:100%;height:auto}
     <div class="brow"><button class="btn ghost" id="restoreBtn">バックアップコードから復元</button></div>
   </div>
 
-  <!-- 連続記録 -->
-  <div id="streak" class="streak hide">
-    連続記録 <b id="stDays">0</b>日 <span class="r" id="stMsg">今日はまだ未記録</span>
+  <!-- 現在ランク（ヒーロー） -->
+  <div class="c hero hide" id="hero">
+    <div class="eyeb">MY RANK // 現在地</div>
+    <div class="heroTop">
+      <span class="tierName" id="hTier">-</span>
+      <span class="chip" id="hStreak">-</span>
+    </div>
+    <div class="heroGrid">
+      <div><span>現在RP</span><b id="hRp">-</b></div>
+      <div><span>偏差値</span><b class="acc" id="hDev">-</b></div>
+      <div><span>上位</span><b id="hTop">-</b></div>
+    </div>
   </div>
 
   <!-- 推移 -->
-  <div class="c">
-    <div class="ch"><b>RP推移</b><span id="splitLabel">-</span></div>
+  <div class="c cy">
+    <button class="shareBtn" id="shareBtn" aria-label="スプリット成績を画像で共有" title="画像で共有">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4M12 4L7 9M12 4l5 5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+    </button>
+    <div class="eyeb">SEASON PROGRESS</div>
+    <div class="snm"><b id="sNo">—</b><span id="sName"></span><em id="sSp"></em></div>
+    <div class="ssec"><span id="sLeft">—</span><span class="dim" id="sPct"></span></div>
     <div class="tabs" id="splitTabs"></div>
     <canvas id="line" width="720" height="400" style="margin-top:12px"></canvas>
     <div class="legend"><span><i></i>自動取得</span><span><i class="man"></i>手入力</span></div>
   </div>
 
   <!-- 入力 -->
-  <div class="c" id="inputCard">
+  <div class="c cy" id="inputCard">
     <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
     <div class="rpbox">
       <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="今日のRP">
@@ -163,29 +263,33 @@ canvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
-  <div class="kpi" id="kpi">
-    <div><span>現在RP</span><b id="kNow">-</b></div>
-    <div><span>今日の増減</span><b id="kToday">-</b></div>
-    <div><span>直近7日</span><b id="kWeek">-</b></div>
+  <div class="c pk hide" id="todayCard">
+    <div class="ch"><b>今日の増減</b><span id="todayCount">-</span></div>
+    <div class="tdSum"><b id="todaySum">-</b><span id="todayFrom"></span></div>
+    <canvas id="todayChart" width="720" height="230" style="margin-top:2px"></canvas>
+    <div class="note" id="todayNote" style="margin-top:4px;font-size:11px"></div>
   </div>
 
   <!-- 目標 -->
   <div class="c goal" id="goalCard">
-    <div class="ch"><b id="goalTitle" style="color:var(--amber)">-</b><span>GOAL</span></div>
-    <div><span class="big" id="goalRp">-</span><span class="u">RP</span></div>
+    <div class="grow">
+      <span class="big" id="goalRp">-</span><span class="u">RP</span>
+      <span class="gto" id="goalTitle">-</span>
+    </div>
     <div class="bar"><i id="goalBar" style="width:0%"></i></div>
     <div class="bl"><span id="goalFrom">-</span><span id="goalPace">-</span></div>
+    <div class="note hide" id="tierWarn" style="font-size:10px;color:var(--amber)">
+      ティア表の値が実際と合っていません（表示はALSの値を優先しています）</div>
   </div>
 
   <!-- 増減 -->
-  <div class="c">
-    <div class="ch"><b>1日ごとの増減</b><span id="avgDelta">-</span></div>
-    <canvas id="bars" width="720" height="300"></canvas>
-    <div class="note" id="barNote" style="margin-top:8px"></div>
+  <div class="kpi" id="kpi">
+    <div><span>直近7日</span><b id="kWeek">-</b></div>
+    <div><span>スプリット合計</span><b id="kSplit">-</b></div>
   </div>
 
   <!-- カレンダー -->
-  <div class="c">
+  <div class="c cy">
     <div class="ch"><b>記録カレンダー</b><span>直近3週間</span></div>
     <div class="cal" id="calHead"></div>
     <div class="cal" id="cal" style="margin-top:6px"></div>
@@ -193,17 +297,15 @@ canvas{display:block;width:100%;height:auto}
   </div>
 
   <!-- 共有 -->
-  <div class="c flat">
-    <div class="ch"><b>スプリット成績を画像で共有</b></div>
-    <div class="kpi" style="margin-top:0">
-      <div><span>スプリット合計</span><b id="sTotal">-</b></div>
-      <div><span>記録日数</span><b id="sDays">-</b></div>
-      <div><span>最高RP</span><b id="sPeak">-</b></div>
-    </div>
-    <div class="brow">
-      <button class="btn pink" id="imgBtn">画像を作る</button>
-      <button class="btn ghost" id="bkBtn">バックアップ</button>
-    </div>
+  <div class="brow" style="margin-top:14px">
+    <button class="btn ghost" id="bkBtn">バックアップ</button>
+  </div>
+
+  <div class="c cy" style="margin-top:20px">
+    <div class="ch"><b>関連ページ</b></div>
+    <a class="rel" href="./rank.html"><b>ランク分布</b><span>自分のRPが全体のどのあたりか</span></a>
+    <a class="rel" href="./deviation.html"><b>ランク偏差値</b><span>ランクを偏差値に換算して比較</span></a>
+    <a class="rel" href="./zukai/s30/rank.html"><b>図解 / S30ランク</b><span>今シーズンのランク環境をグラフで</span></a>
   </div>
 
   <div class="warn">
@@ -219,12 +321,16 @@ canvas{display:block;width:100%;height:auto}
   <div class="grab"></div>
   <div class="ch"><b style="font-size:15px">設定</b><span id="closeCfg" style="cursor:pointer;color:var(--cyan)">閉じる</span></div>
 
-  <div class="lb">EA名（自動取得に使用）</div>
-  <input class="ti" id="cfgName" placeholder="大文字・小文字も一致させてください" autocomplete="off">
+  <div class="lb">EA名 / UID（自動取得に使用）</div>
+  <input class="ti" id="cfgName" placeholder="EA名 または UID（数字）" autocomplete="off">
   <div class="lb">プラットフォーム</div>
   <div class="pf" id="cfgPf">
     <button data-pf="PC">PC</button><button data-pf="PS4">PS</button><button data-pf="X1">Xbox</button>
   </div>
+  <div class="lb">目標ランク</div>
+  <div class="chipRow" id="goalTierRow"></div>
+  <div class="chipRow" id="goalDivRow"></div>
+
   <div class="brow"><button class="btn" id="cfgSave">保存する</button></div>
 
   <div class="hr"></div>
@@ -242,6 +348,15 @@ canvas{display:block;width:100%;height:auto}
   <div class="brow"><button class="btn ghost" id="wipe" style="color:var(--pink);border-color:#5a1e33">すべての記録を削除</button></div>
 </div></div>
 
+<div class="modal" id="shareModal"><div class="box">
+  <img id="shareImg" alt="スプリット成績">
+  <div class="brow">
+    <button class="btn ghost" id="shareClose">閉じる</button>
+    <button class="btn pink" id="shareSave">画像を保存</button>
+  </div>
+  <div class="note" style="text-align:center;font-size:10px">画像を長押しでも保存できます</div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -249,84 +364,27 @@ canvas{display:block;width:100%;height:auto}
    RPトラッカー v1（テスト運用・導線なし）
    保存先: localStorage のみ / 自動取得のみ Worker を使用
    ========================================================= */
-const KEY = "apexwb_rp_v1";
 const API = "https://apex-map-streamer.suidobashi-y.workers.dev"; // ← 本番ドメインに差し替え可
 
-/* ---- スプリット定義（data.js へ移す想定） ---- */
-const SPLITS = [
-  { id:"s30-1", season:30, label:"S30 スプリット1",
-    start:"2026-08-05T02:00+09:00", end:"2026-09-16T02:00+09:00", confirmed:true },
-  { id:"s30-2", season:30, label:"S30 スプリット2",
-    start:"2026-09-16T02:00+09:00", end:"2026-11-04T02:00+09:00", confirmed:false }
-];
-
-/* ---- ティア境界（S30で変更があれば要更新） ---- */
-const TIERS = [
-  {n:"ルーキー",   rp:0},
-  {n:"ブロンズIV", rp:1000},{n:"ブロンズIII",rp:1500},{n:"ブロンズII",rp:2000},{n:"ブロンズI",rp:2500},
-  {n:"シルバーIV", rp:3000},{n:"シルバーIII",rp:3750},{n:"シルバーII",rp:4500},{n:"シルバーI",rp:5250},
-  {n:"ゴールドIV", rp:6000},{n:"ゴールドIII",rp:7000},{n:"ゴールドII",rp:8000},{n:"ゴールドI",rp:9000},
-  {n:"プラチナIV", rp:10000},{n:"プラチナIII",rp:11250},{n:"プラチナII",rp:12500},{n:"プラチナI",rp:13750},
-  {n:"ダイヤIV",   rp:15000},{n:"ダイヤIII",  rp:16250},{n:"ダイヤII",  rp:17500},{n:"ダイヤI",  rp:18750},
-  {n:"マスター",   rp:20000}
-];
-
-/* ---- 日付ユーティリティ（Apexの日境界は 02:00 JST） ---- */
-const DAY = 86400000;
-function apexDate(d = new Date()){
-  return new Date(d.getTime() - 2*3600*1000)
-    .toLocaleDateString("sv-SE", { timeZone:"Asia/Tokyo" });
+/* ---- 目標ランク ---- */
+function goalTier(){
+  const g = DB.profile && DB.profile.goal;
+  if (!g) return null;
+  return TIERS.find(t => t.t === g.t && (t.d === g.d || t.d === 0)) || null;
 }
-const parseD = s => new Date(s + "T12:00:00+09:00");
-const addD   = (s,n) => apexDate(new Date(parseD(s).getTime() + n*DAY + 2*3600*1000));
-const diffD  = (a,b) => Math.round((parseD(a)-parseD(b))/DAY);
-function splitOf(dateStr){
-  const t = parseD(dateStr).getTime();
-  return SPLITS.find(s => t >= new Date(s.start).getTime() && t < new Date(s.end).getTime()) || null;
-}
-function currentSplit(){ return splitOf(apexDate()) || SPLITS[SPLITS.length-1]; }
-const fmt  = n => n.toLocaleString("en-US");
-const sign = n => (n>0?"+":"") + fmt(n);
 
 /* ---- 保存 ---- */
-let DB = { v:1, profile:{ name:"", platform:"X1" }, records:{} };
 let viewSplit = currentSplit().id;
 
 function load(){
   try{
-    const raw = localStorage.getItem(KEY);
+    const raw = STORE.getItem(KEY);
     if (raw) DB = Object.assign(DB, JSON.parse(raw));
   }catch(e){ toast("保存データを読めませんでした", true); }
 }
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  try{ STORE.setItem(KEY, JSON.stringify(DB)); }
   catch(e){ toast("保存できませんでした。空き容量を確認してください", true); }
-}
-
-/* ---- 抽出 ---- */
-function entries(splitId){
-  const sp = SPLITS.find(s=>s.id===splitId);
-  return Object.keys(DB.records).sort()
-    .filter(d => !sp || (parseD(d) >= new Date(sp.start) && parseD(d) < new Date(sp.end)))
-    .map(d => ({ date:d, ...DB.records[d] }));
-}
-/* デルタ: スプリット内で前の記録がある日のみ算出 */
-function withDelta(list){
-  return list.map((e,i)=> ({ ...e, delta: i===0 ? null : e.rp - list[i-1].rp }));
-}
-function streak(){
-  const all = Object.keys(DB.records).sort();
-  if (!all.length) return { n:0, today:false };
-  const t = apexDate();
-  const today = !!DB.records[t];
-  let cur = today ? t : addD(t,-1), n = 0;
-  while (DB.records[cur]) { n++; cur = addD(cur,-1); }
-  return { n, today };
-}
-function tierAt(rp){
-  let i = 0;
-  for (let k=0;k<TIERS.length;k++) if (rp >= TIERS[k].rp) i = k;
-  return { cur:TIERS[i], next:TIERS[i+1] || null };
 }
 
 /* ---- 描画 ---- */
@@ -338,7 +396,7 @@ function render(){
   ["streak","kpi","goalCard"].forEach(id=>document.getElementById(id));
 
   const hasAny = all>0;
-  document.getElementById("streak").classList.toggle("hide", !hasAny);
+  document.getElementById("hero").classList.toggle("hide", !hasAny);
   document.querySelectorAll(".c.goal, .kpi").forEach(el=>el.classList.toggle("hide", !hasAny));
   document.querySelectorAll(".tw > .c").forEach(el=>{
     if (el.id==="empty" || el.id==="inputCard") return;
@@ -352,91 +410,121 @@ function render(){
     ? p.name + " / " + ({PC:"PC",PS4:"PS",X1:"Xbox"}[p.platform]||p.platform)
     : "取得元は未設定";
 
-  const st = streak();
-  document.getElementById("stDays").textContent = st.n;
-  const sm = document.getElementById("stMsg");
-  sm.textContent = st.today ? "今日は記録済み" : "今日はまだ未記録";
-  sm.className = "r" + (st.today ? " done" : "");
 
   tabs();
   if (!hasAny) { drawGhost(); return; }
 
   const d = withDelta(cur);
   const last = d[d.length-1];
-  document.getElementById("kNow").textContent = last ? fmt(last.rp) : "-";
   const td = last && last.date===apexDate() ? last.delta : null;
-  const kT = document.getElementById("kToday");
-  kT.textContent = td===null ? "—" : sign(td);
-  kT.className = td===null ? "" : (td>=0?"up":"dn");
   const wk = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null)
               .reduce((a,e)=>a+e.delta, 0);
   const kW = document.getElementById("kWeek");
   kW.textContent = d.length>1 ? sign(wk) : "—";
   kW.className = wk>=0?"up":"dn";
 
+  // ---- ヒーロー ----
+  const st = streak();
+  const chip = document.getElementById("hStreak");
+  chip.textContent = st.today ? `連続 ${st.n}日` : "今日はまだ未記録";
+  chip.className = "chip" + (st.today ? "" : " todo");
+
+  const latest = Object.keys(DB.records).sort().pop();      // スプリットを跨いでも最新を出す
+  const lrp = DB.records[latest].rp;
+  const lrec = { rp: lrp, ...DB.records[latest] };
+  const base = tierBaseOf(lrp);
+  const col = TIER_COLOR[base.t] || "#00e5ff";
+  document.getElementById("hero").style.setProperty("--tc", col);
+  document.getElementById("hTier").textContent = tierLabel(lrec) || tierAt(lrp).cur.n;
+  document.getElementById("hRp").textContent = fmt(lrp);
+  const dv = deviation(lrp);
+  document.getElementById("hDev").textContent = dv ? dv.dev.toFixed(1) : "—";
+  document.getElementById("hTop").innerHTML = dv
+    ? (dv.topP < 1 ? dv.topP.toFixed(2) : dv.topP.toFixed(1)) + '<em>%</em>' : "—";
+
+  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
+  const kS = document.getElementById("kSplit");
+  kS.textContent = d.length>1 ? sign(gain) : "—";
+  kS.className = gain>=0 ? "up":"dn";
+
+  writeSummary(lrec, dv, st, td);
+
   goal(last, d);
-  drawLine(d);
-  drawBars(d);
+  document.getElementById("tierWarn").classList.toggle("hide",
+    !(tierLabel(last) && tierLabel(last) !== tierAt(last.rp).cur.n));
+  if (!introDone && d.length > 1) animateLine(d);
+  else drawLine(d);
+  todayCard(d);
   calendar();
-  summary(d);
 }
 
+function startedSplits(){
+  const now = Date.now();
+  return SPLITS.filter(s => new Date(s.start).getTime() <= now);
+}
 function tabs(){
   const w = document.getElementById("splitTabs");
+  const list = startedSplits();
   w.innerHTML = "";
-  SPLITS.forEach(s=>{
+  w.classList.toggle("hide", list.length < 2);   // スプリット1のうちはタブ自体を出さない
+  list.forEach(s=>{
     const b = document.createElement("button");
-    b.textContent = s.label.replace("S30 ","") + (s.confirmed?"":"（予定）");
+    b.textContent = s.label.replace(/^S\d+ /,"");
     b.className = s.id===viewSplit ? "on" : "";
     b.onclick = ()=>{ viewSplit = s.id; render(); };
     w.appendChild(b);
   });
-  const sp = SPLITS.find(s=>s.id===viewSplit);
-  document.getElementById("splitLabel").textContent =
-    sp.start.slice(5,10).replace("-","/") + "〜" + sp.end.slice(5,10).replace("-","/");
+  seasonHead();
 }
 
 function goal(last, d){
   if (!last) return;
-  const { cur, next } = tierAt(last.rp);
-  const g = document.getElementById("goalCard");
-  if (!next){
-    document.getElementById("goalTitle").textContent = "マスター到達";
-    document.getElementById("goalRp").textContent = fmt(last.rp);
+  const auto = tierAt(last.rp);
+  const g = goalTier();
+  const target = g || auto.next;             // 未設定なら次のディビジョン
+  const isGoal = !!g;
+  const set = document.getElementById("goalFrom");
+
+  // カード全体を目標ティアの色にする（未設定なら次ティアの色）
+  const card = document.getElementById("goalCard");
+  card.style.setProperty("--gt", target ? (TIER_COLOR[target.t] || "var(--amber)") : "var(--amber)");
+
+  if (!target || last.rp >= target.rp){
+    document.getElementById("goalTitle").textContent = target ? target.n + " 到達" : "マスター到達";
+    document.getElementById("goalRp").textContent = "達成";
     document.getElementById("goalBar").style.width = "100%";
-    document.getElementById("goalFrom").textContent = cur.n;
+    set.textContent = isGoal ? "目標を変更" : "";
     document.getElementById("goalPace").textContent = "";
     return;
   }
-  const rest = next.rp - last.rp;
-  const span = next.rp - cur.rp;
-  document.getElementById("goalTitle").textContent = next.n + "まで";
+
+  const rest = target.rp - last.rp;
+  // 起点＝このスプリット最初の記録（無ければ現在のディビジョン下限）
+  const base = d.length ? Math.min(d[0].rp, last.rp) : auto.cur.rp;
+  const span = Math.max(1, target.rp - base);
+  document.getElementById("goalTitle").textContent = target.n + " まで";
   document.getElementById("goalRp").textContent = fmt(rest);
-  document.getElementById("goalBar").style.width = Math.max(2, (1-rest/span)*100) + "%";
-  document.getElementById("goalFrom").textContent = cur.n;
-  const recent = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null);
+  document.getElementById("goalBar").style.width =
+    Math.min(100, Math.max(2, (last.rp - base) / span * 100)) + "%";
+  set.textContent = isGoal ? "目標: " + target.n : "目標を設定する";
+  set.className = "set";
+  set.onclick = openSheet;
+
+  const recent = d.filter(e => diffD(apexDate(), e.date) < 7 && e.delta !== null);
   const pace = recent.length ? recent.reduce((a,e)=>a+e.delta,0)/recent.length : 0;
   document.getElementById("goalPace").textContent =
-    pace > 0 ? "直近7日ペースなら あと" + Math.ceil(rest/pace) + "日" : "直近7日は伸びていません";
+    pace > 0 ? "直近7日ペースで あと" + Math.ceil(rest/pace) + "日" : "直近7日は伸びていません";
 }
 
 /* ---- Canvas ---- */
-function ctx2(id){
-  const c = document.getElementById(id);
-  const w = c.parentElement.clientWidth - 28;
-  const r = window.devicePixelRatio || 1;
-  const h = +c.getAttribute("height") / (+c.getAttribute("width")/w);
-  c.width = w*r; c.height = h*r; c.style.height = h + "px";
-  const x = c.getContext("2d"); x.scale(r,r);
-  return { x, w, h };
-}
-const CSSV = n => getComputedStyle(document.body).getPropertyValue(n).trim();
-
 function drawGhost(){
   const c = document.getElementById("ghost");
-  const w = c.parentElement.clientWidth - 28, h = 150, r = window.devicePixelRatio||1;
-  c.width = w*r; c.height = h*r; c.style.height = h+"px";
-  const x = c.getContext("2d"); x.scale(r,r);
+  const w = Math.max(80, c.parentElement.clientWidth - 28), h = 150, r = window.devicePixelRatio||1;
+  const W = Math.round(w*r), H = Math.round(h*r);
+  if (c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+  c.style.width = w+"px"; c.style.height = h+"px";
+  const x = c.getContext("2d");
+  x.setTransform(r,0,0,r,0,0); x.clearRect(0,0,w,h);
   const v = [.08,.2,.14,.32,.4,.34,.52,.6,.56,.7,.8,.76,.9,1];
   x.beginPath();
   v.forEach((p,i)=>{ const px = 10+i*(w-20)/13, py = h-14-(h-40)*p; i?x.lineTo(px,py):x.moveTo(px,py); });
@@ -447,82 +535,156 @@ function drawGhost(){
   x.textAlign = "center"; x.fillText("S A M P L E", w/2, h/2);
 }
 
-function drawLine(d){
-  const { x, w, h } = ctx2("line");
-  if (!d.length) return;
-  const L = 42, R = 10, T = 16, B = 26;
-  const vs = d.map(e=>e.rp);
-  let lo = Math.min(...vs), hi = Math.max(...vs);
-  const { cur, next } = tierAt(vs[vs.length-1]);
-  if (next) hi = Math.max(hi, next.rp);
-  lo = Math.min(lo, cur.rp);
-  const pad = Math.max(200,(hi-lo)*.15); lo -= pad; hi += pad;
-  const px = i => L + (d.length===1 ? (w-L-R)/2 : i*(w-L-R)/(d.length-1));
-  const py = v => h-B - (v-lo)/(hi-lo)*(h-T-B);
+function todayCard(d){
+  const card = document.getElementById("todayCard");
+  const t = apexDate();
+  const rec = DB.records[t];
+  if (!rec){ card.classList.add("hide"); return; }   // 今日まだ記録が無ければ非表示
 
-  const step = (hi-lo) > 6000 ? 2000 : 1000;
-  x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
-  for (let g = Math.ceil(lo/step)*step; g < hi; g += step){
-    x.strokeStyle = "#141e30"; x.beginPath(); x.moveTo(L,py(g)); x.lineTo(w-R,py(g)); x.stroke();
-    x.fillStyle = "#5c6884"; x.fillText((g/1000)+"k", L-6, py(g)+3);
-  }
-  /* 面 + 線 */
-  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(px(i),py(e.rp)):x.moveTo(px(i),py(e.rp)));
-  const st = x.strokeStyle;
-  x.save(); x.lineTo(px(d.length-1), h-B); x.lineTo(px(0), h-B); x.closePath();
-  const gr = x.createLinearGradient(0,T,0,h-B);
-  gr.addColorStop(0,"rgba(0,229,255,.22)"); gr.addColorStop(1,"rgba(0,229,255,.02)");
-  x.fillStyle = gr; x.fill(); x.restore();
-  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(px(i),py(e.rp)):x.moveTo(px(i),py(e.rp)));
-  x.strokeStyle = CSSV("--cyan"); x.lineWidth = 2; x.lineJoin = "round"; x.stroke();
+  // 今日より前の最後の記録（＝起点）
+  const prevDay = d.filter(e => e.date < t).pop();
+  const baseRp  = prevDay ? prevDay.rp : null;
 
-  /* ティア線 */
-  x.setLineDash([5,5]); x.lineWidth = 1; x.textAlign = "left";
-  [[next, CSSV("--amber")],[cur, "#8a6bd6"]].forEach(([t,col])=>{
-    if (!t || py(t.rp) < T || py(t.rp) > h-B) return;
-    x.strokeStyle = col; x.beginPath(); x.moveTo(L,py(t.rp)); x.lineTo(w-R,py(t.rp)); x.stroke();
-    x.fillStyle = col; x.font = "500 9px 'Noto Sans JP'";
-    x.fillText(t.n+" "+fmt(t.rp), L+3, py(t.rp)-5);
-  });
-  x.setLineDash([]);
+  const log = Array.isArray(rec.log) && rec.log.length
+    ? rec.log
+    : [{ rp: rec.rp, src: rec.src, at: null }];      // 旧データ互換
 
-  /* 点 */
-  d.forEach((e,i)=>{
-    if (e.src === "manual"){
-      x.beginPath(); x.arc(px(i),py(e.rp),3.5,0,7);
-      x.fillStyle = "#0a0e1a"; x.fill();
-      x.strokeStyle = CSSV("--amber"); x.lineWidth = 1.5; x.stroke();
-    } else if (i === d.length-1){
-      x.beginPath(); x.arc(px(i),py(e.rp),4,0,7); x.fillStyle = CSSV("--cyan"); x.fill();
-    }
-  });
 
-  x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'";
-  x.textAlign = "left";  x.fillText(d[0].date.slice(5).replace("-","/"), L, h-8);
-  if (d.length>1){ x.textAlign = "right"; x.fillText(d[d.length-1].date.slice(5).replace("-","/"), w-R, h-8); }
+  const total = baseRp === null ? null : rec.rp - baseRp;
+  const sum = document.getElementById("todaySum");
+  sum.textContent = total === null ? fmt(rec.rp) : sign(total);
+  sum.className = total === null ? "" : (total >= 0 ? "up" : "dn");
+  document.getElementById("todayFrom").textContent = baseRp === null
+    ? "RP（初日）"
+    : "RP　" + fmt(baseRp) + " → " + fmt(rec.rp);
+  document.getElementById("todayCount").textContent =
+    log.length > 1 ? log.length + "回更新" : "1回記録";
+
+  const best = (()=>{
+    let prev = baseRp, mx = null;
+    log.forEach(e=>{ if (prev !== null){ const dl = e.rp - prev; if (mx === null || dl > mx) mx = dl; } prev = e.rp; });
+    return mx;
+  })();
+  document.getElementById("todayNote").textContent =
+    (best !== null ? "この日の最大 " + sign(best) : "この日はまだ比較対象がありません")
+    + (log.length > 1 ? "　更新 " + log.length + "回" : "");
+
+  card.classList.remove("hide");        // 幅を測る前に必ず表示しておく
+  if (window.__tdAnimate){ window.__tdAnimate = false; animateToday(baseRp, log); }
+  else drawToday(baseRp, log);
 }
 
-function drawBars(d){
-  const { x, w, h } = ctx2("bars");
-  const ds = d.filter(e=>e.delta!==null);
-  const note = document.getElementById("barNote");
-  if (!ds.length){ x.clearRect(0,0,w,h); note.textContent = "2日目から表示されます"; return; }
-  const mx = Math.max(...ds.map(e=>Math.abs(e.delta)), 100);
-  const L = 36, R = 8, zy = h*0.62, bw = (w-L-R)/ds.length;
-  x.strokeStyle = "#1c2438"; x.beginPath(); x.moveTo(L-6,zy); x.lineTo(w-R,zy); x.stroke();
-  x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
-  x.fillText("0", L-10, zy+3);
-  ds.forEach((e,i)=>{
-    const cx = L + i*bw + bw/2, hh = Math.abs(e.delta)/mx*(h*0.32);
-    x.fillStyle = e.delta>=0 ? CSSV("--cyan") : CSSV("--pink");
-    x.fillRect(cx-bw*0.3, e.delta>=0 ? zy-hh : zy, bw*0.6, hh);
+let tdAnim = 0;
+function drawToday(baseRp, log, animate){
+  const cc = ctx2("todayChart");
+  if (!cc) return;
+  const { x, w, h } = cc;
+  const L = 46, R = 12, T = 20, B = 24;
+  const vals = (baseRp === null ? [] : [baseRp]).concat(log.map(e=>e.rp));
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = Math.max(60, (hi-lo)*0.35);
+  lo -= pad; hi += pad;
+  const n  = log.length;
+  const sw = (w-L-R)/Math.max(1,n);                     // 1更新ぶんの横幅
+  const px = i => L + sw*i + sw/2;
+  const py = v => h-B - (v-lo)/(hi-lo)*(h-T-B);
+
+  // 起点ライン
+  if (baseRp !== null){
+    x.setLineDash([4,5]); x.strokeStyle = "#39445e"; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(L-8, py(baseRp)); x.lineTo(w-R, py(baseRp)); x.stroke();
+    x.setLineDash([]);
+    x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
+    x.fillText(fmt(baseRp), L-12, py(baseRp)+3);
+  }
+
+  const t = animate === undefined ? 1 : animate;
+  let prev = baseRp;
+  const tops = [];
+
+  log.forEach((e,i)=>{
+    const from = prev === null ? e.rp : prev;
+    const to   = e.rp;
+    const up   = to >= from;
+    const col  = up ? CSSV("--cyan") : CSSV("--pink");
+    const y0 = py(from), y1 = py(from + (to-from)*t);
+    const bw = Math.max(3, Math.min(26, sw*0.55));
+    const cx = px(i);
+
+    // 接続線（前の更新から）
+    if (i > 0){
+      x.strokeStyle = "rgba(255,255,255,.14)"; x.lineWidth = 1;
+      x.beginPath(); x.moveTo(px(i-1), y0); x.lineTo(cx, y0); x.stroke();
+    } else if (baseRp !== null){
+      x.strokeStyle = "rgba(255,255,255,.14)"; x.lineWidth = 1;
+      x.beginPath(); x.moveTo(L-8, y0); x.lineTo(cx, y0); x.stroke();
+    }
+
+    // バー（グロー付き）
+    const top = Math.min(y0,y1), hgt = Math.max(2, Math.abs(y1-y0));
+    const gr = x.createLinearGradient(0, top, 0, top+hgt);
+    if (up){ gr.addColorStop(0, col); gr.addColorStop(1, "rgba(0,229,255,.35)"); }
+    else   { gr.addColorStop(0, "rgba(255,45,120,.35)"); gr.addColorStop(1, col); }
+    x.shadowColor = col; x.shadowBlur = 12;
+    x.fillStyle = gr;
+    x.beginPath();
+    if (x.roundRect) x.roundRect(cx-bw/2, top, bw, hgt, 2);
+    else x.rect(cx-bw/2, top, bw, hgt);
+    x.fill();
+    x.shadowBlur = 0;
+
+    // 差分ラベル
+    const dl = prev === null ? null : to - prev;
+    const room = sw >= 34 || i === n-1 || (n <= 8);
+    if (dl !== null && t > .6 && room){
+      x.fillStyle = col; x.font = "700 10px 'Chakra Petch'"; x.textAlign = "center";
+      x.fillText(sign(dl), cx, up ? top - 6 : top + hgt + 12);
+    }
+    tops.push([cx, y1]);
+    prev = to;
   });
-  const up = ds.filter(e=>e.delta>0).length, dn = ds.filter(e=>e.delta<0).length;
-  const auto = d.filter(e=>e.src==="api").length, man = d.length-auto;
-  const best = ds.reduce((a,e)=>e.delta>a.delta?e:a, ds[0]);
-  note.textContent = `プラス${up}日 / マイナス${dn}日　最高 ${sign(best.delta)} (${best.date.slice(5).replace("-","/")})　自動取得${auto} / 手入力${man}`;
-  const avg = Math.round(ds.reduce((a,e)=>a+e.delta,0)/ds.length);
-  document.getElementById("avgDelta").textContent = "平均 " + sign(avg) + " / 日";
+
+  // 最新値のマーカー
+  if (tops.length){
+    const [cx, cy] = tops[tops.length-1];
+    x.strokeStyle = "rgba(0,229,255,.5)"; x.lineWidth = 1.5;
+    x.beginPath(); x.arc(cx, cy, 7, 0, 7); x.stroke();
+    x.fillStyle = CSSV("--cyan");
+    x.beginPath(); x.arc(cx, cy, 3.5, 0, 7); x.fill();
+    if (sw >= 26){
+      x.fillStyle = CSSV("--text"); x.font = "700 11px 'Chakra Petch'";
+      x.textAlign = cx > w*0.7 ? "right" : "left";
+      x.fillText(fmt(log[log.length-1].rp), cx > w*0.7 ? cx-12 : cx+12, cy-8);
+    }
+  }
+
+  // 時刻ラベル
+  x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "center";
+  const skip = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(w/64))));
+  log.forEach((e,i)=>{
+    if (i % skip !== 0 && i !== n-1) return;
+    const tm = e.at ? new Date(e.at).toLocaleTimeString("ja-JP",
+      { timeZone:"Asia/Tokyo", hour:"2-digit", minute:"2-digit" }) : "--:--";
+    x.fillText(tm, px(i), h-8);
+    // 取得元（自動＝丸、手入力＝白抜き丸）
+    x.beginPath(); x.arc(px(i), h-20, 2.4, 0, 7);
+    if (e.src === "api"){ x.fillStyle = CSSV("--cyan"); x.fill(); }
+    else { x.strokeStyle = CSSV("--amber"); x.lineWidth = 1.2; x.stroke(); }
+    x.fillStyle = "#5c6884";
+  });
+}
+
+/* 記録直後だけ立ち上がりアニメーションを再生 */
+function animateToday(baseRp, log){
+  cancelAnimationFrame(tdAnim);
+  const st = performance.now(), dur = 520;
+  const step = now=>{
+    const p = Math.min(1, (now-st)/dur);
+    const e = 1 - Math.pow(1-p, 3);
+    drawToday(baseRp, log, e);
+    if (p < 1) tdAnim = requestAnimationFrame(step);
+  };
+  tdAnim = requestAnimationFrame(step);
 }
 
 function calendar(){
@@ -552,13 +714,22 @@ function calendar(){
   }
 }
 
-function summary(d){
-  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
-  const el = document.getElementById("sTotal");
-  el.textContent = d.length>1 ? sign(gain) : "—";
-  el.className = gain>=0 ? "up":"dn";
-  document.getElementById("sDays").textContent = d.length + "日";
-  document.getElementById("sPeak").textContent = d.length ? fmt(Math.max(...d.map(e=>e.rp))) : "-";
+/* ---- index.html のウィジェット用サマリー ---- */
+function writeSummary(rec, dv, st, todayDelta){
+  try{
+    STORE.setItem(SUM_KEY, JSON.stringify({
+      v: 1,
+      rp: rec.rp,
+      tier: tierLabel(rec) || tierAt(rec.rp).cur.n,
+      dev: dv ? +dv.dev.toFixed(1) : null,
+      topP: dv ? +dv.topP.toFixed(2) : null,
+      streak: st.n,
+      today: st.today,
+      delta: todayDelta,
+      date: apexDate(),
+      at: Date.now()
+    }));
+  }catch(e){}
 }
 
 /* ---- 記録 ---- */
@@ -566,16 +737,27 @@ function record(rp, src){
   if (!Number.isFinite(rp) || rp < 0 || rp > 100000){ toast("RPの値を確認してください", true); return; }
   const t = apexDate();
   const dup = !!DB.records[t];
-  DB.records[t] = { rp: Math.round(rp), src };
+  const rec = { rp: Math.round(rp), src };
+  if (src === "api" && lastFetch && lastFetch.rp === rec.rp){
+    if (lastFetch.tier) rec.tier = lastFetch.tier;
+    if (lastFetch.div)  rec.div  = lastFetch.div;
+  }
+  const before = DB.records[t];
+  rec.log = (before && Array.isArray(before.log)) ? before.log.slice() : [];
+  rec.log.push({ rp: rec.rp, src, at: Date.now() });
+  if (rec.log.length > 30) rec.log = rec.log.slice(-30);
+  DB.records[t] = rec;
   save();
   const sp = splitOf(t);
   if (sp && sp.id !== viewSplit) viewSplit = sp.id;
+  window.__tdAnimate = true;
   render();
   toast(dup ? "今日の記録を更新しました" : "記録しました");
 }
 
 /* ---- 自動取得 ---- */
 let cooling = false;
+let lastFetch = null;   // 自動取得の結果（ティア名の付与に使う）
 async function autoFetch(){
   const p = DB.profile;
   if (!p.name){ openSheet(); toast("先にEA名を設定してください", true); return; }
@@ -583,15 +765,23 @@ async function autoFetch(){
   const b = document.getElementById("fetchBtn");
   b.disabled = true; b.textContent = "取得中…";
   try{
-    const r = await fetch(`${API}/rp?player=${encodeURIComponent(p.name)}&platform=${p.platform}`);
-    if (!r.ok) throw new Error(r.status);
-    const j = await r.json();
-    if (j.rp === null || j.rp === undefined) throw new Error("no-rp");
+    const q = /^\d{6,}$/.test(p.name)      // 数字だけならUIDとして扱う
+      ? `uid=${encodeURIComponent(p.name)}`
+      : `player=${encodeURIComponent(p.name)}`;
+    const r = await fetch(`${API}/rp?${q}&platform=${p.platform}`);
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok || j.error){
+      throw new Error(j.error === "not-found"
+        ? "見つかりませんでした。EA名とプラットフォームを確認してください"
+        : (j.detail || "取得に失敗しました"));
+    }
+    if (j.rp === null || j.rp === undefined) throw new Error("ランク情報がありません");
     document.getElementById("rp").value = j.rp;
+    lastFetch = { rp: j.rp, tier: j.tier, div: j.div };
     toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
     cooling = true; setTimeout(()=>cooling=false, 60000);
   }catch(e){
-    toast("取得できませんでした。EA名を確認するか、手入力で記録してください", true);
+    toast(String(e.message || e).slice(0,80) + "（手入力で記録できます）", true);
   }finally{
     b.disabled = false; b.textContent = "自動取得";
   }
@@ -623,9 +813,9 @@ function loadCode(){
 }
 
 /* ---- 共有画像 ---- */
-function shareImage(){
+function buildShareCanvas(){
   const d = withDelta(entries(viewSplit));
-  if (!d.length){ toast("記録がありません", true); return; }
+  if (!d.length){ toast("記録がありません", true); return null; }
   const sp = SPLITS.find(s=>s.id===viewSplit);
   const W = 1200, H = 675, c = document.createElement("canvas");
   c.width = W; c.height = H;
@@ -668,9 +858,22 @@ function shareImage(){
   x.fillText(d[0].date.replace(/-/g,"/") + " 〜 " + d[d.length-1].date.replace(/-/g,"/"), 56, 610);
   x.textAlign = "right"; x.fillText("apex-workbook.com", W-56, 610);
 
-  c.toBlob(b=>{
+  return c;
+}
+
+let shareCanvas = null;
+function openShare(){
+  const c = buildShareCanvas();
+  if (!c) return;
+  shareCanvas = c;
+  document.getElementById("shareImg").src = c.toDataURL("image/png");
+  document.getElementById("shareModal").classList.add("open");
+}
+function saveShare(){
+  if (!shareCanvas) return;
+  shareCanvas.toBlob(b=>{
     const u = URL.createObjectURL(b), a = document.createElement("a");
-    a.href = u; a.download = `apexwb-${sp.id}-${apexDate()}.png`; a.click();
+    a.href = u; a.download = `apexwb-${apexDate()}.png`; a.click();
     setTimeout(()=>URL.revokeObjectURL(u), 4000);
     toast("画像を保存しました");
   });
@@ -683,10 +886,52 @@ function toast(m, warn){
   t.textContent = m; t.className = "toast on" + (warn?" warn2":"");
   clearTimeout(toastT); toastT = setTimeout(()=>t.className="toast"+(warn?" warn2":""), 3200);
 }
+let goalSel = { t:null, d:4 };
+function buildGoalChips(){
+  const tr = document.getElementById("goalTierRow"), dr = document.getElementById("goalDivRow");
+  if (tr.childElementCount) return;
+  ["ブロンズ","シルバー","ゴールド","プラチナ","ダイヤ","マスター"].forEach(t=>{
+    const b = document.createElement("button");
+    b.textContent = t; b.dataset.t = t;
+    b.onclick = ()=>{ goalSel.t = t; if (t==="マスター") goalSel.d = 0; else if(!goalSel.d) goalSel.d = 4; paintGoal(); };
+    tr.appendChild(b);
+  });
+  [4,3,2,1].forEach(d=>{
+    const b = document.createElement("button");
+    b.textContent = ROMAN[d]; b.dataset.d = d;
+    b.onclick = ()=>{ goalSel.d = d; paintGoal(); };
+    dr.appendChild(b);
+  });
+  const none = document.createElement("button");
+  none.textContent = "設定しない";
+  none.onclick = ()=>{ goalSel = { t:null, d:4 }; paintGoal(); };
+  dr.appendChild(none);
+}
+function paintGoal(){
+  const col = goalSel.t ? (TIER_COLOR[goalSel.t] || "") : "";
+  [...document.getElementById("goalTierRow").children].forEach(b=>{
+    b.classList.toggle("on", b.dataset.t === goalSel.t);
+    b.style.setProperty("--gc", TIER_COLOR[b.dataset.t] || "");
+  });
+  [...document.getElementById("goalDivRow").children].forEach(b=>{
+    if (b.dataset.d) {
+      b.classList.toggle("on", goalSel.t && goalSel.t !== "マスター" && +b.dataset.d === goalSel.d);
+      b.style.setProperty("--gc", col);
+      b.disabled = !goalSel.t || goalSel.t === "マスター";
+      b.style.opacity = b.disabled ? ".35" : "1";
+    } else {
+      b.classList.toggle("on", !goalSel.t);
+    }
+  });
+}
+
 function openSheet(){
   document.getElementById("cfgName").value = DB.profile.name || "";
   document.querySelectorAll("#cfgPf button").forEach(b=>
     b.classList.toggle("on", b.dataset.pf === DB.profile.platform));
+  buildGoalChips();
+  goalSel = DB.profile.goal ? { ...DB.profile.goal } : { t:null, d:4 };
+  paintGoal();
   document.getElementById("bkCode").textContent = enc(DB);
   document.getElementById("sheet").classList.add("open");
 }
@@ -709,6 +954,7 @@ document.getElementById("cfgSave").onclick = ()=>{
   DB.profile.name = document.getElementById("cfgName").value.trim();
   const on = document.querySelector("#cfgPf button.on");
   DB.profile.platform = on ? on.dataset.pf : "X1";
+  DB.profile.goal = goalSel.t ? { t: goalSel.t, d: goalSel.d } : null;
   save(); render(); toast("保存しました");
 };
 document.getElementById("copyCode").onclick = ()=>{
@@ -718,11 +964,16 @@ document.getElementById("copyCode").onclick = ()=>{
 };
 document.getElementById("loadCode").onclick = loadCode;
 document.getElementById("bkBtn").onclick = openSheet;
-document.getElementById("imgBtn").onclick = shareImage;
+document.getElementById("shareBtn").onclick = openShare;
+document.getElementById("shareSave").onclick = saveShare;
+document.getElementById("shareClose").onclick = ()=> document.getElementById("shareModal").classList.remove("open");
+document.getElementById("shareModal").onclick = e => { if (e.target.id === "shareModal") e.currentTarget.classList.remove("open"); };
 document.getElementById("wipe").onclick = ()=>{
   if (!confirm("すべての記録を削除します。取り消せません。よろしいですか？")) return;
   navigator.clipboard.writeText(enc(DB)).catch(()=>{});
-  DB.records = {}; save(); render(); closeSheet(); toast("削除しました");
+  DB.records = {}; save();
+  try{ STORE.removeItem(SUM_KEY); }catch(e){}
+  render(); closeSheet(); toast("削除しました");
 };
 document.getElementById("rp").addEventListener("keydown", e=>{ if (e.key === "Enter") document.getElementById("saveBtn").click(); });
 let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(render, 180); });
@@ -730,6 +981,14 @@ let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(rende
 load();
 document.fonts && document.fonts.ready.then(render);
 render();
+
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
 </script>
 </body>
 </html>

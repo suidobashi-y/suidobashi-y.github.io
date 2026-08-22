@@ -126,6 +126,42 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 @media(max-width:400px){.prlist .pr{grid-template-columns:14px 88px 1fr 44px;gap:6px}
   .prlist .prl{font-size:11px}}
 
+/* RANK WORKBOOK：推移カード（記録3件以上で season カードと差し替え） */
+.card.rwchart{padding:13px 16px 12px}
+.card.rwchart::before{background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 10px rgba(0,229,255,.5)}
+.rwhead{display:flex;align-items:flex-start;gap:10px}
+.rwhead .snm{font-family:'Chakra Petch';font-size:19px;font-weight:700;line-height:1.3;color:var(--text);white-space:nowrap;margin:2px 0 1px}
+.rwhead .snm b{color:var(--cyan);margin-right:2px}
+.rwhead .snm em{font-style:normal;font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;
+  color:var(--bg);background:var(--cyan);padding:2px 7px;border-radius:2px;vertical-align:4px;margin-left:8px;font-weight:700}
+.rwsec{font-family:'Chakra Petch';font-size:12px;color:var(--muted)}
+.rwsec b{color:var(--green)} .rwsec .dim{margin-left:8px}
+.rwopen{margin-left:auto;flex:0 0 auto;font-family:'Chakra Petch';font-size:11px;color:var(--cyan);
+  border:1px solid var(--line);border-radius:2px;padding:5px 9px;white-space:nowrap}
+.rwchart .sbar{margin:9px 0 2px}
+.rwchart canvas{display:block;width:100%;height:auto;margin-top:2px}
+.rwleg{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:6px}
+.rwleg i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:5px}
+.rwleg i.man{background:transparent;border:1.5px solid var(--amber)}
+
+/* RPトラッカーのカード */
+.card.rpcard{padding:9px 16px 8px}
+.card.rpcard::before{background:linear-gradient(90deg,var(--tc,var(--cyan)),var(--pink));
+  box-shadow:0 0 10px var(--tc,var(--cyan))}
+.card.rppromo{padding:9px 16px 8px}
+.card.rppromo::before{background:linear-gradient(90deg,var(--amber),rgba(255,176,32,.15));box-shadow:0 0 10px rgba(255,176,32,.5)}
+.card.rppromo .prim{font-size:15px;margin:1px 0 0}
+.card.rppromo .sec{font-size:11px;margin-top:1px}
+.rprow{display:flex;align-items:baseline;gap:10px;margin-top:2px;flex-wrap:wrap}
+.rprow .tn{font-family:'Chakra Petch','Noto Sans JP';font-size:17px;font-weight:700;
+  color:var(--tc,var(--cyan));text-shadow:0 0 14px var(--tc,transparent)}
+.rprow .rv{font-family:'Chakra Petch';font-size:17px;font-weight:700;color:var(--text)}
+.rprow .rv i{font-style:normal;font-size:10px;color:var(--muted);margin-left:2px}
+.rprow .dv{font-family:'Chakra Petch';font-size:11px;color:var(--muted);margin-left:auto}
+.rprow .dv b{color:var(--cyan);font-size:13px}
+.rprow .td.up{color:var(--green)} .rprow .td.dn{color:var(--pink)}
+.rprow .td{font-family:'Chakra Petch';font-size:12px;font-weight:700}
+
 /* ライブ配信カード */
 .card.livecard::before{background:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
 .card.livecard:hover{border-color:rgba(255,45,120,.45)}
@@ -190,6 +226,7 @@ a.lvmore:hover{border-style:solid}
     <a href="./index.html" class="on">HOME</a>
     <a href="./deviation.html">ランク偏差値</a>
     <a href="./rank.html">ランク分布</a>
+    <a href="./tracker.html">ランクワークブック</a>
     <a href="./pickrate.html">ピック率</a>
     <a href="./streamers.html">ライブ配信</a>
     <a href="./assist.html">エイムアシスト</a>
@@ -208,7 +245,21 @@ a.lvmore:hover{border-style:solid}
 
 <!-- ファーストビュー（トップページはヒーローを持たず、ここから始まる） -->
 <div class="fv">
-  <div class="card season slim wide">
+  <a class="card rwchart wide" href="./tracker.html" id="rw-chart" style="display:none">
+    <div class="rwhead">
+      <div>
+        <div class="eyeb">SEASON PROGRESS</div>
+        <div class="snm"><b id="rw-no">—</b><span id="rw-name"></span><em id="rw-sp"></em></div>
+        <div class="rwsec"><span id="rw-left">—</span><span class="dim" id="rw-pct"></span></div>
+      </div>
+      <span class="rwopen">記録する →</span>
+    </div>
+    <div class="sbar"><i id="rw-bar"></i><s id="rw-split" title="スプリット2開始"></s><u id="rw-head"></u></div>
+    <canvas id="line" width="720" height="400"></canvas>
+    <div class="rwleg"><span><i></i>自動取得</span><span><i class="man"></i>手入力</span></div>
+  </a>
+
+  <div class="card season slim wide" id="s29card">
     <div class="eyeb">SEASON PROGRESS</div>
     <div class="prim snm"><b id="s29-no">S29</b> <span id="s29-name">—</span><em id="s29-sp"></em></div>
     <div class="sec"><span id="s29-left">—</span><span class="dim" id="s29-pct"></span></div>
@@ -224,6 +275,17 @@ a.lvmore:hover{border-style:solid}
     <div class="foot"><span>次: <span id="rk-next">—</span></span><span class="src">Apex Legends Status</span></div>
   </div>
 
+  <a class="card rpcard wide" href="./tracker.html" id="rp-status" style="display:none">
+    <div class="eyeb">MY RANK // ランクワークブック<span id="rp-streak"></span></div>
+    <div class="rprow">
+      <span class="tn" id="rp-tier">—</span>
+      <span class="rv" id="rp-rp">—<i>RP</i></span>
+      <span class="td" id="rp-today"></span>
+      <span class="dv">偏差値 <b id="rp-dev">—</b><span id="rp-top"></span></span>
+    </div>
+    <div class="foot"><span class="src" id="rp-date">—</span><span class="more" id="rp-more">記録する →</span></div>
+  </a>
+
   <a class="card" href="./rank.html">
     <div class="eyeb">RANK DISTRIBUTION // ランク分布</div>
     <div class="mini" id="mini-dist"></div>
@@ -234,6 +296,13 @@ a.lvmore:hover{border-style:solid}
     <div class="eyeb">PICK RATE // <b id="pr-label">レジェンドピック率</b> BEST 5</div>
     <div class="prlist" id="pr-list"></div>
     <div class="foot"><span class="src" id="pr-src">—</span><span class="more">すべて見る →</span></div>
+  </a>
+
+  <a class="card rppromo wide" href="./tracker.html" id="rp-promo" style="display:none">
+    <div class="eyeb">RANK WORKBOOK // 新機能</div>
+    <div class="prim">毎日のRPを記録して、伸びを可視化</div>
+    <div class="sec">ティア・偏差値・スプリット合計が自動で出ます</div>
+    <div class="foot"><span class="src">ログイン不要 / 端末内に保存</span><span class="more">はじめる →</span></div>
   </a>
 
   <div class="card livecard wide" id="livecard" style="display:none">
@@ -320,6 +389,7 @@ a.lvmore:hover{border-style:solid}
   <h2>更新履歴</h2>
   <div class="panel">
     <ul class="updates">
+      <li><span class="d">08-22</span><span>ランクワークブックを公開。毎日のRPを記録すると、推移グラフ・現在のティア・偏差値・スプリット合計が自動で出ます。ログイン不要で端末内に保存されます</span></li>
       <li><span class="d">08-19</span><span>図解を更新。メタに首位交代の推移を追加し、ランクの「分布の推移」に26ディビジョンの形を並べたグラフを載せました</span></li>
       <li><span class="d">08-19</span><span>ピック率を最新データに更新（開幕15日目）。アクセルが首位に復帰し、ブラッドハウンドは1週間で約40%減と反動が出ています</span></li>
       <li><span class="d">08-19</span><span>図解の各ページに「関連ページ」カードを追加。メタ・ランク・武器・実数値から他ページへ直接移動できるようにしました</span></li>
@@ -329,7 +399,6 @@ a.lvmore:hover{border-style:solid}
       <li><span class="d">08-17</span><span>ランク分布を最新データに更新（開幕13日目）。マスター帯が出現し、プラチナIIIに二つ目の山ができています</span></li>
       <li><span class="d">08-15</span><span>S30ランクの図解を公開。リセットが表示ランクではなくMMRで決まる仕組みを整理しました</span></li>
       <li><span class="d">08-15</span><span>図解にメタページを公開。ランク帯別ピック率で、上位帯ほど選ばれるレジェンドを比較しています</span></li>
-      <li><span class="d">08-14</span><span>破損アタッチメントの実測値ページを公開。赤5種の変化量を武器別に14挺ぶん掲載しました</span></li>
     </ul>
   </div>
   <p class="note" style="margin-top:12px">それ以前の更新は
@@ -377,6 +446,7 @@ a.lvmore:hover{border-style:solid}
     pr.updated.replace(/-/g,"/") + " 時点 / " + pr.source;
 })();
 </script>
+<script src="./rank-chart.js"></script>
 <script src="./rotation.js"></script>
 <script>
 /* data.js が旧版でも動くようにフォールバックを用意 */
@@ -550,6 +620,75 @@ var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シー
   b.onclick=function(){ set(!d.classList.contains("open")); };
   d.onclick=function(e){ if(e.target===d) set(false); };
   document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+<script>
+/* ===== RPトラッカーのウィジェット =====
+   tracker.html が書き出す apexwb_rp_summary_v1 を読むだけ（計算はしない） */
+(function(){
+  /* 記録が3件以上あれば、シーズン進捗カードを RP推移カードに差し替える */
+  try{
+    loadDB();
+    if (recordCount() >= 3){
+      var d = withDelta(entries(currentSplit().id));
+      if (d.length >= 2){
+        var card = document.getElementById("rw-chart"),
+            old  = document.getElementById("s29card");
+        if (card && old){
+          old.style.display = "none";
+          card.style.display = "";
+          var head = function(){
+            seasonHead({ no:"rw-no", name:"rw-name", sp:"rw-sp", left:"rw-left", pct:"rw-pct" });
+            var st = new Date(SEASON.start).getTime(),
+                en = new Date(SEASON.end).getTime(),
+                sp = new Date(SEASON.splitStart).getTime(),
+                pct = Math.max(0, Math.min(100, (Date.now()-st)/(en-st)*100));
+            document.getElementById("rw-bar").style.width = pct + "%";
+            document.getElementById("rw-head").style.left = pct + "%";
+            document.getElementById("rw-split").style.left = ((sp-st)/(en-st)*100) + "%";
+          };
+          head(); setInterval(head, 60000);
+          animateLine(d);
+          var rz; addEventListener("resize", function(){
+            clearTimeout(rz); rz = setTimeout(function(){ drawLine(d); }, 180);
+          });
+        }
+      }
+    }
+  }catch(e){}
+
+  var sum = null;
+  try { sum = JSON.parse(localStorage.getItem("apexwb_rp_summary_v1") || "null"); } catch(e){}
+
+  if (!sum || typeof sum.rp !== "number"){
+    var pr = document.getElementById("rp-promo");
+    if (pr) pr.style.display = "";
+    return;
+  }
+  var el = document.getElementById("rp-status");
+  if (!el) return;
+  el.style.display = "";
+
+  var f = function(n){ return n.toLocaleString("en-US"); };
+  var COL = { "ルーキー":"#BCC5D2","ブロンズ":"#C08A4E","シルバー":"#CFD6E2","ゴールド":"#F5C542",
+              "プラチナ":"#4CF0D5","ダイヤ":"#63B4FF","マスター":"#C97DFF","プレデター":"#FF4655" };
+  var baseName = String(sum.tier || "").replace(/(IV|III|II|I)$/, "");
+  el.style.setProperty("--tc", COL[baseName] || "var(--cyan)");
+
+  document.getElementById("rp-tier").textContent = sum.tier || "—";
+  document.getElementById("rp-rp").innerHTML     = f(sum.rp) + "<i>RP</i>";
+  document.getElementById("rp-dev").textContent  = sum.dev != null ? sum.dev.toFixed(1) : "—";
+  document.getElementById("rp-top").textContent  = sum.topP != null
+    ? " / 上位" + (sum.topP < 1 ? sum.topP.toFixed(2) : sum.topP.toFixed(1)) + "%" : "";
+
+  var td = document.getElementById("rp-today");
+  if (sum.today && typeof sum.delta === "number"){
+    td.textContent = (sum.delta > 0 ? "+" : "") + f(sum.delta);
+    td.className = "td " + (sum.delta >= 0 ? "up" : "dn");
+  }
+  if (sum.streak > 0) document.getElementById("rp-streak").textContent = " 連続" + sum.streak + "日";
+  document.getElementById("rp-date").textContent = "最終記録 " + String(sum.date || "").replace(/-/g, "/");
+  document.getElementById("rp-more").textContent = sum.today ? "推移を見る →" : "今日のRPを記録する →";
 })();
 </script>
 </body>
