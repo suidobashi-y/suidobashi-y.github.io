@@ -221,9 +221,9 @@ function ctx2(id){
 }
 const CSSV = n => getComputedStyle(document.body).getPropertyValue(n).trim();
 
-function drawLine(d, pr){
+function drawLine(d, pr, gc){
   const p1 = (pr === undefined ? 1 : pr);
-  const cc = ctx2("line");
+  const cc = gc || ctx2("line");
   if (!cc) return;
   const { x, w, h } = cc;
   if (!d.length) return;

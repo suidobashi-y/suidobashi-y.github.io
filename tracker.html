@@ -162,7 +162,7 @@ canvas{display:block;width:100%;height:auto}
   color:var(--text);opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.warn2{border-color:var(--amber)}
-.shareBtn{position:absolute;top:11px;right:12px;width:34px;height:30px;border-radius:3px;
+.shareBtn{position:absolute;top:10px;right:12px;z-index:2;width:34px;height:30px;border-radius:3px;
   background:#101a2c;border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .shareBtn svg{width:15px;height:15px;stroke:var(--cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .modal{position:fixed;inset:0;z-index:85;background:rgba(4,6,14,.86);display:none;align-items:center;justify-content:center;padding:18px}
@@ -172,7 +172,7 @@ canvas{display:block;width:100%;height:auto}
 .tdBig b{font-family:'Chakra Petch';font-size:27px;font-weight:700;line-height:1}
 .tdBig em{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px}
 #todayCard .ch{align-items:baseline;margin-bottom:6px}
-#todayCard .ch #todayCount{margin-left:auto}
+#todayCard .ch #todayCount{margin-left:auto;margin-right:42px}
 .rel{display:flex;align-items:baseline;gap:10px;padding:10px 2px;border-bottom:1px solid #182036;
   text-decoration:none;color:var(--text)}
 .rel:last-child{border-bottom:0}
@@ -255,7 +255,7 @@ canvas{display:block;width:100%;height:auto}
     <button class="shareBtn" id="shareBtn" aria-label="スプリット成績を画像で共有" title="画像で共有">
       <svg viewBox="0 0 24 24"><path d="M12 16V4M12 4L7 9M12 4l5 5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
     </button>
-    <div class="eyeb">RW_SEASON PROGRESS</div>
+    <div class="eyeb">SEASON PROGRESS</div>
     <div class="snm"><b id="sNo">—</b><span id="sName"></span><em id="sSp"></em></div>
     <div class="ssec"><span id="sLeft">—</span><span class="dim" id="sPct"></span></div>
     <div class="tabs" id="splitTabs"></div>
@@ -287,6 +287,9 @@ canvas{display:block;width:100%;height:auto}
       <span class="tdBig"><b id="todaySum">-</b><em>RP</em></span>
       <span id="todayCount">-</span>
     </div>
+    <button class="shareBtn" id="shareBtnToday" aria-label="今日の増減を画像で共有" title="画像で共有">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4M12 4L7 9M12 4l5 5M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+    </button>
     <canvas id="todayChart" width="720" height="340" style="margin-top:0"></canvas>
     <i class="pulse hide" id="tdPulse" aria-hidden="true"></i>
     <div class="divp hide" id="hDiv">
@@ -399,6 +402,17 @@ canvas{display:block;width:100%;height:auto}
    ========================================================= */
 const API = "https://apex-map-streamer.suidobashi-y.workers.dev"; // ← 本番ドメインに差し替え可
 
+/* 当日の増減（日をまたぐ記録が無くても算出できるようにする）
+   前日の記録があれば「前日終値 → 現在」、無ければ「その日の初回 → 現在」 */
+function todayGain(d){
+  const t = apexDate(), rec = DB.records[t];
+  if (!rec) return null;
+  const prevDay = d.filter(e => e.date < t).pop();
+  if (prevDay) return rec.rp - prevDay.rp;
+  const log = Array.isArray(rec.log) ? rec.log : null;
+  return (log && log.length > 1) ? rec.rp - log[0].rp : null;
+}
+
 /* ---- 目標ランク ---- */
 function goalTier(){
   const g = DB.profile && DB.profile.goal;
@@ -450,11 +464,13 @@ function render(){
   const d = withDelta(cur);
   const last = d[d.length-1];
   const td = last && last.date===apexDate() ? last.delta : null;
-  const wk = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null)
-              .reduce((a,e)=>a+e.delta, 0);
+  const wkList = d.filter(e=>diffD(apexDate(), e.date) < 7 && e.delta!==null);
+  let wk = wkList.reduce((a,e)=>a+e.delta, 0), wkHas = wkList.length > 0;
+  const tgain = todayGain(d);
+  if (tgain !== null && !wkList.some(e=>e.date===apexDate())){ wk += tgain; wkHas = true; }
   const kW = document.getElementById("kWeek");
-  kW.textContent = d.length>1 ? sign(wk) : "—";
-  kW.className = wk>=0?"up":"dn";
+  kW.textContent = wkHas ? sign(wk) : "—";
+  kW.className = wkHas ? (wk>=0?"up":"dn") : "";
 
   // 入力欄が空なら、直近の記録を初期値として入れておく
   const rpIn = document.getElementById("rp");
@@ -503,10 +519,12 @@ function render(){
     dp.classList.remove("hide");
   } else dp.classList.add("hide");
 
-  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
+  let gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
+  let gHas = d.length > 1;
+  if (!gHas){ const g = todayGain(d); if (g !== null){ gain = g; gHas = true; } }
   const kS = document.getElementById("kSplit");
-  kS.textContent = d.length>1 ? sign(gain) : "—";
-  kS.className = gain>=0 ? "up":"dn";
+  kS.textContent = gHas ? sign(gain) : "—";
+  kS.className = gHas ? (gain>=0 ? "up":"dn") : "";
 
   writeSummary(lrec, dv, st, td);
 
@@ -571,10 +589,21 @@ function goal(last, d){
   set.className = "set";
   set.onclick = openSheet;
 
+  // 直近7日の増減。日またぎの記録が無い初日でも、当日分だけで算出する
   const recent = d.filter(e => diffD(apexDate(), e.date) < 7 && e.delta !== null);
-  const pace = recent.length ? recent.reduce((a,e)=>a+e.delta,0)/recent.length : 0;
-  document.getElementById("goalPace").textContent =
-    pace > 0 ? "直近7日ペースで あと" + Math.ceil(rest/pace) + "日" : "直近7日は伸びていません";
+  let sumG = recent.reduce((a,e)=>a+e.delta, 0), days = recent.length;
+  const tg = todayGain(d);
+  if (tg !== null && !recent.some(e => e.date === apexDate())){ sumG += tg; days += 1; }
+  const pace = days ? sumG / days : 0;
+  const el = document.getElementById("goalPace");
+  if (pace > 0){
+    el.textContent = (days === 1 ? "今日のペースで あと" : "直近" + days + "日のペースで あと")
+      + Math.ceil(rest / pace) + "日";
+  } else if (days === 0){
+    el.textContent = "記録が増えると到達予想が出ます";
+  } else {
+    el.textContent = days === 1 ? "今日はまだ伸びていません" : "直近" + days + "日は伸びていません";
+  }
 }
 
 /* ---- Canvas ---- */
@@ -628,8 +657,8 @@ function todayCard(d){
 }
 
 let tdAnim = 0;
-function drawToday(baseRp, log, animate){
-  const cc = ctx2("todayChart");
+function drawToday(baseRp, log, animate, gc){
+  const cc = gc || ctx2("todayChart");
   if (!cc) return;
   const { x, w, h } = cc;
   const L = 46, R = 12, T = 16, B = 26;
@@ -720,6 +749,7 @@ function drawToday(baseRp, log, animate){
     x.fillStyle = "#5c6884";
   });
 
+  if (gc) return;                       // 共有画像では点滅マーカーを置かない
   // 最新の記録だけ、時刻の上で点滅させる
   const cv = document.getElementById("todayChart");
   const dot = document.getElementById("tdPulse");
@@ -874,58 +904,166 @@ function loadCode(){
 }
 
 /* ---- 共有画像 ---- */
-function buildShareCanvas(){
-  const d = withDelta(entries(viewSplit));
-  if (!d.length){ toast("記録がありません", true); return null; }
-  const sp = SPLITS.find(s=>s.id===viewSplit);
-  const W = 1200, H = 675, c = document.createElement("canvas");
+/* ---- 共有画像：画面に出ているカードをそのまま焼き込む ---- */
+function todayData(){
+  const dd = withDelta(entries(viewSplit));
+  const t = apexDate(), rec = DB.records[t];
+  if (!rec) return null;
+  const log = (Array.isArray(rec.log) && rec.log.length) ? rec.log : [{ rp:rec.rp, src:rec.src, at:null }];
+  const prevDay = dd.filter(e => e.date < t).pop();
+  const baseRp = prevDay ? prevDay.rp : (log.length > 1 ? log[0].rp : null);
+  if (baseRp === null) return null;
+  return { rec, log, baseRp, total: rec.rp - baseRp };
+}
+
+function shareImage(kind){
+  const W = 1080, PAD = 46;
+  const cw = W - PAD*2;
+  const ratio = kind === "line" ? 400/720 : 340/720;
+  const ch = Math.round(cw * ratio);
+  const headH = kind === "line" ? 168 : 118;
+  const extraH = kind === "line" ? 54 : 132;
+  const footH = 96;
+  const H = headH + ch + extraH + footH;
+
+  const c = document.createElement("canvas");
   c.width = W; c.height = H;
   const x = c.getContext("2d");
-  x.fillStyle = "#0a0e1a"; x.fillRect(0,0,W,H);
-  x.strokeStyle = "rgba(0,229,255,.05)";
-  for (let i=0;i<W;i+=40){ x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke(); }
-  for (let i=0;i<H;i+=40){ x.beginPath();x.moveTo(0,i);x.lineTo(W,i);x.stroke(); }
 
-  x.font = "700 26px 'Chakra Petch'"; x.fillStyle = "#e8ecf5";
-  x.fillText("APEX ", 56, 74);
-  const bw2 = x.measureText("APEX ").width;
-  x.fillStyle = "#ff2d78"; x.fillText("WORKBOOK", 56+bw2, 74);
-  x.font = "700 20px 'Noto Sans JP'"; x.fillStyle = "#8a93ad";
-  x.fillText(sp.label, 56, 112);
+  /* 背景（パネルのグラデーション＋グリッド） */
+  const bg = x.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#101628"); bg.addColorStop(1, "#0a0e1a");
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.strokeStyle = "rgba(0,229,255,.045)"; x.lineWidth = 1;
+  for (let i = 0; i < W; i += 46){ x.beginPath(); x.moveTo(i,0); x.lineTo(i,H); x.stroke(); }
+  for (let i = 0; i < H; i += 46){ x.beginPath(); x.moveTo(0,i); x.lineTo(W,i); x.stroke(); }
 
-  const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
-  x.font = "700 96px 'Chakra Petch'"; x.fillStyle = gain>=0 ? "#2dffa8" : "#ff2d78";
-  x.fillText(sign(gain), 56, 220);
-  x.font = "500 22px 'Noto Sans JP'"; x.fillStyle = "#8a93ad";
-  x.fillText("スプリット合計RP", 56, 258);
+  /* 上端のアクセントライン */
+  const acc = x.createLinearGradient(0, 0, W, 0);
+  if (kind === "line"){ acc.addColorStop(0, "#00e5ff"); acc.addColorStop(1, "#ff2d78"); }
+  else { acc.addColorStop(0, "#ff2d78"); acc.addColorStop(1, "rgba(255,45,120,.15)"); }
+  x.fillStyle = acc; x.fillRect(0, 0, W, 4);
 
-  [["現在RP", fmt(d[d.length-1].rp)],["記録日数", d.length+"日"],["最高RP", fmt(Math.max(...d.map(e=>e.rp)))]]
-  .forEach(([k,v],i)=>{
-    const bx = 56 + i*250;
-    x.font = "500 18px 'Noto Sans JP'"; x.fillStyle = "#8a93ad"; x.fillText(k, bx, 320);
-    x.font = "700 40px 'Chakra Petch'"; x.fillStyle = "#e8ecf5"; x.fillText(v, bx, 366);
-  });
+  const CY = "#00e5ff", TXT = "#e8ecf5", MU = "#8a93ad";
+  let y = 0;
 
-  const L=56, R=56, T=410, B=560;
-  const vs = d.map(e=>e.rp), lo = Math.min(...vs)-200, hi = Math.max(...vs)+200;
-  const gx = i => L + (d.length===1 ? (W-L-R)/2 : i*(W-L-R)/(d.length-1));
-  const gy = v => B - (v-lo)/(hi-lo||1)*(B-T);
-  x.beginPath(); d.forEach((e,i)=> i?x.lineTo(gx(i),gy(e.rp)):x.moveTo(gx(i),gy(e.rp)));
-  x.strokeStyle = "#00e5ff"; x.lineWidth = 4; x.lineJoin="round"; x.stroke();
-  x.lineTo(gx(d.length-1),B); x.lineTo(gx(0),B); x.closePath();
-  x.fillStyle = "rgba(0,229,255,.14)"; x.fill();
+  if (kind === "line"){
+    x.textAlign = "left";
+    x.font = "600 17px 'Chakra Petch'"; x.fillStyle = MU;
+    x.fillText("S E A S O N   P R O G R E S S", PAD, 52);
+    x.font = "700 40px 'Chakra Petch'"; x.fillStyle = CY;
+    x.fillText("S" + RW_SEASON.no, PAD, 100);
+    const nw = x.measureText("S" + RW_SEASON.no).width;
+    x.fillStyle = TXT; x.fillText(" " + (RW_SEASON.name || ""), PAD + nw, 100);
+    const tw = nw + x.measureText(" " + (RW_SEASON.name || "")).width;
+    const sp = new Date(RW_SEASON.splitStart).getTime();
+    const lab = Date.now() < sp ? "SPLIT 1" : "SPLIT 2";
+    x.font = "700 18px 'Chakra Petch'";
+    const bw = x.measureText(lab).width + 26;
+    x.fillStyle = CY;
+    if (x.roundRect){ x.beginPath(); x.roundRect(PAD + tw + 18, 72, bw, 32, 3); x.fill(); }
+    else x.fillRect(PAD + tw + 18, 72, bw, 32);
+    x.fillStyle = "#0a0e1a"; x.textAlign = "center";
+    x.fillText(lab, PAD + tw + 18 + bw/2, 95);
+    x.textAlign = "left";
+    x.font = "500 21px 'Noto Sans JP'"; x.fillStyle = MU;
+    x.fillText(document.getElementById("sLeft").textContent + "　"
+             + document.getElementById("sPct").textContent, PAD, 140);
+    y = headH;
+  } else {
+    const td = todayData();
+    x.textAlign = "left";
+    x.font = "700 27px 'Noto Sans JP'"; x.fillStyle = TXT;
+    x.fillText("今日の増減", PAD, 62);
+    const lw2 = x.measureText("今日の増減").width;
+    x.font = "700 52px 'Chakra Petch'";
+    x.fillStyle = td.total >= 0 ? "#2dffa8" : "#ff2d78";
+    x.fillText(sign(td.total), PAD + lw2 + 22, 66);
+    const vw = x.measureText(sign(td.total)).width;
+    x.font = "500 20px 'Noto Sans JP'"; x.fillStyle = MU;
+    x.fillText("RP", PAD + lw2 + 30 + vw, 64);
+    x.textAlign = "right";
+    x.fillText(td.log.length + "回更新", W - PAD, 60);
+    x.textAlign = "left";
+    y = headH;
+  }
 
-  x.font = "500 20px 'Chakra Petch'"; x.fillStyle = "#5c6884";
-  x.fillText(d[0].date.replace(/-/g,"/") + " 〜 " + d[d.length-1].date.replace(/-/g,"/"), 56, 610);
-  x.textAlign = "right"; x.fillText("apex-workbook.com", W-56, 610);
+  /* グラフ本体：画面と同じ論理サイズ（幅330px相当）で描いてから拡大する。
+     直接1080pxで描くと、フォントや線の太さだけが相対的に細くなるため。 */
+  const BASE = 330, SC = cw / BASE;
+  x.save();
+  x.translate(PAD, y); x.scale(SC, SC);
+  x.globalAlpha = 1; x.setLineDash([]); x.shadowBlur = 0; x.lineWidth = 1;
+  if (kind === "line"){
+    drawLine(withDelta(entries(viewSplit)), 1, { x, w: BASE, h: Math.round(BASE * ratio) });
+  } else {
+    const td = todayData();
+    drawToday(td.baseRp, td.log, 1, { x, w: BASE, h: Math.round(BASE * ratio) });
+  }
+  x.restore();
+  y += ch;
+
+  if (kind === "line"){
+    /* 凡例 */
+    x.beginPath(); x.arc(PAD + 7, y + 22, 7, 0, 7); x.fillStyle = CY; x.fill();
+    x.font = "500 18px 'Noto Sans JP'"; x.fillStyle = MU; x.textAlign = "left";
+    x.fillText("自動取得", PAD + 24, y + 28);
+    const gx = PAD + 24 + x.measureText("自動取得").width + 30;
+    x.beginPath(); x.arc(gx + 7, y + 22, 6.5, 0, 7);
+    x.strokeStyle = "#ffb020"; x.lineWidth = 2.5; x.stroke();
+    x.fillText("手入力", gx + 24, y + 28);
+    y += extraH;
+  } else {
+    /* ディビジョン進捗 */
+    const rp = todayData().rec.rp, bt = tierAt(rp);
+    x.strokeStyle = "#1a2338"; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(PAD, y + 18); x.lineTo(W - PAD, y + 18); x.stroke();
+    if (bt.next){
+      const col = TIER_COLOR[bt.cur.t] || CY, ncol = TIER_COLOR[bt.next.t] || CY;
+      const inDiv = Math.max(0, rp - bt.cur.rp), span = bt.next.rp - bt.cur.rp;
+      x.font = "700 20px 'Noto Sans JP'"; x.textAlign = "left";
+      x.fillStyle = col; x.fillText(bt.cur.n, PAD, y + 58);
+      const lw3 = x.measureText(bt.cur.n).width;
+      x.textAlign = "right"; x.fillStyle = ncol; x.fillText(bt.next.n, W - PAD, y + 58);
+      const rw3 = x.measureText(bt.next.n).width;
+      const bx = PAD + lw3 + 18, bw2 = (W - PAD - rw3 - 18) - bx;
+      x.fillStyle = "rgba(255,255,255,.08)";
+      if (x.roundRect){ x.beginPath(); x.roundRect(bx, y + 44, bw2, 10, 5); x.fill(); }
+      else x.fillRect(bx, y + 44, bw2, 10);
+      x.fillStyle = col; x.shadowColor = col; x.shadowBlur = 10;
+      const fw = Math.max(10, bw2 * Math.min(1, inDiv/span));
+      if (x.roundRect){ x.beginPath(); x.roundRect(bx, y + 44, fw, 10, 5); x.fill(); }
+      else x.fillRect(bx, y + 44, fw, 10);
+      x.shadowBlur = 0;
+      x.textAlign = "left"; x.font = "700 28px 'Chakra Petch'"; x.fillStyle = TXT;
+      x.fillText(fmt(inDiv), PAD, y + 104);
+      const iw = x.measureText(fmt(inDiv)).width;
+      x.font = "500 18px 'Noto Sans JP'"; x.fillStyle = MU;
+      x.fillText(" / " + fmt(span) + " RP", PAD + iw + 6, y + 102);
+      x.textAlign = "right"; x.font = "700 22px 'Noto Sans JP'"; x.fillStyle = ncol;
+      x.fillText("次まで あと " + fmt(span - inDiv), W - PAD, y + 103);
+    }
+    y += extraH;
+  }
+
+  /* フッター：ブランドを焼き込む */
+  x.strokeStyle = "rgba(0,229,255,.16)"; x.lineWidth = 1;
+  x.beginPath(); x.moveTo(PAD, y + 14); x.lineTo(W - PAD, y + 14); x.stroke();
+  x.textAlign = "left"; x.font = "700 30px 'Chakra Petch'"; x.fillStyle = TXT;
+  x.fillText("APEX", PAD, y + 62);
+  const aw = x.measureText("APEX").width;
+  x.fillStyle = "#ff2d78"; x.fillText("WORKBOOK", PAD + aw + 6, y + 62);
+  x.textAlign = "right"; x.font = "500 19px 'Chakra Petch'"; x.fillStyle = MU;
+  x.fillText("apex-workbook.com　" + apexDate().replace(/-/g, "/"), W - PAD, y + 60);
 
   return c;
 }
 
 let shareCanvas = null;
-function openShare(){
-  const c = buildShareCanvas();
-  if (!c) return;
+function openShare(kind){
+  if (kind === "today" && !todayData()){ toast("今日の記録がありません", true); return; }
+  if (kind === "line" && withDelta(entries(viewSplit)).length < 2){ toast("記録が2日ぶん必要です", true); return; }
+  const c = shareImage(kind);
   shareCanvas = c;
   document.getElementById("shareImg").src = c.toDataURL("image/png");
   document.getElementById("shareModal").classList.add("open");
@@ -1025,7 +1163,8 @@ document.getElementById("copyCode").onclick = ()=>{
 };
 document.getElementById("loadCode").onclick = loadCode;
 document.getElementById("bkBtn").onclick = openSheet;
-document.getElementById("shareBtn").onclick = openShare;
+document.getElementById("shareBtn").onclick = ()=> openShare("line");
+document.getElementById("shareBtnToday").onclick = e => { e.preventDefault(); openShare("today"); };
 document.getElementById("shareSave").onclick = saveShare;
 document.getElementById("shareClose").onclick = ()=> document.getElementById("shareModal").classList.remove("open");
 document.getElementById("shareModal").onclick = e => { if (e.target.id === "shareModal") e.currentTarget.classList.remove("open"); };
