@@ -390,7 +390,7 @@ canvas{display:block;width:100%;height:auto}
     <button class="btn ghost" id="shareClose">閉じる</button>
     <button class="btn pink" id="shareSave">画像を保存</button>
   </div>
-  <div class="note" style="text-align:center;font-size:10px">画像を長押しでも保存できます</div>
+  <div class="note" style="text-align:center;font-size:10px">「写真に保存」→ 共有メニューの「画像を保存」で写真アルバムに入ります<br>画像を長押ししても保存できます</div>
 </div></div>
 
 <div class="toast" id="toast"></div>
@@ -1059,23 +1059,49 @@ function shareImage(kind){
   return c;
 }
 
-let shareCanvas = null;
+let shareCanvas = null, shareBlob = null, shareFile = null;
+
 function openShare(kind){
   if (kind === "today" && !todayData()){ toast("今日の記録がありません", true); return; }
   if (kind === "line" && withDelta(entries(viewSplit)).length < 2){ toast("記録が2日ぶん必要です", true); return; }
   const c = shareImage(kind);
-  shareCanvas = c;
+  shareCanvas = c; shareBlob = null; shareFile = null;
+
+  // タップ時に同期で共有できるよう、開いた時点で画像データを用意しておく
+  const name = `apexwb-${kind === "today" ? "today" : "split"}-${apexDate()}.png`;
+  c.toBlob(b=>{
+    shareBlob = b;
+    try { shareFile = new File([b], name, { type:"image/png" }); } catch(e){}
+    const btn = document.getElementById("shareSave");
+    btn.disabled = false;
+    btn.textContent = (shareFile && navigator.canShare && navigator.canShare({ files:[shareFile] }))
+      ? "写真に保存" : "画像を保存";
+  }, "image/png");
+
+  const btn = document.getElementById("shareSave");
+  btn.disabled = true; btn.textContent = "準備中…";
   document.getElementById("shareImg").src = c.toDataURL("image/png");
   document.getElementById("shareModal").classList.add("open");
 }
+
 function saveShare(){
-  if (!shareCanvas) return;
-  shareCanvas.toBlob(b=>{
-    const u = URL.createObjectURL(b), a = document.createElement("a");
-    a.href = u; a.download = `apexwb-${apexDate()}.png`; a.click();
-    setTimeout(()=>URL.revokeObjectURL(u), 4000);
-    toast("画像を保存しました");
-  });
+  // iOS/Android はシェアシート経由だと「画像を保存」で写真アルバムに入る
+  if (shareFile && navigator.canShare && navigator.canShare({ files:[shareFile] })){
+    navigator.share({ files:[shareFile] })
+      .then(()=> toast("共有しました"))
+      .catch(err=>{ if (!err || err.name !== "AbortError") downloadShare(); });
+    return;
+  }
+  downloadShare();
+}
+
+function downloadShare(){
+  const b = shareBlob;
+  if (!b) return;
+  const u = URL.createObjectURL(b), a = document.createElement("a");
+  a.href = u; a.download = `apexwb-${apexDate()}.png`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(u), 4000);
+  toast("画像を保存しました");
 }
 
 /* ---- UI ---- */
