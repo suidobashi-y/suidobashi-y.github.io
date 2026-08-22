@@ -57,6 +57,22 @@
 .heroGrid span{display:block;font-size:10px;color:var(--muted);line-height:1.5}
 .heroGrid b{font-family:'Chakra Petch';font-size:21px;font-weight:700}
 .heroGrid b.acc{color:var(--tc,var(--cyan))}
+.pulse{position:absolute;width:7px;height:7px;margin:0;border-radius:50%;
+  background:var(--pc,var(--cyan));box-shadow:0 0 9px var(--pc,var(--cyan));
+  transform:translate(-50%,-50%);pointer-events:none;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:.2;transform:translate(-50%,-50%) scale(.65)}
+}
+.divp{margin-top:10px;padding-top:10px;border-top:1px solid #1a2338}
+.drow{display:flex;align-items:center;gap:9px}
+.drow .dl,.drow .dr{font-size:10.5px;white-space:nowrap;font-weight:700}
+.drow .dl{color:var(--text)}
+.dbar{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.dbar i{display:block;height:100%;border-radius:4px;transition:width .9s cubic-bezier(.22,1,.36,1)}
+.dnum{display:flex;align-items:baseline;gap:5px;margin-top:6px;font-size:10px;color:var(--muted)}
+.dnum b{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--text)}
+.dnum em{margin-left:auto;font-style:normal;font-family:'Chakra Petch';font-size:12px;font-weight:700}
 .heroGrid b em{font-style:normal;font-size:11px;color:var(--muted);margin-left:2px}
 .rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
 .rpbox input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--cyan);
@@ -169,7 +185,8 @@ canvas{display:block;width:100%;height:auto}
 .tw > .c:nth-of-type(3){animation-delay:.10s}
 .tw > .c:nth-of-type(4){animation-delay:.15s}
 .tw > .kpi{animation-delay:.20s}
-@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}
+  .pulse{opacity:1}}
 </style>
 </head>
 <body>
@@ -265,9 +282,21 @@ canvas{display:block;width:100%;height:auto}
 
   <div class="c pk hide" id="todayCard">
     <div class="ch"><b>今日の増減</b><span id="todayCount">-</span></div>
-    <div class="tdSum"><b id="todaySum">-</b><span id="todayFrom"></span></div>
+    <div class="tdSum"><b id="todaySum">-</b><span>RP</span></div>
     <canvas id="todayChart" width="720" height="230" style="margin-top:2px"></canvas>
-    <div class="note" id="todayNote" style="margin-top:4px;font-size:11px"></div>
+    <i class="pulse hide" id="tdPulse" aria-hidden="true"></i>
+    <div class="divp hide" id="hDiv">
+      <div class="drow">
+        <span class="dl" id="hCur">-</span>
+        <div class="dbar"><i id="hBar"></i></div>
+        <span class="dr" id="hNext">-</span>
+      </div>
+      <div class="dnum">
+        <b id="hIn">-</b><span>/ <span id="hSpan">-</span> RP</span>
+        <em id="hRest"></em>
+      </div>
+    </div>
+
   </div>
 
   <!-- 目標 -->
@@ -442,6 +471,27 @@ function render(){
   document.getElementById("hTop").innerHTML = dv
     ? (dv.topP < 1 ? dv.topP.toFixed(2) : dv.topP.toFixed(1)) + '<em>%</em>' : "—";
 
+  // ディビジョン進捗（ゲーム内のランクリーグ表示と同じ見せ方）
+  const bt = tierAt(lrp), dp = document.getElementById("hDiv");
+  if (bt.next){
+    const inDiv = Math.max(0, lrp - bt.cur.rp), span = bt.next.rp - bt.cur.rp;
+    const ncol = TIER_COLOR[bt.next.t] || col;
+    const hc = document.getElementById("hCur");
+    hc.textContent = bt.cur.n; hc.style.color = col;
+    document.getElementById("hNext").textContent = bt.next.n;
+    document.getElementById("hNext").style.color = ncol;
+    const bar = document.getElementById("hBar");
+    bar.style.width = Math.min(100, inDiv/span*100) + "%";
+    bar.style.background = col;
+    bar.style.boxShadow = "0 0 8px " + col;
+    document.getElementById("hIn").textContent   = fmt(inDiv);
+    document.getElementById("hSpan").textContent = fmt(span);
+    const rest = document.getElementById("hRest");
+    rest.textContent = "次まで あと " + fmt(span - inDiv);
+    rest.style.color = ncol;
+    dp.classList.remove("hide");
+  } else dp.classList.add("hide");
+
   const gain = d.filter(e=>e.delta!==null).reduce((a,e)=>a+e.delta,0);
   const kS = document.getElementById("kSplit");
   kS.textContent = d.length>1 ? sign(gain) : "—";
@@ -539,35 +589,27 @@ function todayCard(d){
   const card = document.getElementById("todayCard");
   const t = apexDate();
   const rec = DB.records[t];
-  if (!rec){ card.classList.add("hide"); return; }   // 今日まだ記録が無ければ非表示
+  const pulse = document.getElementById("tdPulse");
+  if (!rec){ card.classList.add("hide"); pulse.classList.add("hide"); return; }   // 今日まだ記録が無ければ非表示
 
   // 今日より前の最後の記録（＝起点）
   const prevDay = d.filter(e => e.date < t).pop();
-  const baseRp  = prevDay ? prevDay.rp : null;
 
   const log = Array.isArray(rec.log) && rec.log.length
     ? rec.log
     : [{ rp: rec.rp, src: rec.src, at: null }];      // 旧データ互換
 
 
-  const total = baseRp === null ? null : rec.rp - baseRp;
+  // 前日の記録が無い日は、その日の初回記録を起点にする
+  const baseRp = prevDay ? prevDay.rp : (log.length > 1 ? log[0].rp : null);
+  if (baseRp === null){ card.classList.add("hide"); pulse.classList.add("hide"); return; }   // 比較対象が無いので出さない
+
+  const total = rec.rp - baseRp;
   const sum = document.getElementById("todaySum");
-  sum.textContent = total === null ? fmt(rec.rp) : sign(total);
-  sum.className = total === null ? "" : (total >= 0 ? "up" : "dn");
-  document.getElementById("todayFrom").textContent = baseRp === null
-    ? "RP（初日）"
-    : "RP　" + fmt(baseRp) + " → " + fmt(rec.rp);
+  sum.textContent = sign(total);
+  sum.className = total >= 0 ? "up" : "dn";
   document.getElementById("todayCount").textContent =
     log.length > 1 ? log.length + "回更新" : "1回記録";
-
-  const best = (()=>{
-    let prev = baseRp, mx = null;
-    log.forEach(e=>{ if (prev !== null){ const dl = e.rp - prev; if (mx === null || dl > mx) mx = dl; } prev = e.rp; });
-    return mx;
-  })();
-  document.getElementById("todayNote").textContent =
-    (best !== null ? "この日の最大 " + sign(best) : "この日はまだ比較対象がありません")
-    + (log.length > 1 ? "　更新 " + log.length + "回" : "");
 
   card.classList.remove("hide");        // 幅を測る前に必ず表示しておく
   if (window.__tdAnimate){ window.__tdAnimate = false; animateToday(baseRp, log); }
@@ -644,20 +686,6 @@ function drawToday(baseRp, log, animate){
     prev = to;
   });
 
-  // 最新値のマーカー
-  if (tops.length){
-    const [cx, cy] = tops[tops.length-1];
-    x.strokeStyle = "rgba(0,229,255,.5)"; x.lineWidth = 1.5;
-    x.beginPath(); x.arc(cx, cy, 7, 0, 7); x.stroke();
-    x.fillStyle = CSSV("--cyan");
-    x.beginPath(); x.arc(cx, cy, 3.5, 0, 7); x.fill();
-    if (sw >= 26){
-      x.fillStyle = CSSV("--text"); x.font = "700 11px 'Chakra Petch'";
-      x.textAlign = cx > w*0.7 ? "right" : "left";
-      x.fillText(fmt(log[log.length-1].rp), cx > w*0.7 ? cx-12 : cx+12, cy-8);
-    }
-  }
-
   // 時刻ラベル
   x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "center";
   const skip = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(w/64))));
@@ -666,12 +694,24 @@ function drawToday(baseRp, log, animate){
     const tm = e.at ? new Date(e.at).toLocaleTimeString("ja-JP",
       { timeZone:"Asia/Tokyo", hour:"2-digit", minute:"2-digit" }) : "--:--";
     x.fillText(tm, px(i), h-8);
-    // 取得元（自動＝丸、手入力＝白抜き丸）
+    if (i === n-1) return;                     // 最新は点滅する DOM に任せる
+    // 取得元（自動＝塗り、手入力＝白抜き）
     x.beginPath(); x.arc(px(i), h-20, 2.4, 0, 7);
     if (e.src === "api"){ x.fillStyle = CSSV("--cyan"); x.fill(); }
     else { x.strokeStyle = CSSV("--amber"); x.lineWidth = 1.2; x.stroke(); }
     x.fillStyle = "#5c6884";
   });
+
+  // 最新の記録だけ、時刻の上で点滅させる
+  const cv = document.getElementById("todayChart");
+  const dot = document.getElementById("tdPulse");
+  if (cv && dot){
+    const last = log[n-1];
+    dot.style.left = (cv.offsetLeft + px(n-1)) + "px";
+    dot.style.top  = (cv.offsetTop  + h - 20) + "px";
+    dot.style.setProperty("--pc", last.src === "api" ? CSSV("--cyan") : CSSV("--amber"));
+    dot.classList.remove("hide");
+  }
 }
 
 /* 記録直後だけ立ち上がりアニメーションを再生 */
