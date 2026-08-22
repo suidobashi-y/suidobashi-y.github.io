@@ -688,12 +688,19 @@ function drawToday(baseRp, log, animate){
 
   // 時刻ラベル
   x.fillStyle = "#5c6884"; x.font = "600 9px 'Chakra Petch'"; x.textAlign = "center";
-  const skip = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(w/64))));
-  log.forEach((e,i)=>{
-    if (i % skip !== 0 && i !== n-1) return;
+  /* 時刻ラベル：最新から左へ、実際の文字幅ぶん間隔が空くものだけ描く（重なり防止） */
+  const lw = x.measureText("00:00").width, need = lw + 12;
+  const show = [];
+  let lastX = Infinity;
+  for (let i = n-1; i >= 0; i--){
+    if (i === n-1 || lastX - px(i) >= need){ show.push(i); lastX = px(i); }
+  }
+  show.forEach(i=>{
+    const e = log[i];
     const tm = e.at ? new Date(e.at).toLocaleTimeString("ja-JP",
       { timeZone:"Asia/Tokyo", hour:"2-digit", minute:"2-digit" }) : "--:--";
-    x.fillText(tm, px(i), h-8);
+    const tx2 = Math.min(Math.max(px(i), lw/2 + 2), w - lw/2 - 2);   // 端で切れないよう内側に寄せる
+    x.fillText(tm, tx2, h-8);
     if (i === n-1) return;                     // 最新は点滅する DOM に任せる
     // 取得元（自動＝塗り、手入力＝白抜き）
     x.beginPath(); x.arc(px(i), h-20, 2.4, 0, 7);
