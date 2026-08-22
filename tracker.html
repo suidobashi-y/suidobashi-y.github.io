@@ -74,6 +74,15 @@
 .dnum b{font-family:'Chakra Petch';font-size:15px;font-weight:700;color:var(--text)}
 .dnum em{margin-left:auto;font-style:normal;font-family:'Chakra Petch';font-size:12px;font-weight:700}
 .heroGrid b em{font-style:normal;font-size:11px;color:var(--muted);margin-left:2px}
+.rksel{display:grid;grid-template-columns:1.6fr 1fr;gap:8px;margin-bottom:9px}
+.rksel select{width:100%;-webkit-appearance:none;appearance:none;background:var(--panel2);
+  border:1px solid var(--line);border-radius:3px;color:var(--text);font-size:14px;font-weight:700;
+  font-family:'Noto Sans JP';padding:10px 30px 10px 12px;outline:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--cyan) 50%),linear-gradient(135deg,var(--cyan) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 20px,calc(100% - 11px) 20px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.rksel select:focus{border-color:var(--cyan)}
+.absl{margin-top:9px;font-size:10.5px;color:var(--muted)}
+.absl b{font-family:'Chakra Petch';font-size:13px;color:var(--text)}
 .rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
 .rpbox input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--cyan);
   font-family:'Chakra Petch';font-weight:700;font-size:30px;letter-spacing:.02em;-moz-appearance:textfield}
@@ -272,11 +281,16 @@ canvas{display:block;width:100%;height:auto}
   <!-- 入力 -->
   <div class="c cy" id="inputCard">
     <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
-    <div class="rpbox">
-      <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="今日のRP">
-      <span class="u">RP</span>
-      <div class="stp"><button id="minus" aria-label="50減らす">−</button><button id="plus" aria-label="50増やす">＋</button></div>
+    <div class="rksel">
+      <select id="selTier" aria-label="ティア"></select>
+      <select id="selDiv" aria-label="ディビジョン"></select>
     </div>
+    <div class="rpbox">
+      <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="ディビジョン内のRP">
+      <span class="u" id="rpMax">/ 750 RP</span>
+      <div class="stp"><button id="minus" aria-label="10減らす">−</button><button id="plus" aria-label="10増やす">＋</button></div>
+    </div>
+    <div class="absl">ゲーム画面の「◯◯RP / 750RP」をそのまま入力　<b id="rpAbs">—</b></div>
     <div class="brow">
       <button class="btn sub" id="fetchBtn">自動取得</button>
       <button class="btn" id="saveBtn">記録する</button>
@@ -485,11 +499,12 @@ function render(){
   kW.className = wkHas ? (wk>=0?"up":"dn") : "";
 
   // 入力欄が空なら、直近の記録を初期値として入れておく
+  buildRankSelects();
   const rpIn = document.getElementById("rp");
-  if (!rpIn.value && !rpIn.dataset.touched){
+  if (rpIn.value === "" && !rpIn.dataset.touched){
     const latestKey = Object.keys(DB.records).sort().pop();
-    if (latestKey) rpIn.value = DB.records[latestKey].rp;
-  }
+    if (latestKey) setFromAbs(DB.records[latestKey].rp); else syncRank(false);
+  } else syncRank(false);
 
   // ---- ヒーロー ----
   const st = streak();
@@ -832,6 +847,62 @@ function writeSummary(rec, dv, st, todayDelta){
   }catch(e){}
 }
 
+/* ---- 手入力：ティア＋ディビジョン内RP ⇄ 絶対RP ----
+   ゲーム画面には絶対RPが出ず「534RP / 750RP」しか見えないため、
+   入力はゲームの表示に合わせ、内部では絶対RPに変換して保持する */
+const DIV_TIERS = ["ルーキー","ブロンズ","シルバー","ゴールド","プラチナ","ダイヤ","マスター"];
+
+function tierEntry(t, d){
+  return TIERS.find(x => x.t === t && (x.d === d || x.d === 0)) || null;
+}
+function divSpan(t, d){
+  const cur = tierEntry(t, d);
+  if (!cur) return null;
+  const i = TIERS.indexOf(cur), next = TIERS[i+1];
+  return next ? next.rp - cur.rp : null;      // マスターは上限なし
+}
+function buildRankSelects(){
+  const st = document.getElementById("selTier"), sd = document.getElementById("selDiv");
+  if (st.options.length) return;
+  DIV_TIERS.forEach(t=>{ const o = document.createElement("option"); o.value = t; o.textContent = t; st.appendChild(o); });
+  [4,3,2,1].forEach(d=>{ const o = document.createElement("option"); o.value = d; o.textContent = ROMAN[d]; sd.appendChild(o); });
+  st.onchange = ()=>{ syncRank(true); };
+  sd.onchange = ()=>{ syncRank(true); };
+}
+/* 選択に合わせて上限と合計値を更新 */
+function syncRank(clamp){
+  const st = document.getElementById("selTier"), sd = document.getElementById("selDiv");
+  const rpIn = document.getElementById("rp");
+  const t = st.value, isM = (t === "マスター");
+  sd.style.display = isM ? "none" : "";
+  document.querySelector(".rksel").style.gridTemplateColumns = isM ? "1fr" : "1.6fr 1fr";
+  const d = isM ? 0 : +sd.value;
+  const span = divSpan(t, d);
+  const max = document.getElementById("rpMax");
+  max.textContent = isM ? "RP（合計）" : "/ " + fmt(span) + " RP";
+  let v = parseInt(rpIn.value, 10);
+  if (!Number.isFinite(v) || v < 0) v = 0;
+  if (!isM && span && clamp && v > span) { v = span; rpIn.value = v; }
+  document.getElementById("rpAbs").textContent = "合計 " + fmt(absRP()) + " RP";
+}
+function absRP(){
+  const t = document.getElementById("selTier").value;
+  const isM = (t === "マスター");
+  const d = isM ? 0 : +document.getElementById("selDiv").value;
+  const base = tierEntry(t, d);
+  const v = parseInt(document.getElementById("rp").value, 10) || 0;
+  if (!base) return v;
+  return isM ? Math.max(base.rp, v) : base.rp + v;
+}
+/* 絶対RPから選択欄へ戻す（自動取得・初期値の反映用） */
+function setFromAbs(rp){
+  const cur = tierAt(rp).cur;
+  document.getElementById("selTier").value = cur.t;
+  if (cur.d) document.getElementById("selDiv").value = cur.d;
+  document.getElementById("rp").value = (cur.t === "マスター") ? rp : (rp - cur.rp);
+  syncRank(false);
+}
+
 /* ---- 記録 ---- */
 function record(rp, src){
   if (!Number.isFinite(rp) || rp < 0 || rp > 100000){ toast("RPの値を確認してください", true); return; }
@@ -852,7 +923,7 @@ function record(rp, src){
   if (sp && sp.id !== viewSplit) viewSplit = sp.id;
   const rpEl = document.getElementById("rp");
   rpEl.dataset.touched = "";
-  rpEl.value = "";              // render() が最新値を入れ直す
+  rpEl.value = "";              // render() が最新の記録から入れ直す
   window.__tdAnimate = true;
   render();
   toast(dup ? "今日の記録を更新しました" : "記録しました");
@@ -879,7 +950,7 @@ async function autoFetch(){
         : (j.detail || "取得に失敗しました"));
     }
     if (j.rp === null || j.rp === undefined) throw new Error("ランク情報がありません");
-    document.getElementById("rp").value = j.rp;
+    setFromAbs(j.rp);
     lastFetch = { rp: j.rp, tier: j.tier, div: j.div };
     toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
     cooling = true; setTimeout(()=>cooling=false, 60000);
@@ -1174,11 +1245,11 @@ function openSheet(){
 }
 const closeSheet = ()=> document.getElementById("sheet").classList.remove("open");
 
-document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById("rp"); r.value = (+r.value||0)+50; };
-document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-50); };
-document.getElementById("saveBtn").onclick  = ()=> record(parseInt(document.getElementById("rp").value,10), "manual");
+document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById("rp"); r.value = (+r.value||0)+10; syncRank(true); };
+document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-10); syncRank(true); };
+document.getElementById("saveBtn").onclick  = ()=> record(absRP(), "manual");
 document.getElementById("fetchBtn").onclick = autoFetch;
-document.getElementById("startBtn").onclick = ()=> document.getElementById("rp").focus();
+document.getElementById("startBtn").onclick = ()=>{ buildRankSelects(); syncRank(false); document.getElementById("rp").focus(); };
 document.getElementById("restoreBtn").onclick = ()=>{ openSheet(); document.getElementById("bkIn").focus(); };
 document.getElementById("openCfg").onclick  = openSheet;
 document.getElementById("closeCfg").onclick = closeSheet;
@@ -1217,7 +1288,9 @@ document.getElementById("rp").addEventListener("keydown", e=>{ if (e.key === "En
 document.getElementById("rp").addEventListener("input", e=>{
   // 自分で空にしたら、以降は自動補完しない（記録すると解除）
   e.target.dataset.touched = e.target.value === "" ? "1" : "";
+  syncRank(false);
 });
+document.getElementById("rp").addEventListener("blur", ()=> syncRank(true));
 document.getElementById("rp").addEventListener("focus", e=>{ e.target.select(); });
 let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(render, 180); });
 
