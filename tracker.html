@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JT68JRBHLK');
+</script>
 <title>ランクワークブック｜ApexのRPを毎日記録して推移を可視化 | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legendsのランクポイント（RP）を毎日記録して、推移グラフ・ティア・偏差値・スプリット合計を自動表示。ログイン不要、端末内保存のRP記録ツール。">
 <link rel="canonical" href="https://apex-workbook.com/tracker.html">
@@ -1019,6 +1027,7 @@ function record(rp, src){
   rpEl.value = "";              // render() が最新の記録から入れ直す
   window.__tdAnimate = true;
   render();
+  ev("rp_record", { source: src, updated: dup ? 1 : 0, total_days: Object.keys(DB.records).length });
   toast(dup ? "今日の記録を更新しました" : "記録しました");
 }
 
@@ -1045,9 +1054,11 @@ async function autoFetch(){
     if (j.rp === null || j.rp === undefined) throw new Error("ランク情報がありません");
     setFromAbs(j.rp);
     lastFetch = { rp: j.rp, tier: j.tier, div: j.div };
+    ev("rp_fetch", { result: "ok", platform: p.platform });
     toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
     cooling = true; setTimeout(()=>cooling=false, 60000);
   }catch(e){
+    ev("rp_fetch", { result: "error", platform: p.platform });
     toast(String(e.message || e).slice(0,60) + "。設定からEA名を確認できます", true);
   }finally{
     b.disabled = false; b.textContent = "自動取得";
@@ -1241,6 +1252,7 @@ function openShare(kind){
   if (kind === "today" && !todayData()){ toast("今日の記録がありません", true); return; }
   if (kind === "line" && withDelta(entries(viewSplit)).length < 2){ toast("記録が2日ぶん必要です", true); return; }
   const c = shareImage(kind);
+  ev("rp_share_open", { kind });
   shareCanvas = c; shareBlob = null; shareFile = null;
 
   // タップ時に同期で共有できるよう、開いた時点で画像データを用意しておく
@@ -1278,6 +1290,12 @@ function downloadShare(){
   a.href = u; a.download = `apexwb-${apexDate()}.png`; a.click();
   setTimeout(()=>URL.revokeObjectURL(u), 4000);
   toast("画像を保存しました");
+}
+
+/* ---- 計測（GA4）----
+   何人が記録まで到達したか、手入力と自動取得の比率、共有の有無を見るため */
+function ev(name, params){
+  try{ if (typeof gtag === "function") gtag("event", name, params || {}); }catch(e){}
 }
 
 /* ---- UI ---- */
@@ -1361,6 +1379,7 @@ document.getElementById("cfgSave").onclick = ()=>{
   const on = document.querySelector("#cfgPf button.on");
   DB.profile.platform = on ? on.dataset.pf : "X1";
   DB.profile.goal = goalSel.t ? { t: goalSel.t, d: goalSel.d } : null;
+  ev("rp_settings_save", { has_name: DB.profile.name ? 1 : 0, has_goal: DB.profile.goal ? 1 : 0 });
   save(); render(); toast("保存しました");
 };
 document.getElementById("copyCode").onclick = ()=>{
@@ -1446,6 +1465,8 @@ load();
       "　すでに記録がある場合は「バックアップ」でコードをコピーし、移動先で読み込んでください。";
   }
   el.classList.remove("hide");
+  try{ if (typeof gtag === "function")
+    gtag("event", "rp_inapp_browser", { memory_only: memoryOnly ? 1 : 0 }); }catch(e){}
 })();
 
 document.fonts && document.fonts.ready.then(render);
