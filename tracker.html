@@ -81,6 +81,14 @@
   background-image:linear-gradient(45deg,transparent 50%,var(--cyan) 50%),linear-gradient(135deg,var(--cyan) 50%,transparent 50%);
   background-position:calc(100% - 16px) 20px,calc(100% - 11px) 20px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 .rksel select:focus{border-color:var(--cyan)}
+.stepl{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--cyan);margin:0 0 7px}
+.stepl i{font-style:normal;width:18px;height:18px;border-radius:50%;background:#003240;
+  border:1px solid var(--cyan);font-family:'Chakra Petch';font-size:10px;
+  display:flex;align-items:center;justify-content:center}
+.rksel.wait select#selTier{border-color:var(--cyan);animation:sel 1.6s ease-in-out infinite}
+@keyframes sel{0%,100%{box-shadow:0 0 0 rgba(0,229,255,0)}50%{box-shadow:0 0 12px rgba(0,229,255,.55)}}
+.firsthint{font-size:10.5px;line-height:1.7;color:var(--amber);background:#1c1608;
+  border-radius:3px;padding:8px 10px;margin-bottom:10px}
 .absl{margin-top:9px;font-size:10.5px;color:var(--muted)}
 .absl b{font-family:'Chakra Petch';font-size:13px;color:var(--text)}
 .rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
@@ -96,12 +104,15 @@
   cursor:pointer;border:1.5px solid var(--cyan);background:#003c4e;color:var(--cyan)}
 .btn.ghost{background:#101a2c;border-color:var(--line);color:var(--muted);font-weight:500}
 .btn.sub{flex:0 0 42%}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.rpbox input:disabled{opacity:.35}
 .btn.pink{background:#2e0a1a;border-color:var(--pink);color:var(--pink)}
 .meta{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--muted)}
 .meta .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:0 0 auto}
 .meta .dot.off{background:#3c4560}
-.meta a{margin-left:auto;color:var(--cyan);cursor:pointer;text-decoration:none}
+.meta a{margin-left:auto;color:var(--cyan);cursor:pointer;text-decoration:none;flex:0 0 auto}
+.meta .nudge{color:var(--amber)}
+.meta span:not(.dot){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
 .kpi div{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:11px 6px 12px;text-align:center}
 .kpi span{display:block;font-size:11px;color:var(--muted)}
@@ -147,6 +158,14 @@ canvas{display:block;width:100%;height:auto}
   border-top:1px solid var(--line);border-radius:12px 12px 0 0;padding:14px 16px 26px;max-height:88vh;overflow:auto}
 .grab{width:40px;height:4px;border-radius:2px;background:#303a50;margin:0 auto 14px}
 .lb{font-size:10px;color:var(--muted);margin:14px 0 6px}
+.lead{font-size:11.5px;line-height:1.8;color:var(--muted);margin:2px 0 18px;
+  background:#0d1626;border-left:2px solid var(--cyan);border-radius:2px;padding:9px 11px}
+.lead b{color:var(--cyan)}
+.sec{margin-bottom:10px}
+.sec h3{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--text)}
+.sec h3 em{font-style:normal;font-size:9.5px;letter-spacing:.1em;color:var(--muted);
+  border:1px solid #33405c;border-radius:2px;padding:2px 7px}
+.sec p{font-size:10.5px;line-height:1.75;color:var(--muted);margin-top:5px}
 .help{margin-top:9px}
 .help a{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--cyan);
   text-decoration:none;border-bottom:1px solid rgba(0,229,255,.4);padding-bottom:1px}
@@ -168,10 +187,16 @@ canvas{display:block;width:100%;height:auto}
 .empty{text-align:center;padding:6px 0 4px}
 .empty h3{font-size:15px;margin-top:10px}
 .empty p{font-size:11px;color:var(--muted);margin-top:6px}
-.feat{margin:16px 0 0;padding:0;list-style:none;text-align:left}
-.feat li{font-size:11px;color:var(--muted);padding:5px 0 5px 16px;position:relative}
-.feat li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--cyan)}
-.feat b{color:var(--text);font-size:11px;margin-right:6px}
+.steps{margin:18px 0 0;padding:0;list-style:none;text-align:left;counter-reset:st}
+.steps li{font-size:11.5px;line-height:1.7;color:var(--muted);padding:8px 0 8px 34px;position:relative;
+  border-bottom:1px solid #182036}
+.steps li:last-child{border-bottom:0}
+.steps li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:8px;
+  width:22px;height:22px;border-radius:50%;background:#003240;border:1px solid var(--cyan);
+  color:var(--cyan);font-family:'Chakra Petch';font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center}
+.steps b{color:var(--text)}
+.feat2{font-size:10.5px;line-height:1.7;color:var(--muted);margin-top:14px;text-align:left}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:90;
   background:#0d1626;border:1px solid var(--cyan);border-radius:3px;padding:10px 18px;font-size:12px;
   color:var(--text);opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
@@ -194,6 +219,18 @@ canvas{display:block;width:100%;height:auto}
 .rel b{font-size:13px}
 .rel span{font-size:11px;color:var(--muted)}
 .rel::after{content:">";margin-left:auto;color:var(--cyan);font-family:'Chakra Petch'}
+.iab{background:#1c1608;border:1px solid #5c4010;border-left:3px solid var(--amber);
+  border-radius:3px;padding:12px 14px;margin-top:16px}
+.iab > b{display:block;font-size:13px;color:var(--amber);margin-bottom:5px}
+.iab p{font-size:11.5px;line-height:1.75;color:var(--muted)}
+.iab p b{color:var(--text)}
+.iab p.sm{font-size:10.5px;margin-top:8px}
+.iabBtns{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.ib{flex:1;min-width:96px;text-align:center;padding:9px 6px;border-radius:3px;cursor:pointer;
+  font-family:'Noto Sans JP';font-size:12px;font-weight:700;text-decoration:none;
+  background:#101a2c;border:1px solid var(--line);color:var(--cyan)}
+.ib.prim{background:#3a2a08;border-color:var(--amber);color:var(--amber)}
+.ib.gh{flex:0 0 68px;min-width:0;color:var(--muted);border-color:#3a4560;font-weight:500}
 .hide{display:none !important}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .tw > .c, .tw > .kpi{animation:rise .5s cubic-bezier(.22,1,.36,1) both}
@@ -231,6 +268,18 @@ canvas{display:block;width:100%;height:auto}
 
 <div class="tw">
 
+  <div class="iab hide" id="iabWarn">
+    <b>アプリ内ブラウザで開いています</b>
+    <p id="iabMsg">このままだと記録が<b>この画面を閉じたときに消える可能性</b>があります。
+       Safari など通常のブラウザで開き直してください。</p>
+    <div class="iabBtns">
+      <a class="ib prim" id="iabOpen" href="#">ブラウザで開く</a>
+      <button class="ib" id="iabCopy">URLをコピー</button>
+      <button class="ib gh" id="iabClose">閉じる</button>
+    </div>
+    <p class="sm" id="iabHint"></p>
+  </div>
+
   <h1 class="tt">RANK <span>WORKBOOK</span><em>BETA</em></h1>
   <div class="ttja">ランクワークブック</div>
   <p class="tsub">毎日のランクポイントを記録して、伸びを可視化</p>
@@ -241,13 +290,14 @@ canvas{display:block;width:100%;height:auto}
       <canvas id="ghost" width="640" height="220" aria-hidden="true"></canvas>
       <h3>まだ記録がありません</h3>
       <p>今日のRPを1回入れると、明日から推移が出ます</p>
-      <ul class="feat">
-        <li><b>連続記録</b>毎日の記録日数を数えます</li>
-        <li><b>スプリット合計</b>期間中に稼いだ総RPが出ます</li>
-        <li><b>次ティアまで</b>到達予想日を表示します</li>
-      </ul>
+      <ol class="steps">
+        <li><b>ティアとディビジョン</b>を選ぶ</li>
+        <li>ゲームの<b>ランクリーグ画面</b>に出ている<br>「534RP / 750RP」の<b>左の数字</b>を入れる</li>
+        <li><b>記録する</b>を押す</li>
+      </ol>
+      <p class="feat2">連続記録・スプリット合計・次ティアまでの残りRPは、記録すると自動で出ます</p>
     </div>
-    <div class="brow"><button class="btn" id="startBtn">今日のRPを記録する</button></div>
+    <div class="brow"><button class="btn" id="startBtn">入力をはじめる</button></div>
     <div class="brow"><button class="btn ghost" id="restoreBtn">バックアップコードから復元</button></div>
   </div>
 
@@ -281,10 +331,13 @@ canvas{display:block;width:100%;height:auto}
   <!-- 入力 -->
   <div class="c cy" id="inputCard">
     <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
-    <div class="rksel">
+    <p class="firsthint hide" id="firstHint">ゲーム内 → ランクリーグ で、いまのティアと「◯◯RP / 750RP」を確認してください</p>
+    <div class="stepl hide" id="stepA"><i>1</i>いまのランクを選ぶ</div>
+    <div class="rksel" id="rkSel">
       <select id="selTier" aria-label="ティア"></select>
       <select id="selDiv" aria-label="ディビジョン"></select>
     </div>
+    <div class="stepl hide" id="stepB"><i>2</i>ディビジョン内のRPを入れる</div>
     <div class="rpbox">
       <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="ディビジョン内のRP">
       <span class="u" id="rpMax">/ 750 RP</span>
@@ -376,8 +429,15 @@ canvas{display:block;width:100%;height:auto}
 <div class="sheet" id="sheet"><div class="in">
   <div class="grab"></div>
   <div class="ch"><b style="font-size:15px">設定</b><span id="closeCfg" style="cursor:pointer;color:var(--cyan)">閉じる</span></div>
+  <p class="lead">手入力だけで使う場合、ここの設定は必要ありません。<br>
+     下はどちらも<b>任意</b>です。</p>
 
-  <div class="lb">EA名 / UID（自動取得に使用）</div>
+  <div class="sec">
+    <h3>自動取得<em>任意</em></h3>
+    <p>設定すると、ボタン1つで現在のRPを取り込めます。うまく取得できない場合は手入力のままで問題ありません。</p>
+  </div>
+
+  <div class="lb">EA名 / UID</div>
   <input class="ti" id="cfgName" placeholder="EA名 または UID（数字）" autocomplete="off">
   <div class="help">
     <a href="https://myaccount.ea.com/cp-ui/aboutme/index" target="_blank" rel="noopener">
@@ -389,7 +449,10 @@ canvas{display:block;width:100%;height:auto}
   <div class="pf" id="cfgPf">
     <button data-pf="PC">PC</button><button data-pf="PS4">PS</button><button data-pf="X1">Xbox</button>
   </div>
-  <div class="lb">目標ランク</div>
+  <div class="sec" style="margin-top:22px">
+    <h3>目標ランク<em>任意</em></h3>
+    <p>目標カードの「あと◯◯RP」と到達予想日の計算に使います。未設定なら次のディビジョンが目標になります。</p>
+  </div>
   <div class="chipRow" id="goalTierRow"></div>
   <div class="chipRow" id="goalDivRow"></div>
 
@@ -397,8 +460,8 @@ canvas{display:block;width:100%;height:auto}
 
   <div class="hr"></div>
 
-  <div class="ch"><b style="font-size:14px">バックアップ</b></div>
-  <p class="note" style="margin:0 0 8px">コードをコピーしておけば、別の端末でも復元できます</p>
+  <div class="sec"><h3>バックアップ</h3>
+    <p>コードをコピーしておけば、別の端末やブラウザでも記録を引き継げます。</p></div>
   <div class="code" id="bkCode">-</div>
   <div class="brow"><button class="btn ghost" id="copyCode">コードをコピー</button></div>
 
@@ -468,6 +531,10 @@ function render(){
   document.getElementById("empty").classList.toggle("hide", all>0);
   ["streak","kpi","goalCard"].forEach(id=>document.getElementById(id));
 
+  const first = all === 0;
+  document.getElementById("firstHint").classList.toggle("hide", !first);
+  document.getElementById("stepA").classList.toggle("hide", !first);
+  document.getElementById("stepB").classList.toggle("hide", !first);
   const hasAny = all>0;
   document.getElementById("hero").classList.toggle("hide", !hasAny);
   document.querySelectorAll(".c.goal, .kpi").forEach(el=>el.classList.toggle("hide", !hasAny));
@@ -477,11 +544,17 @@ function render(){
   });
   document.querySelector(".warn").classList.toggle("hide", !hasAny);
 
+  document.getElementById("fetchBtn").disabled = !DB.profile.name && all === 0;
   const p = DB.profile;
   document.getElementById("pdot").className = "dot" + (p.name ? "" : " off");
-  document.getElementById("pname").textContent = p.name
-    ? p.name + " / " + ({PC:"PC",PS4:"PS",X1:"Xbox"}[p.platform]||p.platform)
-    : "取得元は未設定";
+  const pn = document.getElementById("pname");
+  if (p.name){
+    pn.textContent = p.name + " / " + ({PC:"PC",PS4:"PS",X1:"Xbox"}[p.platform]||p.platform);
+    pn.className = "";
+  } else {
+    pn.textContent = all > 0 ? "毎回の入力は、自動取得にすると1タップになります" : "手入力だけでも使えます";
+    pn.className = all > 0 ? "nudge" : "";
+  }
 
 
   tabs();
@@ -503,7 +576,8 @@ function render(){
   const rpIn = document.getElementById("rp");
   if (rpIn.value === "" && !rpIn.dataset.touched){
     const latestKey = Object.keys(DB.records).sort().pop();
-    if (latestKey) setFromAbs(DB.records[latestKey].rp); else syncRank(false);
+    if (latestKey) setFromAbs(DB.records[latestKey].rp);
+    else { document.getElementById("selTier").value = ""; syncRank(false); }
   } else syncRank(false);
 
   // ---- ヒーロー ----
@@ -864,16 +938,35 @@ function divSpan(t, d){
 function buildRankSelects(){
   const st = document.getElementById("selTier"), sd = document.getElementById("selDiv");
   if (st.options.length) return;
+  const ph = document.createElement("option");
+  ph.value = ""; ph.textContent = "ランクを選択"; ph.disabled = true; st.appendChild(ph);
   DIV_TIERS.forEach(t=>{ const o = document.createElement("option"); o.value = t; o.textContent = t; st.appendChild(o); });
   [4,3,2,1].forEach(d=>{ const o = document.createElement("option"); o.value = d; o.textContent = ROMAN[d]; sd.appendChild(o); });
-  st.onchange = ()=>{ syncRank(true); };
-  sd.onchange = ()=>{ syncRank(true); };
+  st.onchange = ()=>{                      // ティアを選んだら次の入力へ送る
+    syncRank(true);
+    if (st.value === "マスター") document.getElementById("rp").focus();
+    else sd.focus();
+  };
+  sd.onchange = ()=>{ syncRank(true); document.getElementById("rp").focus(); };
 }
 /* 選択に合わせて上限と合計値を更新 */
 function syncRank(clamp){
   const st = document.getElementById("selTier"), sd = document.getElementById("selDiv");
   const rpIn = document.getElementById("rp");
   const t = st.value, isM = (t === "マスター");
+
+  // ランク未選択のうちは記録させない（数字だけ入れても意味が定まらないため）
+  const none = !t;
+  document.getElementById("saveBtn").disabled = none;
+  document.getElementById("rkSel").classList.toggle("wait", none);
+  rpIn.disabled = none;
+  if (none){
+    sd.style.display = "none";
+    document.querySelector(".rksel").style.gridTemplateColumns = "1fr";
+    document.getElementById("rpMax").textContent = "/ — RP";
+    document.getElementById("rpAbs").textContent = "—";
+    return;
+  }
   sd.style.display = isM ? "none" : "";
   document.querySelector(".rksel").style.gridTemplateColumns = isM ? "1fr" : "1.6fr 1fr";
   const d = isM ? 0 : +sd.value;
@@ -1249,7 +1342,12 @@ document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById
 document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-10); syncRank(true); };
 document.getElementById("saveBtn").onclick  = ()=> record(absRP(), "manual");
 document.getElementById("fetchBtn").onclick = autoFetch;
-document.getElementById("startBtn").onclick = ()=>{ buildRankSelects(); syncRank(false); document.getElementById("rp").focus(); };
+document.getElementById("startBtn").onclick = ()=>{
+  buildRankSelects(); syncRank(false);
+  const card = document.getElementById("inputCard");
+  card.scrollIntoView({ behavior:"smooth", block:"center" });
+  setTimeout(()=> document.getElementById("selTier").focus(), 380);
+};
 document.getElementById("restoreBtn").onclick = ()=>{ openSheet(); document.getElementById("bkIn").focus(); };
 document.getElementById("openCfg").onclick  = openSheet;
 document.getElementById("closeCfg").onclick = closeSheet;
@@ -1295,6 +1393,61 @@ document.getElementById("rp").addEventListener("focus", e=>{ e.target.select(); 
 let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(render, 180); });
 
 load();
+
+/* ---- アプリ内ブラウザの検出と警告 ----
+   X / Instagram / LINE などのアプリ内ブラウザは独自のストレージ領域を使うため、
+   ここで記録してもSafariには引き継がれず、アプリ側の都合で消えることがある */
+(function(){
+  const ua = navigator.userAgent || "";
+  const iOS = /iPhone|iPad|iPod/.test(ua);
+  const named = /Twitter|FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|TikTok|SnapChat/i.test(ua);
+  const androidWV = /Android/.test(ua) && /\bwv\b/.test(ua);
+  const iosWV = iOS && !/Safari/.test(ua) && !window.navigator.standalone;
+  const memoryOnly = (typeof STORE !== "undefined" && STORE !== window.localStorage);
+  const inApp = named || androidWV || iosWV;
+
+  if (!inApp && !memoryOnly) return;
+  if (sessionStorage && sessionStorage.getItem("awb_iab_hide")) return;
+
+  const el = document.getElementById("iabWarn");
+  const url = "https://apex-workbook.com/tracker.html";
+
+  if (memoryOnly && !inApp){
+    document.getElementById("iabMsg").innerHTML =
+      "このブラウザでは<b>記録を保存できません</b>。プライベートブラウズを解除するか、通常のブラウザで開いてください。";
+  }
+
+  const open = document.getElementById("iabOpen");
+  if (iOS){
+    open.href = "x-safari-" + url;                     // Safari で開き直す
+    document.getElementById("iabHint").textContent =
+      "開かない場合は、右上や右下の「…」から「Safariで開く」を選んでください。";
+  } else if (/Android/.test(ua)){
+    open.href = "intent://apex-workbook.com/tracker.html#Intent;scheme=https;end";
+    document.getElementById("iabHint").textContent =
+      "開かない場合は、右上の「⋮」から「ブラウザで開く」を選んでください。";
+  } else {
+    open.classList.add("hide");
+  }
+
+  document.getElementById("iabCopy").onclick = ()=>{
+    navigator.clipboard.writeText(url)
+      .then(()=> toast("URLをコピーしました。ブラウザに貼り付けてください"))
+      .catch(()=> toast("コピーできませんでした", true));
+  };
+  document.getElementById("iabClose").onclick = ()=>{
+    el.classList.add("hide");
+    try{ sessionStorage.setItem("awb_iab_hide","1"); }catch(e){}
+  };
+
+  // すでに記録がある場合は、引き継ぎ方も案内する
+  if (Object.keys(DB.records || {}).length){
+    document.getElementById("iabHint").textContent +=
+      "　すでに記録がある場合は「バックアップ」でコードをコピーし、移動先で読み込んでください。";
+  }
+  el.classList.remove("hide");
+})();
+
 document.fonts && document.fonts.ready.then(render);
 render();
 
