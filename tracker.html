@@ -153,6 +153,12 @@ canvas{display:block;width:100%;height:auto}
 .cal .cell{aspect-ratio:1;border-radius:3px;background:#1b2438}
 .cal .cell.future{background:#131a2a}
 .cal .cell.today{outline:1.5px solid var(--cyan)}
+.bkn{background:#07222b;border:1px solid #12525f;border-left:3px solid var(--cyan);
+  border-radius:3px;padding:12px 13px;margin-top:14px}
+.bkn b{display:block;font-size:12px;color:var(--cyan);margin-bottom:5px}
+.bkn p{font-size:11px;color:var(--muted);line-height:1.6}
+.bkn .brow{margin-top:11px}
+.bkn .btn{padding:9px 8px;font-size:12px}
 .warn{background:#1c1608;border:1px solid #5c4010;border-left:3px solid var(--amber);border-radius:3px;padding:10px 12px;margin-top:14px}
 .warn b{display:block;font-size:12px;color:var(--amber);margin-bottom:4px}
 .warn p{font-size:11px;color:var(--muted);line-height:1.6}
@@ -413,6 +419,17 @@ canvas{display:block;width:100%;height:auto}
     <div class="note">色が濃いほどRPの伸びが大きい日 / 濃いグレーは未記録</div>
   </div>
 
+  <!-- バックアップ促進 -->
+  <div class="bkn hide" id="bkNudge">
+    <b>記録をバックアップしておきましょう</b>
+    <p>この記録は端末内にだけ保存されています。iPhoneのSafariでは7日以上開かないと消えることがあります。
+       コードをコピーしてメモなどに貼っておけば、消えても元に戻せます。</p>
+    <div class="brow">
+      <button class="btn" id="bkNudgeGo">コードをコピー</button>
+      <button class="btn ghost sub" id="bkNudgeLater">あとで</button>
+    </div>
+  </div>
+
   <!-- 共有 -->
   <div class="brow" style="margin-top:14px">
     <button class="btn ghost" id="bkBtn">バックアップ</button>
@@ -551,6 +568,7 @@ function render(){
     el.classList.toggle("hide", !hasAny);
   });
   document.querySelector(".warn").classList.toggle("hide", !hasAny);
+  updateBkNudge(all);
 
   document.getElementById("fetchBtn").disabled = !DB.profile.name && all === 0;
   const p = DB.profile;
@@ -1086,6 +1104,9 @@ function loadCode(){
   if (!confirm(msg)) return;
   DB.records = Object.assign({}, DB.records, o.records);
   if (o.profile && o.profile.name && !DB.profile.name) DB.profile = o.profile;
+  const bkr = (DB.bk = DB.bk || {});
+  bkr.copiedAt = Date.now();
+  bkr.copiedCount = Object.keys(DB.records || {}).length;
   save(); render(); closeSheet();
   toast("読み込みました");
 }
@@ -1382,11 +1403,52 @@ document.getElementById("cfgSave").onclick = ()=>{
   ev("rp_settings_save", { has_name: DB.profile.name ? 1 : 0, has_goal: DB.profile.goal ? 1 : 0 });
   save(); render(); toast("保存しました");
 };
-document.getElementById("copyCode").onclick = ()=>{
-  navigator.clipboard.writeText(enc(DB))
-    .then(()=>toast("コードをコピーしました"))
+/* ---- バックアップ促進 ----
+   3日以上記録があり、まだコードを取っていない人に出す。
+   一度コピーしたら、そこから記録が10日ぶん増えるまでは二度と出さない（時間では戻さない）。
+   「あとで」を押したら7日は再表示しない。 */
+const BK_MIN_DAYS = 3, BK_NEW_DAYS = 10, BK_SNOOZE = 7*864e5;
+let bkShownLogged = false;
+
+function bkState(){ DB.bk = DB.bk || {}; return DB.bk; }
+function markBackedUp(){
+  const b = bkState();
+  b.copiedAt = Date.now();
+  b.copiedCount = Object.keys(DB.records || {}).length;
+  save(); updateBkNudge();
+}
+
+function updateBkNudge(count){
+  const el = document.getElementById("bkNudge");
+  if (!el) return;
+  const all = (typeof count === "number") ? count : Object.keys(DB.records || {}).length;
+  const b = bkState(), now = Date.now();
+  // コピー時点の記録日数を基準にする。基準が無い古いデータは「今が基準」とみなす
+  const base = (typeof b.copiedCount === "number") ? b.copiedCount : all;
+  const needsBackup = !b.copiedAt || (all - base) >= BK_NEW_DAYS;
+  const show = all >= BK_MIN_DAYS
+            && needsBackup
+            && (now - (b.snoozedAt || 0)) > BK_SNOOZE;
+  el.classList.toggle("hide", !show);
+  if (show && !bkShownLogged){
+    bkShownLogged = true;
+    ev("rp_backup_nudge_shown", { total_days: all });
+  }
+}
+
+function copyBackupCode(from){
+  return navigator.clipboard.writeText(enc(DB))
+    .then(()=>{ markBackedUp(); ev("rp_backup_copy", { from }); toast("コードをコピーしました"); })
     .catch(()=>toast("コピーできませんでした。長押しで選択してください", true));
+}
+
+document.getElementById("bkNudgeGo").onclick = ()=> copyBackupCode("nudge");
+document.getElementById("bkNudgeLater").onclick = ()=>{
+  bkState().snoozedAt = Date.now(); save(); updateBkNudge();
+  ev("rp_backup_nudge_snooze");
+  toast("設定の「バックアップ」からいつでもコピーできます");
 };
+document.getElementById("copyCode").onclick = ()=> copyBackupCode("sheet");
 document.getElementById("loadCode").onclick = loadCode;
 document.getElementById("bkBtn").onclick = openSheet;
 document.getElementById("shareBtn").onclick = ()=> openShare("line");
@@ -1397,7 +1459,7 @@ document.getElementById("shareModal").onclick = e => { if (e.target.id === "shar
 document.getElementById("wipe").onclick = ()=>{
   if (!confirm("すべての記録を削除します。取り消せません。よろしいですか？")) return;
   navigator.clipboard.writeText(enc(DB)).catch(()=>{});
-  DB.records = {}; save();
+  DB.records = {}; DB.bk = {}; save();
   try{ STORE.removeItem(SUM_KEY); }catch(e){}
   render(); closeSheet(); toast("削除しました");
 };
