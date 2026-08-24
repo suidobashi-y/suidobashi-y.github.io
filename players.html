@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-JT68JRBHLK');
+</script>
+<title>Apexの人口・同時接続数はいくつ？正確な数字が存在しない理由 | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legends の同時接続数（同接）とプレイヤー人口を、公開されているデータだけで整理。Steam同接の実数、全プラットフォーム合計が推定できない理由、「過疎った」説の検証まで。2026年8月時点の数値を掲載しています。">
+<link rel="canonical" href="https://apex-workbook.com/players.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="Apexの人口・同時接続数はいくつ？正確な数字が存在しない理由">
+<meta property="og:description" content="公開されている実数はSteamの同時接続数だけ。PS・Xbox・EA appを含む全体の人数が誰にも分からない理由と、それでも推定に使える手がかりを整理しました。">
+<meta property="og:url" content="https://apex-workbook.com/players.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<style>
+header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
+h1{font-family:'Chakra Petch';font-size:clamp(26px,6vw,38px);font-weight:700;line-height:1.25;margin:6px 0 10px}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);font-family:'Chakra Petch'}
+.meta .upd{color:var(--green)}
+section{margin-top:36px}
+h3{font-size:15px;margin:18px 0 6px;color:var(--text)}
+p{font-size:14px}
+.panel{margin-bottom:12px}
+/* 結論ボックス */
+.tldr{background:linear-gradient(180deg,rgba(0,229,255,.07),rgba(0,229,255,0));
+  border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:4px;padding:16px}
+.tldr ol{margin:0;padding-left:1.2em;font-size:14px}
+.tldr li{margin-bottom:7px}
+.tldr li:last-child{margin-bottom:0}
+/* ライブ数値 */
+.live{text-align:center;padding:22px 16px}
+.live .lbl{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--muted)}
+.live .big{font-family:'Chakra Petch';font-weight:700;font-size:clamp(38px,11vw,60px);
+  color:var(--cyan);line-height:1.1;margin:6px 0 2px;letter-spacing:.02em}
+.live .unit{font-size:14px;color:var(--muted);font-family:'Noto Sans JP'}
+.live .stamp{font-size:11px;color:var(--muted);margin-top:6px}
+.live .dot{display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--green);margin-right:5px;vertical-align:1px}
+.live.stale .dot{background:var(--muted)}
+/* テーブル */
+.vals{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
+.vals th,.vals td{padding:9px 6px;border-bottom:1px solid rgba(0,229,255,.1);text-align:left;vertical-align:top}
+.vals th{font-family:'Chakra Petch';font-size:11px;letter-spacing:.1em;color:var(--muted);font-weight:400}
+.vals .num{font-family:'Chakra Petch';font-size:17px;font-weight:700;color:var(--cyan);white-space:nowrap}
+.vals .num.dim{color:var(--muted)}
+/* プラットフォーム */
+.plat{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:4px}
+.plat div{border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:13px}
+.plat .vis{border-color:rgba(0,229,255,.45);color:var(--cyan)}
+.plat .hid{border-color:rgba(255,45,120,.35);color:var(--pink)}
+.plat small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+/* 壁リスト */
+.walls{list-style:none;counter-reset:w}
+.walls li{counter-increment:w;position:relative;padding:12px 0 12px 42px;border-bottom:1px solid rgba(0,229,255,.08)}
+.walls li:last-child{border-bottom:none}
+.walls li::before{content:counter(w);position:absolute;left:0;top:12px;width:26px;height:26px;
+  border:1px solid var(--amber);color:var(--amber);border-radius:50%;
+  font-family:'Chakra Petch';font-size:13px;display:flex;align-items:center;justify-content:center}
+.walls .t{font-weight:700;font-size:14px}
+.walls p{font-size:13px;color:#c4cbdd;margin-top:3px}
+/* FAQ */
+.faq{border-top:1px solid rgba(0,229,255,.1)}
+.faq details{border-bottom:1px solid rgba(0,229,255,.1)}
+.faq summary{cursor:pointer;padding:13px 0;font-size:14px;font-weight:700;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::before{content:"Q";font-family:'Chakra Petch';color:var(--cyan);margin-right:9px}
+.faq details[open] summary{color:var(--cyan)}
+.faq .a{font-size:13.5px;color:#c4cbdd;padding:0 0 14px 22px}
+.calc{margin-top:14px;border:1px dashed rgba(0,229,255,.28);border-radius:4px;
+  padding:12px 13px;background:rgba(0,229,255,.03)}
+.calc .ch{font-family:'Chakra Petch';font-size:11px;letter-spacing:.14em;color:var(--cyan)}
+.calc .cs{color:var(--muted);letter-spacing:.04em}
+.calc p{font-size:12px;color:#b6bed2;margin-top:8px;line-height:1.7}
+.ctbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:9px}
+.ctbl th,.ctbl td{padding:5px 4px;border-bottom:1px solid rgba(0,229,255,.09);text-align:right;white-space:nowrap}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl th{font-family:'Chakra Petch';font-size:10px;letter-spacing:.08em;color:var(--muted);font-weight:400}
+.ctbl td{font-family:'Chakra Petch'}
+.ctbl tr.hi td{color:var(--cyan)}
+.calc .out{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.calc .out div{flex:1 1 130px;border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:11px;color:var(--muted)}
+.calc .out b{display:block;font-family:'Chakra Petch';font-size:19px;color:var(--amber);margin-top:2px}
+.tag{font-family:'Chakra Petch';font-size:10px;letter-spacing:.15em;padding:2px 8px;border-radius:2px;vertical-align:2px;white-space:nowrap;display:inline-block}
+.vals.tiers td:first-child{white-space:nowrap}
+.factrow{border:1px solid var(--line);border-left:2px solid var(--muted);border-radius:3px;
+  padding:12px 14px;margin-top:10px}
+.factrow .fh{font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.factrow p{font-size:13px;color:#c4cbdd;margin-top:5px}
+.factrow .when{font-size:11px;color:var(--muted);margin-top:4px}
+.tag.official{background:rgba(45,255,168,.12);color:var(--green);border:1px solid rgba(45,255,168,.4)}
+.tag.est{background:rgba(255,176,32,.12);color:var(--amber);border:1px solid rgba(255,176,32,.4)}
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"FAQPage",
+  "mainEntity":[
+    {"@type":"Question","name":"Apexの同時接続数は今どれくらいですか？",
+     "acceptedAnswer":{"@type":"Answer","text":"公開されているのはSteamの同時接続数のみで、2026年8月時点で平日は約9万〜13万人、ピーク時は25万人前後です。これはSteamから起動したプレイヤーだけの数字で、PlayStation・Xbox・EA app・Nintendo Switch 2のプレイヤーは含まれていません。"}},
+    {"@type":"Question","name":"Apexの全プラットフォーム合計のプレイヤー数は分かりますか？",
+     "acceptedAnswer":{"@type":"Answer","text":"分かりません。EAもRespawnもプラットフォーム別の同時接続数を公表していないため、全体の実数を示す公開データは存在しません。「全プラットフォーム合計◯◯万人」と表示しているサイトの数字は、公表データではなく各サイト独自の推定値です。"}},
+    {"@type":"Question","name":"Apexは過疎ったのですか？",
+     "acceptedAnswer":{"@type":"Answer","text":"見る期間によって答えが変わります。歴代最高だった2023年2月の624,473人と比べるとSteam同接は半分以下ですが、直近12ヶ月の平均が約10万人なのに対し2026年8月は約12.8万人と、足元では平均を上回っています。長期では減少、短期では増加、というのが公開データから言えることです。"}},
+    {"@type":"Question","name":"Apexの登録プレイヤー数は何人ですか？",
+     "acceptedAnswer":{"@type":"Answer","text":"2024年10月時点で累計1億7000万人以上が登録しています。ただしこれは累計のアカウント数で、現在遊んでいる人数ではありません。月間アクティブユーザーは2000万〜2200万人という第三者推定がありますが、EAの公式発表ではありません。"}},
+    {"@type":"Question","name":"Nintendo Switch版はまだ人口に含まれますか？",
+     "acceptedAnswer":{"@type":"Answer","text":"初代Nintendo Switch版は2026年8月4日のシーズン30開始をもってサービスを終了したため、現在は含まれません。Nintendo Switch 2版は引き続き稼働しています。"}}
+  ]
+}
+</script>
+</head>
+<body>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./tracker.html">ランクワークブック</a>
+    <a href="./pickrate.html">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./players.html" class="on">プレイ人口</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Apex Workbook // Population</div>
+  <h1>Apexの人口と<span class="accent">同時接続数</span></h1>
+  <div class="meta">
+    <span>CROSS-SEASON</span><span>|</span>
+    <span class="upd">最終更新: 2026-08-24</span>
+  </div>
+</header>
+
+<section>
+  <h2>結論</h2>
+  <div class="tldr">
+    <ol>
+      <li><strong>公開されている実数はSteamの同時接続数だけ。</strong>2026年8月時点で、日中は9万人前後、ピーク帯で25万人前後を推移しています。</li>
+      <li><strong>PlayStation・Xbox・EA app・Switch 2の人数は公表されていない。</strong>したがってApex全体の正確なプレイ人数を知っている人は、EA社内を除いて存在しません。</li>
+      <li><strong>「全プラットフォーム合計◯◯万人」と書いているサイトの数字は推定値です。</strong>出所を確認すると、公表データではなく各サイト独自の計算であることがほとんどです。本サイトが公開データから試算した範囲は<strong>約17万〜65万人</strong>で、手法によって3.8倍の幅が出ます（<a href="#master">試算の詳細</a>）。</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>現在のSteam同時接続数</h2>
+  <div class="panel live stale" id="liveBox">
+    <div class="lbl">STEAM CONCURRENT PLAYERS</div>
+    <div class="big" id="liveNum" style="font-size:clamp(22px,6vw,34px)">90,000〜250,000</div>
+    <div class="unit">人が今Steamでプレイ中</div>
+    <div class="stamp" id="liveStamp"><span class="dot"></span>2026年8月の目安値を表示中</div>
+  </div>
+  <p class="note">Steamの公式API（GetNumberOfCurrentPlayers）から取得しています。取得できない場合は下の表の目安値をご参照ください。
+  日本時間の夜間（21〜24時）とシーズン開幕直後に最も高くなります。</p>
+
+  <h3>Steam同接の主要な数字</h3>
+  <div class="panel">
+    <table class="vals">
+      <tr><th>項目</th><th>数値</th><th>時点</th></tr>
+      <tr><td>直近24時間のピーク</td><td class="num">約274,500</td><td>2026年8月</td></tr>
+      <tr><td>直近30日の平均</td><td class="num">約120,000</td><td>2026年8月</td></tr>
+      <tr><td>過去12ヶ月の平均</td><td class="num dim">約102,400</td><td>2025年9月〜2026年8月</td></tr>
+      <tr><td>直近12ヶ月の最高月間ピーク</td><td class="num">325,457</td><td>2026年5月</td></tr>
+      <tr><td>歴代最高同時接続数</td><td class="num">624,473</td><td>2023年2月18日<br><span style="font-size:11px;color:var(--muted)">シーズン16開幕</span></td></tr>
+    </table>
+    <p class="note">いずれもSteam限定の数値です。出典はSteam公式APIおよびSteamDB。</p>
+  </div>
+</section>
+
+<section>
+  <h2>この数字に含まれないもの</h2>
+  <div class="panel">
+    <p>Apexは複数のプラットフォームで配信されていますが、同時接続数が公開されているのはSteamだけです。</p>
+    <div class="plat">
+      <div class="vis">Steam（PC）<small>数字が見える</small></div>
+      <div class="hid">EA app（PC）<small>非公開</small></div>
+      <div class="hid">PlayStation<small>非公開</small></div>
+      <div class="hid">Xbox<small>非公開</small></div>
+      <div class="hid">Nintendo Switch 2<small>非公開</small></div>
+    </div>
+    <p class="note">初代Nintendo Switch版は2026年8月4日のシーズン30開始をもってサービス終了しました。Switch 2版は継続しています。</p>
+    <p style="margin-top:14px">つまり<strong>見えているのはPCの一部だけ</strong>です。日本のプレイヤーはPlayStationの比率が世界平均より高いとされるため、日本の実感とSteamの数字はさらにずれます。</p>
+  </div>
+</section>
+
+<section>
+  <h2>「全プラットフォーム合計」を出しているサイトについて</h2>
+  <div class="panel">
+    <p>「Apexの現在のプレイヤー数は約62万人」といった全体値を表示しているサイトがありますが、<strong>その数字の出所は公表データではありません</strong>。
+    Steam同接に一定の倍率を掛けて算出しているケースが多く、倍率の根拠はサイトによって異なります。</p>
+    <p style="margin-top:12px">同様に、よく引用される次の2つの数字も性質が違うので注意が必要です。</p>
+    <div class="factrow">
+      <div class="fh">累計1億7000万人以上 <span class="tag official">公表</span></div>
+      <p>2019年の配信開始以降に作られたアカウントの累計です。<strong>今遊んでいる人数ではありません。</strong></p>
+      <div class="when">2024年10月時点 / EA発表</div>
+    </div>
+    <div class="factrow">
+      <div class="fh">月間アクティブ 2000〜2200万人 <span class="tag est">第三者推定</span></div>
+      <p>1ヶ月に1回以上プレイした人数の目安として引用される数字です。EAの公式発表ではありません。</p>
+      <div class="when">統計サイトによる推定値</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>推定を阻む3つの壁</h2>
+  <div class="panel">
+    <p>では、Steam同接から全体を逆算できないのでしょうか。理屈の上では可能ですが、精度を大きく損なう要因が3つあります。</p>
+    <ul class="walls">
+      <li>
+        <div class="t">プラットフォームごとにランク参加率が違う</div>
+        <p>推定の足がかりになるランクデータは、ランクマッチを遊んだ人しか反映されません。コンソール勢はカジュアル比率が高いとされ、ランク人口の比率がそのまま総人口の比率にはなりません。</p>
+      </li>
+      <li>
+        <div class="t">PCの内訳が割れない</div>
+        <p>各種統計サイトの区分は「PC / PlayStation / Xbox / Switch」で、PCの中でSteamとEA appは同一枠にまとめられています。Steam同接を基準にしたい場合、この分母がそもそも確定しません。</p>
+      </li>
+      <li>
+        <div class="t">グローバル集計と日本の構成比がずれる</div>
+        <p>公開されている統計はいずれも世界全体の集計です。日本はPlayStationの比率が高いため、世界の比率をそのまま当てはめると日本の実態からは外れます。</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2 id="master">それでも使える手がかり：マスター人数</h2>
+  <div class="panel">
+    <p>唯一、プラットフォーム間の規模を比べられる公開データが<strong>ランク上位帯の人数</strong>です。ここにはプレデターとマスターで決定的な違いがあります。</p>
+    <table class="vals tiers">
+      <tr><th>ティア</th><th>到達条件</th><th>母数の情報</th></tr>
+      <tr><td>プレデター</td><td>各プラットフォーム上位750人（<strong>枠が固定</strong>）</td><td>持たない</td></tr>
+      <tr><td>マスター</td><td>固定RPに到達した全員（<strong>枠の上限なし</strong>）</td><td><strong style="color:var(--cyan)">持つ</strong></td></tr>
+    </table>
+    <p style="margin-top:14px">プレデターは人口が2倍になっても750人のままなので、規模の情報を持ちません。
+    一方マスターは到達した人が全員入るため、<strong>人数がそのまま母数の大きさに連動します</strong>。
+    プラットフォーム別のマスター人数を比べれば、少なくともランク人口の比率は掴めます。</p>
+    <div class="calc">
+      <div class="ch">実際に試算してみた結果 <span class="cs">/ 2026年6月11日のスナップショット・Switch除く</span></div>
+
+      <table class="ctbl">
+        <tr><th>プラットフォーム</th><th>PC</th><th>PS</th><th>Xbox</th></tr>
+        <tr><td>マスター人数</td><td>15,727</td><td>4,935</td><td>1,718</td></tr>
+        <tr><td>ランク登録者数</td><td>219万</td><td>493万</td><td>465万</td></tr>
+        <tr class="hi"><td>マスター到達率</td><td>0.72%</td><td>0.10%</td><td>0.04%</td></tr>
+      </table>
+
+      <p>ここで問題が出ます。マスター人数で見るとPCが全体の<strong>70%</strong>ですが、ランク登録者数で見るとPCは<strong>18.6%</strong>しかいません。
+      <strong style="color:var(--amber)">PC勢のマスター到達率は、PS勢の約7倍・Xbox勢の約19倍</strong>。つまりマスター人数は「人口」ではなく「上振れしやすさ」を強く反映しています。</p>
+
+      <p>この2つの比率を使って、Steam同接12万人からそれぞれ全体を逆算するとこうなります。</p>
+
+      <div class="out">
+        <div>マスター人数から<b>約17万人</b></div>
+        <div>ランク登録者数から<b>約65万人</b></div>
+      </div>
+
+      <p>同じ公開データセットから出発して、<strong>3.8倍ちがう答え</strong>が出ます。前者は明らかに過小（コンソール勢がランク登録者の81%を占めるのに合計51,000人しかいない計算になる）、後者はPCをSteamだけで代表させている分だけ過大です。
+      <strong>正解はこの間のどこか</strong>としか言えず、これが「誰も知らない」の実態です。</p>
+
+      <p class="cs" style="font-size:11px">出典: Apex Ranked（既知ランクプレイヤー1,176万人のスナップショット）。同時接続数ではなくランクマッチ参加アカウントの集計で、PCにはSteamとEA appの両方が含まれます。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Apexは過疎ったのか</h2>
+  <div class="panel">
+    <p>公開データから言えることは、<strong>見る期間によって答えが逆になる</strong>ということです。</p>
+    <table class="vals">
+      <tr><th>比較</th><th>結果</th></tr>
+      <tr><td>2023年2月の歴代最高（624,473人）と比べて</td><td style="color:var(--pink)">半分以下に減少</td></tr>
+      <tr><td>直近12ヶ月の平均（約102,400人）と比べて</td><td style="color:var(--green)">2026年8月は約128,000人で上回る</td></tr>
+    </table>
+    <p style="margin-top:14px">「ピーク時から大きく減った」も「直近は伸びている」も、どちらも公開データに沿った正しい記述です。
+    どちらか一方だけを取り出すと印象が真逆になるため、この手の話題では<strong>比較の起点がどこか</strong>を確認するのが確実です。</p>
+    <p class="note">なお同接はシーズン開幕日に大きく跳ね、その後2〜3週間かけて下がるのが通常の推移です。開幕直後の数字を平常時と比べると、実態より良く見えます。</p>
+  </div>
+</section>
+
+<section>
+  <h2>よくある質問</h2>
+  <div class="panel faq">
+    <details>
+      <summary>Apexの同時接続数は今どれくらい？</summary>
+      <div class="a">公開されているのはSteam分のみで、2026年8月時点では日中9万人前後、ピーク帯で25万人前後です。上のライブ数値で現在値が確認できます。</div>
+    </details>
+    <details>
+      <summary>全プラットフォーム合計の人数は分かる？</summary>
+      <div class="a">分かりません。EA・Respawnはプラットフォーム別の同接を公表していないため、全体の実数を示す公開データが存在しません。</div>
+    </details>
+    <details>
+      <summary>Apexは過疎った？</summary>
+      <div class="a">2023年のピークと比べれば半分以下ですが、直近12ヶ月の平均と比べると足元はむしろ上回っています。長期では減少、短期では増加です。</div>
+    </details>
+    <details>
+      <summary>登録プレイヤー数は何人？</summary>
+      <div class="a">2024年10月時点で累計1億7000万人以上です。ただし累計アカウント数であり、現在のプレイ人口とは別物です。</div>
+    </details>
+    <details>
+      <summary>日本国内のプレイ人口は分かる？</summary>
+      <div class="a">国別の内訳も公表されていません。日本はPlayStation比率が高いとされるため、Steam同接から日本の人口を推し量るのは特に精度が落ちます。</div>
+    </details>
+    <details>
+      <summary>Nintendo Switch版はまだ含まれる？</summary>
+      <div class="a">初代Switch版は2026年8月4日のシーズン30開始でサービス終了しました。Switch 2版は継続しています。</div>
+    </details>
+  </div>
+</section>
+
+<section>
+  <h2>関連ページ</h2>
+  <div class="rel">
+    <a href="./rank.html">
+      <div class="k">Weekly</div>
+      <div class="n">ランク分布</div>
+      <div class="s">全体の人数は分からなくても、ランク帯の構成比は分かります。毎週月曜更新。</div>
+    </a>
+    <a href="./deviation.html">
+      <div class="k">Tool</div>
+      <div class="n">ランク偏差値</div>
+      <div class="s">今のRPが全プレイヤーの中で上位何％か。人数ではなく順位で自分の位置を確認できます。</div>
+    </a>
+    <a href="./pickrate.html">
+      <div class="k">Weekly</div>
+      <div class="n">レジェンド ピック率</div>
+      <div class="s">現環境で実際に使われているレジェンドの構成比。毎週水曜更新。</div>
+    </a>
+    <a href="./assist.html">
+      <div class="k">Spec</div>
+      <div class="n">エイムアシスト仕様</div>
+      <div class="s">アシスト値と発動条件の変更履歴。同じくシーズンをまたいで更新している資料です。</div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>本ページは公表データと第三者推定を区別して掲載しています。
+  タグの意味 — <span class="tag official">公表</span> EA・Steam等が公開 /
+  <span class="tag est">第三者推定</span> 統計サイト等の独自推定。</p>
+  <p class="disc">出典: Steam公式API（App ID 1172470）、SteamDB、EA公式発表、Apex Legends Status。</p>
+  <p class="disc">誤りの指摘・掲載に関するご連絡: X @apexwidgets</p>
+</footer>
+
+</div>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+
+(function(){
+  var API="https://apex-map-streamer.suidobashi-y.workers.dev";
+  var box=document.getElementById("liveBox"),
+      num=document.getElementById("liveNum"),
+      stamp=document.getElementById("liveStamp");
+
+  if(typeof fetch!=="function") return;
+
+  fetch(API+"/players",{cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(j){
+      var n=j.player_count!=null?j.player_count:j.count;
+      if(typeof n!=="number"||!isFinite(n)) throw 0;
+      box.classList.remove("stale");
+      num.textContent=n.toLocaleString("ja-JP");
+      num.style.fontSize="";
+      var t=new Date();
+      stamp.innerHTML='<span class="dot"></span>'+
+        t.toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})+
+        " 時点 / Steam公式APIより";
+    })
+    .catch(function(){ /* 目安値の初期表示のまま */ });
+})();
+</script>
+</body>
+</html>
