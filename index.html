@@ -127,22 +127,8 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
   .prlist .prl{font-size:11px}}
 
 /* RANK WORKBOOK：推移カード（記録3件以上で season カードと差し替え） */
-.card.rwchart{padding:13px 16px 12px}
-.card.rwchart::before{background:linear-gradient(90deg,var(--cyan),var(--pink));box-shadow:0 0 10px rgba(0,229,255,.5)}
-.rwhead{display:flex;align-items:flex-start;gap:10px}
-.rwhead .snm{font-family:'Chakra Petch';font-size:19px;font-weight:700;line-height:1.3;color:var(--text);white-space:nowrap;margin:2px 0 1px}
-.rwhead .snm b{color:var(--cyan);margin-right:2px}
-.rwhead .snm em{font-style:normal;font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;
   color:var(--bg);background:var(--cyan);padding:2px 7px;border-radius:2px;vertical-align:4px;margin-left:8px;font-weight:700}
-.rwsec{font-family:'Chakra Petch';font-size:12px;color:var(--muted)}
-.rwsec b{color:var(--green)} .rwsec .dim{margin-left:8px}
-.rwopen{margin-left:auto;flex:0 0 auto;font-family:'Chakra Petch';font-size:11px;color:var(--cyan);
   border:1px solid var(--line);border-radius:2px;padding:5px 9px;white-space:nowrap}
-.rwchart .sbar{margin:9px 0 2px}
-.rwchart canvas{display:block;width:100%;height:auto;margin-top:2px}
-.rwleg{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:6px}
-.rwleg i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:5px}
-.rwleg i.man{background:transparent;border:1.5px solid var(--amber)}
 
 /* RPトラッカーのカード */
 .card.rpcard{padding:9px 16px 8px}
@@ -152,6 +138,7 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 .card.rppromo::before{background:linear-gradient(90deg,var(--amber),rgba(255,176,32,.15));box-shadow:0 0 10px rgba(255,176,32,.5)}
 .card.rppromo .prim{font-size:15px;margin:1px 0 0}
 .card.rppromo .sec{font-size:11px;margin-top:1px}
+.rpspark{display:block;width:100%;height:auto;margin:6px 0 2px}
 .rprow{display:flex;align-items:baseline;gap:10px;margin-top:2px;flex-wrap:wrap}
 .rprow .tn{font-family:'Chakra Petch','Noto Sans JP';font-size:17px;font-weight:700;
   color:var(--tc,var(--cyan));text-shadow:0 0 14px var(--tc,transparent)}
@@ -255,20 +242,6 @@ a.lvmore:hover{border-style:solid}
 
 <!-- ファーストビュー（トップページはヒーローを持たず、ここから始まる） -->
 <div class="fv">
-  <a class="card rwchart wide" href="./tracker.html" id="rw-chart" style="display:none">
-    <div class="rwhead">
-      <div>
-        <div class="eyeb">SEASON PROGRESS</div>
-        <div class="snm"><b id="rw-no">—</b><span id="rw-name"></span><em id="rw-sp"></em></div>
-        <div class="rwsec"><span id="rw-left">—</span><span class="dim" id="rw-pct"></span></div>
-      </div>
-      <span class="rwopen">記録する →</span>
-    </div>
-    <div class="sbar"><i id="rw-bar"></i><s id="rw-split" title="スプリット2開始"></s><u id="rw-head"></u></div>
-    <canvas id="line" width="720" height="400"></canvas>
-    <div class="rwleg"><span><i></i>自動取得</span><span><i class="man"></i>手入力</span></div>
-  </a>
-
   <div class="card season slim wide" id="s29card">
     <div class="eyeb">SEASON PROGRESS</div>
     <div class="prim snm"><b id="s29-no">S29</b> <span id="s29-name">—</span><em id="s29-sp"></em></div>
@@ -293,6 +266,7 @@ a.lvmore:hover{border-style:solid}
       <span class="td" id="rp-today"></span>
       <span class="dv">偏差値 <b id="rp-dev">—</b><span id="rp-top"></span></span>
     </div>
+    <canvas class="rpspark" id="rp-spark" width="720" height="112" style="display:none"></canvas>
     <div class="foot"><span class="src" id="rp-date">—</span><span class="more" id="rp-more">記録する →</span></div>
   </a>
 
@@ -673,36 +647,7 @@ var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シー
 /* ===== RPトラッカーのウィジェット =====
    tracker.html が書き出す apexwb_rp_summary_v1 を読むだけ（計算はしない） */
 (function(){
-  /* 記録が3件以上あれば、シーズン進捗カードを RP推移カードに差し替える */
-  try{
-    loadDB();
-    if (recordCount() >= 3){
-      var d = withDelta(entries(currentSplit().id));
-      if (d.length >= 2){
-        var card = document.getElementById("rw-chart"),
-            old  = document.getElementById("s29card");
-        if (card && old){
-          old.style.display = "none";
-          card.style.display = "";
-          var head = function(){
-            seasonHead({ no:"rw-no", name:"rw-name", sp:"rw-sp", left:"rw-left", pct:"rw-pct" });
-            var st = new Date(RW_SEASON.start).getTime(),
-                en = new Date(RW_SEASON.end).getTime(),
-                sp = new Date(RW_SEASON.splitStart).getTime(),
-                pct = Math.max(0, Math.min(100, (Date.now()-st)/(en-st)*100));
-            document.getElementById("rw-bar").style.width = pct + "%";
-            document.getElementById("rw-head").style.left = pct + "%";
-            document.getElementById("rw-split").style.left = ((sp-st)/(en-st)*100) + "%";
-          };
-          head(); setInterval(head, 60000);
-          animateLine(d);
-          var rz; addEventListener("resize", function(){
-            clearTimeout(rz); rz = setTimeout(function(){ drawLine(d); }, 180);
-          });
-        }
-      }
-    }
-  }catch(e){}
+  try{ loadDB(); }catch(e){}
 
   var sum = null;
   try { sum = JSON.parse(localStorage.getItem("apexwb_rp_summary_v1") || "null"); } catch(e){}
@@ -716,12 +661,58 @@ var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シー
   if (!el) return;
   el.style.display = "";
 
-  /* 記録が3件以上あれば、マイランクをファーストビューの先頭へ移動する
-     （シーズン進捗の差し替えと同じ 3件 を基準にしている） */
+  /* 記録が3件以上あれば、マイランクを先頭へ移動し、小さな推移線を添える。
+     詳しい推移は tracker.html 側の本チャートに任せ、ここは補助線にとどめる */
   try{
     if (recordCount() >= 3){
       var fv = el.parentNode;
       if (fv && fv.firstElementChild !== el) fv.insertBefore(el, fv.firstElementChild);
+
+      var d = withDelta(entries(currentSplit().id));
+      if (d.length >= 2){
+        var cv = document.getElementById("rp-spark");
+        cv.style.display = "";
+        var draw = function(){
+          var pw = cv.parentElement.clientWidth;
+          if (!pw) return;                               // 非表示だと幅が測れない
+          var w = pw - 32, h = Math.round(w * 112 / 720);
+          var r = window.devicePixelRatio || 1;
+          cv.width = Math.round(w * r); cv.height = Math.round(h * r);
+          cv.style.width = w + "px"; cv.style.height = h + "px";
+          var x = cv.getContext("2d");
+          x.setTransform(r, 0, 0, r, 0, 0);              // scale() は累積するので毎回リセット
+          x.clearRect(0, 0, w, h);
+
+          var vs = d.map(function(e){ return e.rp; });
+          var lo = Math.min.apply(null, vs), hi = Math.max.apply(null, vs);
+          var pad = Math.max(120, (hi - lo) * 0.35);
+          lo -= pad; hi += pad;
+          var T = 6, B = 6;
+          var px = function(i){ return d.length === 1 ? w/2 : i * w / (d.length-1); };
+          var py = function(v){ return h - B - (v-lo)/(hi-lo) * (h-T-B); };
+
+          var path = function(){
+            x.beginPath();
+            d.forEach(function(e,i){ i ? x.lineTo(px(i), py(e.rp)) : x.moveTo(px(i), py(e.rp)); });
+          };
+          path();
+          x.lineTo(px(d.length-1), h); x.lineTo(px(0), h); x.closePath();
+          var gr = x.createLinearGradient(0, T, 0, h);
+          gr.addColorStop(0, "rgba(0,229,255,.20)"); gr.addColorStop(1, "rgba(0,229,255,0)");
+          x.fillStyle = gr; x.fill();
+
+          path();
+          x.strokeStyle = "#00e5ff"; x.lineWidth = 1.6; x.lineJoin = "round"; x.stroke();
+
+          var last = d.length - 1;
+          x.beginPath(); x.arc(px(last), py(d[last].rp), 3, 0, 7);
+          x.fillStyle = "#00e5ff"; x.fill();
+        };
+        draw();
+        var rz; addEventListener("resize", function(){
+          clearTimeout(rz); rz = setTimeout(draw, 180);
+        });
+      }
     }
   }catch(e){}
 
