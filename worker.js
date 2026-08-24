@@ -54,10 +54,11 @@ export default {
       if (url.pathname === "/discover")    return cors(await discover(env, url), origin);
       if (url.pathname === "/feed")        return cors(await feed(request, env, ctx), origin);
       if (url.pathname === "/rp")          return cors(await playerRp(env, url), origin);
+      if (url.pathname === "/players")     return cors(await steamPlayers(), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
         twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定"
       }), origin);
@@ -454,6 +455,28 @@ async function twitchToken(id, secret) {
   });
   if (!res.ok) throw new Error("twitch auth " + res.status);
   return (await res.json()).access_token;
+}
+
+/* ---------- Steam同時接続数（Apex / appid 1172470） ---------- */
+const STEAM_APPID = "1172470";
+
+async function steamPlayers() {
+  const upstream =
+    "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=" + STEAM_APPID;
+
+  // Cloudflare側で60秒キャッシュ。Steamへの実リクエストは毎分1回に抑える
+  const res = await fetch(upstream, { cf: { cacheTtl: 60, cacheEverything: true } });
+  if (!res.ok) return json({ error: "Steam API error: " + res.status }, 502);
+
+  const data = await res.json();
+  const n = data && data.response && data.response.player_count;
+  if (typeof n !== "number") return json({ error: "unexpected Steam response" }, 502);
+
+  return json({
+    player_count: n,
+    appid: STEAM_APPID,
+    fetched_at: new Date().toISOString()
+  }, 200, 60);
 }
 
 function json(obj, status = 200, maxAge = 0) {
