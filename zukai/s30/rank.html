@@ -11,8 +11,8 @@
   gtag('js', new Date());
   gtag('config', 'G-JT68JRBHLK');
 </script>
-<title>S30 ランク早見｜リセットの仕組みと分布 | APEX WORKBOOK</title>
-<meta name="description" content="Apex Legends シーズン30のランクリセットは表示ランクではなく隠しスキル値（MMR）を基準に決まります。同じダイヤでも落ち幅が違う理由、KDとの関係、ランク未プレイ時の扱いを整理。8/10時点の分布スナップショットも掲載。">
+<title>S30ランク分布の推移｜毎週の山の動きとリセットの仕組み | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legends シーズン30のランク分布を毎週月曜に計測し、26ディビジョンの形の変化を時系列で並べています。あわせて、リセットが表示ランクではなく隠しスキル値（MMR）を基準に決まる仕組みを整理。">
 <link rel="canonical" href="https://apex-workbook.com/zukai/s30/rank.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="APEX WORKBOOK">
@@ -62,20 +62,6 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .t-spec{background:var(--pink);color:#fff}
 .t-mis{border:1px solid var(--amber);color:var(--amber)}
 
-.snap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.snap .box{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
-.snap .k{font-size:12px;color:var(--muted)}
-.snap .v{font-family:'Chakra Petch';font-weight:700;font-size:32px;color:var(--amber);
-  line-height:1.2;margin-top:2px}
-.snap .s{font-size:12px;color:var(--muted);margin-top:2px}
-.bar{background:var(--panel);border:1px solid var(--line);border-radius:4px;
-  padding:14px 16px;margin-top:10px}
-.bar .row{display:flex;align-items:center;gap:10px;font-size:13px;margin-top:8px}
-.bar .lb{flex:0 0 90px;font-family:'Chakra Petch';font-size:11px;color:var(--muted)}
-.bar .tr{flex:1;height:9px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.bar .fl{height:100%;border-radius:2px}
-.bar .nm{flex:0 0 54px;text-align:right;font-family:'Chakra Petch';font-weight:700}
-
 .opin{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.35);
   border-radius:4px;padding:16px 18px;margin-top:18px}
 .opin .lb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--cyan)}
@@ -85,7 +71,6 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .note{font-size:13px;color:#c4cbdd;margin-top:10px}
 .note b{color:var(--text)}
 @media(max-width:520px){
-  .snap{grid-template-columns:1fr}
   .step .ttl{font-size:15.5px}
 }
 
@@ -165,7 +150,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 <div class="crumb"><a href="../index.html">図解</a> / SEASON 30 / ランク</div>
 <header>
   <div class="eyebrow">Zukai // Season 30</div>
-  <h1>リセットは、<span class="accent">表示ランク</span>を見ていない</h1>
+  <h1>山は毎週、<span class="accent">右へ動いている</span></h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
     <span class="upd">最終更新: 2026-08-31</span>
@@ -174,113 +159,8 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 </header>
 
 <section>
-  <p class="lead">「同じダイヤなのに、フレンドと落ち幅が違う」。
-  シーズンが変わるたびに出てくる話ですが、これは推測ではなく<b>公式に書かれている仕様</b>です。
-  シーズン25以降、リセット後の開始位置は表示ランクではなく<b>隠しスキル値（MMR）</b>を基準に決まります。
-  だから到達ランクが同じでも、落ちる位置は人によって変わります。</p>
-</section>
-
-<section>
-  <h2>リセットの仕組み</h2>
-  <div class="steps">
-
-    <div class="step key">
-      <div class="no">01</div>
-      <div class="bd">
-        <div class="ttl">開始ランクは隠しスキル値で決まる<span class="tag t-spec">公式仕様</span></div>
-        <div class="ds">表示ランクではなくMMR基準。S25から公式に明記されています。
-        リセットは「全員を一律で同じ位置に落とす」処理ではありません。</div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="no">02</div>
-      <div class="bd">
-        <div class="ttl">同じダイヤでも落ち幅が違う</div>
-        <div class="ds">フレンドとの差は不具合ではなく、設計どおりの挙動です。
-        01の帰結なので、待っていても揃うことはありません。</div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="no">03</div>
-      <div class="bd">
-        <div class="ttl">ランクとMMRは別物ではなく「別軸」</div>
-        <div class="ds">同じ試合から作られるので相関はあります。ただし一致はしません。
-        「ランクが高い＝MMRが高い」とは限らない、という程度の緩さです。</div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="no">04</div>
-      <div class="bd">
-        <div class="ttl">「KDが高いほど落ちる」は言い過ぎ<span class="tag t-mis">よくある誤解</span></div>
-        <div class="ds">MMRは順位・勝敗を含む複合値です。KD単体では決まりません。
-        キル数を抑えてもリセット位置を操作することはできません。</div>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="no">05</div>
-      <div class="bd">
-        <div class="ttl">ランクを触っていなくても数値は付いている</div>
-        <div class="ds">ランクMMRが無い場合は、アンランクトリオの値が使われます。
-        今シーズン初めてランクに入る人にも、すでに内部値は存在しています。</div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="opin">
-    <div class="lb">私見</div>
-    <div class="hd">深く下げたのは、登らせるためでは</div>
-    <p>ダイヤ到達後のランクは消化試合になりやすい。深く下げるほど、登り直す過程が長く残ります。
-    体感としての「今回は深い」は、ここから来ているのだと考えています。
-    ここは仕様に書かれていない、当サイトの推測です。</p>
-  </div>
-</section>
-
-<section>
-  <h2>S30の分布スナップショット</h2>
-  <p class="note" style="margin-top:0">開幕27日目・2026年8月31日時点。全ランク帯／全機種合算。</p>
-  <div class="snap">
-    <div class="box">
-      <div class="k">最も人が多いランク</div>
-      <div class="v">9.05<span style="font-size:18px">%</span></div>
-      <div class="s">プラチナ III</div>
-    </div>
-    <div class="box">
-      <div class="k">ちょうど真ん中</div>
-      <div class="v">P4</div>
-      <div class="s">プラチナ IV ／ 上位51.9%</div>
-    </div>
-  </div>
-
-  <div class="bar">
-    <div style="font-size:12px;color:var(--muted)">ダイヤ以上の割合</div>
-    <div class="row">
-      <div class="lb">S30 / 8.31</div>
-      <div class="tr"><div class="fl" style="width:55%;background:var(--cyan)"></div></div>
-      <div class="nm" style="color:var(--cyan)">21.1%</div>
-    </div>
-    <div class="row">
-      <div class="lb">S29 FINAL</div>
-      <div class="tr"><div class="fl" style="width:100%;background:rgba(255,255,255,.22)"></div></div>
-      <div class="nm" style="color:var(--muted)">38.2%</div>
-    </div>
-  </div>
-
-  <p class="note">シーズン終盤の38.2%に対して、開幕27日目は21.1%。
-  <b>2週間で6.1%から3倍以上</b>に増え、S29最終まで残り17ポイントまで来ました。
-  この数字はシーズンの進行とともにさらに戻っていきます。</p>
-  <p class="note">最新の分布と、自分が上位何％にいるかは
-  <a href="../../rank.html">ランク分布</a>と<a href="../../deviation.html">ランク偏差値</a>、日々の推移は<a href="../../tracker.html">ランクワークブック</a>で確認できます。</p>
-  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.08.31 取得</p>
-</section>
-
-<section>
   <h2>分布の推移</h2>
-  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月15日まで。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。</p>
+  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月15日まで。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。そもそもリセットで自分がどこに落とされるのかは<a href="#reset">下の記事</a>で扱っています。</p>
   <div class="rail">
 
     <div class="ent">
@@ -485,6 +365,75 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   今の壁は<b>ダイヤIIIからダイヤII</b>で、ここで人数が三分の一に落ちます。
   <b>プラチナ帯で普通に戦えているなら、ダイヤIIIまでは今期の射程圏内</b>と見てよさそうです。
   ただしこれはS30もS29と同程度にランクが緩む前提の目安で、RP調整が入れば到達率は変わります。</p>
+  <p class="note">自分が上位何％にいるかは<a href="../../rank.html">ランク分布</a>と<a href="../../deviation.html">ランク偏差値</a>、日々の推移は<a href="../../tracker.html">ランクワークブック</a>で確認できます。</p>
+  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.08.31 取得</p>
+</section>
+
+<section>
+  <p class="lead">「同じダイヤなのに、フレンドと落ち幅が違う」。
+  シーズンが変わるたびに出てくる話ですが、これは推測ではなく<b>公式に書かれている仕様</b>です。
+  シーズン25以降、リセット後の開始位置は表示ランクではなく<b>隠しスキル値（MMR）</b>を基準に決まります。
+  だから到達ランクが同じでも、落ちる位置は人によって変わります。</p>
+</section>
+
+<section>
+  <h2 id="reset">リセットの仕組み</h2>
+  <div class="steps">
+
+    <div class="step key">
+      <div class="no">01</div>
+      <div class="bd">
+        <div class="ttl">開始ランクは隠しスキル値で決まる<span class="tag t-spec">公式仕様</span></div>
+        <div class="ds">表示ランクではなくMMR基準。S25から公式に明記されています。
+        リセットは「全員を一律で同じ位置に落とす」処理ではありません。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="no">02</div>
+      <div class="bd">
+        <div class="ttl">同じダイヤでも落ち幅が違う</div>
+        <div class="ds">フレンドとの差は不具合ではなく、設計どおりの挙動です。
+        01の帰結なので、待っていても揃うことはありません。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="no">03</div>
+      <div class="bd">
+        <div class="ttl">ランクとMMRは別物ではなく「別軸」</div>
+        <div class="ds">同じ試合から作られるので相関はあります。ただし一致はしません。
+        「ランクが高い＝MMRが高い」とは限らない、という程度の緩さです。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="no">04</div>
+      <div class="bd">
+        <div class="ttl">「KDが高いほど落ちる」は言い過ぎ<span class="tag t-mis">よくある誤解</span></div>
+        <div class="ds">MMRは順位・勝敗を含む複合値です。KD単体では決まりません。
+        キル数を抑えてもリセット位置を操作することはできません。</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="no">05</div>
+      <div class="bd">
+        <div class="ttl">ランクを触っていなくても数値は付いている</div>
+        <div class="ds">ランクMMRが無い場合は、アンランクトリオの値が使われます。
+        今シーズン初めてランクに入る人にも、すでに内部値は存在しています。</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="opin">
+    <div class="lb">私見</div>
+    <div class="hd">深く下げたのは、登らせるためでは</div>
+    <p>ダイヤ到達後のランクは消化試合になりやすい。深く下げるほど、登り直す過程が長く残ります。
+    体感としての「今回は深い」は、ここから来ているのだと考えています。
+    ここは仕様に書かれていない、当サイトの推測です。</p>
+  </div>
 </section>
 
 <section>
