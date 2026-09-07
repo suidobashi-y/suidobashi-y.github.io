@@ -137,20 +137,20 @@ canvas{display:block;width:100%;height:auto}
 .legend{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cyan);margin-right:5px}
 .legend i.man{background:transparent;border:1.5px solid var(--amber)}
-.goal{padding:9px 12px 10px;margin-top:10px}
+.goal{padding:11px 14px 12px}
 .goal::before{background:linear-gradient(90deg,var(--gt,var(--amber)),rgba(255,255,255,.06));
   box-shadow:0 0 10px var(--gt,var(--amber))}
 .goal::after{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;
   background:radial-gradient(circle,var(--gt,var(--amber)) 0%,transparent 70%);opacity:.09;pointer-events:none}
-.goal .grow{display:flex;align-items:baseline;gap:6px}
-.goal .big{font-family:'Chakra Petch';font-size:19px;font-weight:700;color:var(--gt,var(--amber));line-height:1.1;text-shadow:0 0 16px var(--gt,transparent)}
-.goal .u{font-size:10px;color:var(--muted)}
-.goal .gto{margin-left:auto;font-size:11px;color:var(--gt,var(--text));font-weight:700}
-.goal a.set{font-size:10.5px;color:var(--cyan);cursor:pointer;margin-left:auto}
-.bar{height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:7px}
+.goal .grow{display:flex;align-items:baseline;gap:7px}
+.goal .big{font-family:'Chakra Petch';font-size:24px;font-weight:700;color:var(--gt,var(--amber));line-height:1.1;text-shadow:0 0 16px var(--gt,transparent)}
+.goal .u{font-size:11px;color:var(--muted)}
+.goal .gto{margin-left:auto;font-size:12px;color:var(--gt,var(--text));font-weight:700}
+.goal a.set{font-size:11px;color:var(--cyan);cursor:pointer;margin-left:auto}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:9px}
 .bar i{display:block;height:100%;background:var(--gt,var(--amber));box-shadow:0 0 8px var(--gt,var(--amber));
   transition:width .9s cubic-bezier(.22,1,.36,1)}
-.bl{display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:5px}
+.bl{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .cal .d{font-size:10px;color:var(--muted);text-align:center}
 .cal .cell{aspect-ratio:1;border-radius:3px;background:#1b2438;display:flex;align-items:center;justify-content:center;font-family:'Chakra Petch',system-ui,sans-serif;font-weight:700;letter-spacing:.01em;line-height:1}
@@ -259,7 +259,7 @@ canvas{display:block;width:100%;height:auto}
 .tw > .c:nth-of-type(2){animation-delay:.05s}
 .tw > .c:nth-of-type(3){animation-delay:.10s}
 .tw > .c:nth-of-type(4){animation-delay:.15s}
-.tw > .kpi{animation-delay:.08s}
+.tw > .kpi{animation-delay:.20s}
 @media(prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}
   .pulse{opacity:1}}
 </style>
@@ -338,12 +338,6 @@ canvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
-  <!-- 増減 -->
-  <div class="kpi" id="kpi">
-    <div><span>直近7日</span><b id="kWeek">-</b></div>
-    <div><span>スプリット合計</span><b id="kSplit">-</b></div>
-  </div>
-
   <!-- 推移 -->
   <div class="c cy">
     <button class="shareBtn" id="shareBtn" aria-label="スプリット成績を画像で共有" title="画像で共有">
@@ -355,6 +349,18 @@ canvas{display:block;width:100%;height:auto}
     <div class="tabs" id="splitTabs"></div>
     <canvas id="line" width="720" height="400" style="margin-top:12px"></canvas>
     <div class="legend"><span><i></i>自動取得</span><span><i class="man"></i>手入力</span></div>
+  </div>
+
+  <!-- 目標 -->
+  <div class="c goal" id="goalCard">
+    <div class="grow">
+      <span class="big" id="goalRp">-</span><span class="u">RP</span>
+      <span class="gto" id="goalTitle">-</span>
+    </div>
+    <div class="bar"><i id="goalBar" style="width:0%"></i></div>
+    <div class="bl"><span id="goalFrom">-</span><span id="goalPace">-</span></div>
+    <div class="note hide" id="tierWarn" style="font-size:10px;color:var(--amber)">
+      ティア表の値が実際と合っていません（表示はALSの値を優先しています）</div>
   </div>
 
   <!-- 入力 -->
@@ -408,24 +414,18 @@ canvas{display:block;width:100%;height:auto}
 
   </div>
 
-  <!-- 目標 -->
-  <div class="c goal" id="goalCard">
-    <div class="grow">
-      <span class="big" id="goalRp">-</span><span class="u">RP</span>
-      <span class="gto" id="goalTitle">-</span>
-    </div>
-    <div class="bar"><i id="goalBar" style="width:0%"></i></div>
-    <div class="bl"><span id="goalFrom">-</span><span id="goalPace">-</span></div>
-    <div class="note hide" id="tierWarn" style="font-size:10px;color:var(--amber)">
-      ティア表の値が実際と合っていません（表示はALSの値を優先しています）</div>
-  </div>
-
   <!-- カレンダー -->
   <div class="c cy">
     <div class="ch"><b>記録カレンダー</b><span>直近3週間</span></div>
     <div class="cal" id="calHead"></div>
     <div class="cal" id="cal" style="margin-top:6px"></div>
     <div class="note">色が濃いほどRPの伸びが大きい日 / +10RP以上はその日の増加量を表示 / 濃いグレーは未記録</div>
+  </div>
+
+  <!-- 増減 -->
+  <div class="kpi" id="kpi">
+    <div><span>直近7日</span><b id="kWeek">-</b></div>
+    <div><span>スプリット合計</span><b id="kSplit">-</b></div>
   </div>
 
   <!-- バックアップ促進 -->
