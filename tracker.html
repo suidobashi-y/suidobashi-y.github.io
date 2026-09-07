@@ -107,6 +107,9 @@
   font-family:'Chakra Petch';font-weight:700;font-size:30px;letter-spacing:.02em;-moz-appearance:textfield}
 .rpbox input::-webkit-outer-spin-button,.rpbox input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .rpbox .u{font-size:12px;color:var(--muted)}
+.msum{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 11px;margin-top:10px}
+.msum span{font-size:12px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msum a{font-size:11px;color:var(--cyan);cursor:pointer;white-space:nowrap}
 .stp{display:flex;gap:6px}
 .stp button{width:38px;height:38px;background:#101a2c;border:1px solid var(--line);border-radius:2px;
   color:var(--cyan);font-size:17px;cursor:pointer;font-family:'Chakra Petch'}
@@ -367,18 +370,24 @@ canvas{display:block;width:100%;height:auto}
   <div class="c cy" id="inputCard">
     <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
     <p class="firsthint hide" id="firstHint">ゲーム内 → ランクリーグ で、いまのティアと「◯◯RP / 750RP」を確認してください</p>
-    <div class="stepl hide" id="stepA"><i>1</i>いまのランクを選ぶ</div>
-    <div class="rksel" id="rkSel">
-      <select id="selTier" aria-label="ティア"></select>
-      <select id="selDiv" aria-label="ディビジョン"></select>
+    <div class="msum hide" id="manualSum">
+      <span id="manualSumTxt">—</span>
+      <a id="manualTog" role="button" tabindex="0">手入力</a>
     </div>
-    <div class="stepl hide" id="stepB"><i>2</i>ディビジョン内のRPを入れる</div>
-    <div class="rpbox">
-      <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="ディビジョン内のRP">
-      <span class="u" id="rpMax">/ 750 RP</span>
-      <div class="stp"><button id="minus" aria-label="10減らす">−</button><button id="plus" aria-label="10増やす">＋</button></div>
+    <div id="manualBox">
+      <div class="stepl hide" id="stepA"><i>1</i>いまのランクを選ぶ</div>
+      <div class="rksel" id="rkSel">
+        <select id="selTier" aria-label="ティア"></select>
+        <select id="selDiv" aria-label="ディビジョン"></select>
+      </div>
+      <div class="stepl hide" id="stepB"><i>2</i>ディビジョン内のRPを入れる</div>
+      <div class="rpbox">
+        <input id="rp" type="number" inputmode="numeric" placeholder="0" aria-label="ディビジョン内のRP">
+        <span class="u" id="rpMax">/ 750 RP</span>
+        <div class="stp"><button id="minus" aria-label="10減らす">−</button><button id="plus" aria-label="10増やす">＋</button></div>
+      </div>
+      <div class="absl"><span>ゲーム画面の「◯◯RP / 750RP」をそのまま入力</span><b id="rpAbs">—</b></div>
     </div>
-    <div class="absl"><span>ゲーム画面の「◯◯RP / 750RP」をそのまま入力</span><b id="rpAbs">—</b></div>
     <div class="brow">
       <button class="btn sub" id="fetchBtn">自動取得</button>
       <button class="btn" id="saveBtn">記録する</button>
@@ -419,7 +428,6 @@ canvas{display:block;width:100%;height:auto}
     <div class="ch"><b>記録カレンダー</b><span>直近3週間</span></div>
     <div class="cal" id="calHead"></div>
     <div class="cal" id="cal" style="margin-top:6px"></div>
-    <div class="note">色が濃いほどRPの伸びが大きい日 / +10RP以上はその日の増加量を表示 / 濃いグレーは未記録</div>
   </div>
 
   <!-- 増減 -->
@@ -958,12 +966,13 @@ function calendar(){
       const v = map[day];
       const a = v===null||v===undefined ? .45 : Math.min(1, Math.max(.3, v/mx));
       c.style.background = `rgba(0,229,255,${a.toFixed(2)})`;
-      // +10RP以上の日は増加量を出す
-      if (typeof v === "number" && v >= 10){
-        const txt = "+" + v;
+      // 増減が0でない日は、その日の増減を出す（マイナスも表示）
+      if (typeof v === "number" && v !== 0){
+        const txt = (v > 0 ? "+" : "") + v;
         c.textContent = txt;
         c.style.fontSize = (txt.length <= 3 ? 10.5 : txt.length === 4 ? 9.5 : txt.length === 5 ? 8 : 7) + "px";
-        c.style.color = a >= .55 ? "#06121c" : "rgba(196,242,255,.92)";
+        c.style.color = v < 0 ? "var(--pink)"
+                      : a >= .55 ? "#06121c" : "rgba(196,242,255,.92)";
       }
     }
     body.appendChild(c);
@@ -1032,6 +1041,7 @@ function syncRank(clamp){
     document.querySelector(".rksel").style.gridTemplateColumns = "1fr";
     document.getElementById("rpMax").textContent = "/ — RP";
     document.getElementById("rpAbs").textContent = "—";
+    updateManual();
     return;
   }
   sd.style.display = isM ? "none" : "";
@@ -1044,7 +1054,30 @@ function syncRank(clamp){
   if (!Number.isFinite(v) || v < 0) v = 0;
   if (!isM && span && clamp && v > span) { v = span; rpIn.value = v; }
   document.getElementById("rpAbs").textContent = "合計 " + fmt(absRP()) + " RP";
+  updateManual();
 }
+/* 自動取得が使えている人は、手入力の欄をたたんでおく */
+let manualOpen = false;
+function autoReady(){
+  const p = DB.profile || {};
+  return !!(p.name && p.autoOk);
+}
+function updateManual(){
+  const sum = document.getElementById("manualSum"), box = document.getElementById("manualBox");
+  if (!sum || !box) return;
+  const ready = autoReady();
+  sum.classList.toggle("hide", !ready);
+  box.classList.toggle("hide", ready && !manualOpen);
+  document.getElementById("manualTog").textContent = manualOpen ? "閉じる" : "手入力";
+  if (!ready) return;
+  const t = document.getElementById("selTier").value;
+  const el = document.getElementById("manualSumTxt");
+  if (!t){ el.textContent = "自動取得で記録します"; return; }
+  const isM = (t === "マスター");
+  const d = isM ? "" : " " + ROMAN[+document.getElementById("selDiv").value];
+  el.textContent = t + d + " ・ 合計 " + fmt(absRP()) + " RP";
+}
+
 function absRP(){
   const t = document.getElementById("selTier").value;
   const isM = (t === "マスター");
@@ -1114,6 +1147,8 @@ async function autoFetch(){
     if (j.rp === null || j.rp === undefined) throw new Error("ランク情報がありません");
     setFromAbs(j.rp);
     lastFetch = { rp: j.rp, tier: j.tier, div: j.div };
+    if (!DB.profile.autoOk){ DB.profile.autoOk = true; saveLocal(); }
+    manualOpen = false; updateManual();
     ev("rp_fetch", { result: "ok", platform: p.platform });
     toast(fmt(j.rp) + " RP を取得しました。確定は「記録する」");
     cooling = true; setTimeout(()=>cooling=false, 60000);
@@ -1725,6 +1760,14 @@ document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById
 document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-10); syncRank(true); };
 document.getElementById("saveBtn").onclick  = ()=> record(absRP(), "manual");
 document.getElementById("fetchBtn").onclick = autoFetch;
+(function bindManualTog(){
+  const a = document.getElementById("manualTog");
+  if (!a) return;
+  const go = ()=>{ manualOpen = !manualOpen; updateManual();
+    if (manualOpen) setTimeout(()=> document.getElementById("rp").focus(), 60); };
+  a.onclick = go;
+  a.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } };
+})();
 document.getElementById("startBtn").onclick = ()=>{
   buildRankSelects(); syncRank(false);
   const card = document.getElementById("inputCard");
