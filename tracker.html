@@ -97,8 +97,11 @@
 @keyframes sel{0%,100%{box-shadow:0 0 0 rgba(0,229,255,0)}50%{box-shadow:0 0 12px rgba(0,229,255,.55)}}
 .firsthint{font-size:10.5px;line-height:1.7;color:var(--amber);background:#1c1608;
   border-radius:3px;padding:8px 10px;margin-bottom:10px}
-.absl{margin-top:9px;font-size:10.5px;color:var(--muted)}
-.absl b{font-family:'Chakra Petch';font-size:13px;color:var(--text)}
+.absl{margin-top:9px;font-size:10.5px;color:var(--muted);
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.absl > span{min-width:0;line-height:1.5}
+.absl b{font-family:'Chakra Petch';font-size:13px;color:var(--text);
+  white-space:nowrap;flex:none}
 .rpbox{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1.5px solid #007a8c;border-radius:3px;padding:6px 8px 6px 14px}
 .rpbox input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--cyan);
   font-family:'Chakra Petch';font-weight:700;font-size:30px;letter-spacing:.02em;-moz-appearance:textfield}
@@ -360,7 +363,7 @@ canvas{display:block;width:100%;height:auto}
       <span class="u" id="rpMax">/ 750 RP</span>
       <div class="stp"><button id="minus" aria-label="10減らす">−</button><button id="plus" aria-label="10増やす">＋</button></div>
     </div>
-    <div class="absl">ゲーム画面の「◯◯RP / 750RP」をそのまま入力　<b id="rpAbs">—</b></div>
+    <div class="absl"><span>ゲーム画面の「◯◯RP / 750RP」をそのまま入力</span><b id="rpAbs">—</b></div>
     <div class="brow">
       <button class="btn sub" id="fetchBtn">自動取得</button>
       <button class="btn" id="saveBtn">記録する</button>
@@ -436,7 +439,8 @@ canvas{display:block;width:100%;height:auto}
   <!-- 復元キーのうながし（サーバー保存が効いているとき） -->
   <div class="bkn hide" id="keyNudge">
     <b>復元キーを控えておきましょう</b>
-    <p>記録はサーバーにも保存されています。端末の記録が消えても、この12文字を入れれば元に戻せます。</p>
+    <p>記録はサーバーにも保存されています。端末の記録が消えても、この12文字を入れれば元に戻せます。<br>
+       下のボタンでコピーして、メモなどに貼っておいてください（人には見せないで）。</p>
     <div class="rkey" id="keyNudgeCode" style="margin:8px 0">-</div>
     <div class="brow">
       <button class="btn" id="keyNudgeGo">キーをコピー</button>
@@ -502,7 +506,8 @@ canvas{display:block;width:100%;height:auto}
   <div class="sec"><h3>記録の引き継ぎ</h3>
     <p>記録はこの端末とサーバーの両方に保存されます。端末の記録が消えたときや、別の端末で続きを記録したいときは、下の<b>復元キー</b>を入れれば元に戻せます。ログインは不要です。</p></div>
   <div class="lb">復元キー（控えておいてください）</div>
-  <div class="rkey" id="syncKeyBox">-</div>
+  <div class="rkey" id="syncKeyBox" style="cursor:pointer;user-select:none">-</div>
+  <div class="note" id="syncKeyHint" style="margin-top:6px">タップして全体を表示</div>
   <div class="brow"><button class="btn ghost" id="copyKey">キーをコピー</button></div>
   <div class="note" id="syncState" style="margin-top:8px">接続を確認しています…</div>
 
@@ -510,7 +515,8 @@ canvas{display:block;width:100%;height:auto}
   <input class="ti" id="keyIn" placeholder="XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"
          style="text-transform:uppercase;font-family:'Chakra Petch';letter-spacing:.1em">
   <div class="brow"><button class="btn" id="keyGo">このキーで復元</button></div>
-  <div class="note" style="margin-top:8px">サーバーに預けるのはRP・日付・ランク・目標だけです。EA名やUIDは送信しません。</div>
+  <div class="note" style="margin-top:8px">サーバーに預けるのはRP・日付・ランク・目標だけです。EA名やUIDは送信しません。<br>
+    キーを知っている人は誰でもこの記録を読めます。人に見せたり、写り込んだスクショを公開したりしないでください。</div>
 
   <div class="hr"></div>
 
@@ -1146,6 +1152,11 @@ function normSyncKey(v){
   return /^[0-9A-HJKMNP-TV-Z]{12}$/.test(t) ? t : null;
 }
 const fmtKey = k => k ? k.slice(0,4) + "-" + k.slice(4,8) + "-" + k.slice(8,12) : "-";
+/* キーを知っていれば誰でもその記録を読める。
+   トップ画面に出るので、スクショに写り込まないよう既定では伏せ字にする。
+   コピーは伏せ字のままでもできる。 */
+let keyShown = false;
+const maskKey = k => k ? k.slice(0,4) + "-\u2022\u2022\u2022\u2022-\u2022\u2022\u2022\u2022" : "-";
 
 function initSyncKey(){
   let k = null;
@@ -1238,7 +1249,7 @@ async function syncPushNow(){
     if (!r.ok || !j.ok) throw new Error(j.error || ("http " + r.status));
     st.pushedAt = days.length ? Math.max.apply(null, days.map(d => d.at)) : Date.now();
     st.profAt   = st.profAt || Date.now();
-    SYNC.ok = true; SYNC.err = null; SYNC.last = st.pushedAt;
+    SYNC.ok = true; SYNC.err = null; SYNC.last = Date.now();
     saveLocal();
     ev("rp_sync_push", { days: days.length });
   }catch(e){
@@ -1341,9 +1352,11 @@ async function restoreByKey(){
 function paintSync(force){
   const el = document.getElementById("syncState");
   const kc = document.getElementById("syncKeyBox");
-  if (kc) kc.textContent = fmtKey(SYNC.key);
+  if (kc) kc.textContent = keyShown ? fmtKey(SYNC.key) : maskKey(SYNC.key);
+  const kh = document.getElementById("syncKeyHint");
+  if (kh) kh.textContent = keyShown ? "タップすると隠します" : "タップして全体を表示（コピーは伏せ字のままでもできます）";
   const kn = document.getElementById("keyNudgeCode");
-  if (kn) kn.textContent = fmtKey(SYNC.key);
+  if (kn) kn.textContent = maskKey(SYNC.key);   // トップ画面に出るので常に伏せ字
   if (!el) return;
   if (force){ el.textContent = force; return; }
   if (SYNC.ok){
@@ -1681,6 +1694,7 @@ function openSheet(){
   paintGoal();
   document.getElementById("bkCode").textContent = enc(DB);
   document.getElementById("keyIn").value = "";
+  keyShown = false;
   paintSync();
   document.getElementById("sheet").classList.add("open");
 }
@@ -1777,6 +1791,7 @@ document.getElementById("bkNudgeLater").onclick = ()=>{
   ev("rp_backup_nudge_snooze");
   toast("設定の「バックアップ」からいつでもコピーできます");
 };
+document.getElementById("syncKeyBox").onclick   = ()=>{ keyShown = !keyShown; paintSync(); };
 document.getElementById("copyKey").onclick      = ()=> copySyncKey("sheet");
 document.getElementById("keyGo").onclick        = restoreByKey;
 document.getElementById("keyNudgeGo").onclick   = ()=> copySyncKey("nudge");
