@@ -9,3 +9,18 @@ compatibility_date = "2026-08-05"
 
 # シークレット（APEX_API_KEY / TWITCH_CLIENT_ID / TWITCH_CLIENT_SECRET）は
 # Cloudflare 側に保存されたままで、deploy しても消えません。ここに書く必要はありません。
+
+# ===== D1（RANK WORKBOOK のサーバー保存） =====
+# ★ database_id は Cloudflare の管理画面で D1 を作ると発行される UUID です。
+#    Workers & Pages → D1 → Create → 名前は apexwb
+#    作成後の画面に出る Database ID をそのまま下に貼ってください。
+#
+#    ここを埋めずに push すると deploy が失敗します。
+#    先に worker.js と tracker.html だけを上げておけば、
+#    サーバー保存が無効なまま今までどおり動きます（トラッカーは端末内保存のまま）。
+#
+#    テーブルは Worker が初回アクセス時に自分で作るので、SQL を流す必要はありません。
+[[d1_databases]]
+binding = "RPDB"
+database_name = "apexwb"
+database_id = "ここに Database ID を貼る"

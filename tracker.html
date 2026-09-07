@@ -164,6 +164,8 @@ canvas{display:block;width:100%;height:auto}
 .warn p{font-size:11px;color:var(--muted);line-height:1.6}
 .code{background:#08101a;border:1px solid var(--line);border-radius:3px;padding:9px 10px;
   font-family:'Chakra Petch';font-size:11px;color:#78c8dc;word-break:break-all;max-height:56px;overflow:hidden}
+.rkey{background:#08101a;border:1px solid #12525f;border-radius:3px;padding:13px 10px;text-align:center;
+  font-family:'Chakra Petch';font-weight:700;font-size:19px;letter-spacing:.14em;color:var(--cyan)}
 .ta{width:100%;background:var(--panel2);border:1px solid #28344c;border-radius:3px;color:var(--text);
   padding:9px 10px;font-family:'Chakra Petch';font-size:11px;resize:vertical;min-height:52px;outline:none}
 .sheet{position:fixed;inset:0;z-index:80;background:rgba(4,6,14,.78);display:none}
@@ -313,7 +315,7 @@ canvas{display:block;width:100%;height:auto}
       <p class="feat2">連続記録・スプリット合計・次ティアまでの残りRPは、記録すると自動で出ます</p>
     </div>
     <div class="brow"><button class="btn" id="startBtn">入力をはじめる</button></div>
-    <div class="brow"><button class="btn ghost" id="restoreBtn">バックアップコードから復元</button></div>
+    <div class="brow"><button class="btn ghost" id="restoreBtn">前の記録を復元する</button></div>
   </div>
 
   <!-- 現在ランク（ヒーロー） -->
@@ -431,6 +433,17 @@ canvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
+  <!-- 復元キーのうながし（サーバー保存が効いているとき） -->
+  <div class="bkn hide" id="keyNudge">
+    <b>復元キーを控えておきましょう</b>
+    <p>記録はサーバーにも保存されています。端末の記録が消えても、この12文字を入れれば元に戻せます。</p>
+    <div class="rkey" id="keyNudgeCode" style="margin:8px 0">-</div>
+    <div class="brow">
+      <button class="btn" id="keyNudgeGo">キーをコピー</button>
+      <button class="btn ghost sub" id="keyNudgeLater">あとで</button>
+    </div>
+  </div>
+
   <!-- 共有 -->
   <div class="brow" style="margin-top:14px">
     <button class="btn ghost" id="bkBtn">バックアップ</button>
@@ -448,7 +461,7 @@ canvas{display:block;width:100%;height:auto}
     <p>iPhoneのSafariの仕様です。ときどき「バックアップ」からコードをコピーして、メモなどに残しておいてください。</p>
   </div>
 
-  <div class="note" style="margin-top:18px">記録はこの端末内にのみ保存されます（ログイン不要）</div>
+  <div class="note" id="footNote" style="margin-top:18px">記録はこの端末内に保存されます（ログイン不要）</div>
 </div>
 
 <!-- 設定シート -->
@@ -486,8 +499,23 @@ canvas{display:block;width:100%;height:auto}
 
   <div class="hr"></div>
 
-  <div class="sec"><h3>バックアップ</h3>
-    <p>コードをコピーしておけば、別の端末やブラウザでも記録を引き継げます。</p></div>
+  <div class="sec"><h3>記録の引き継ぎ</h3>
+    <p>記録はこの端末とサーバーの両方に保存されます。端末の記録が消えたときや、別の端末で続きを記録したいときは、下の<b>復元キー</b>を入れれば元に戻せます。ログインは不要です。</p></div>
+  <div class="lb">復元キー（控えておいてください）</div>
+  <div class="rkey" id="syncKeyBox">-</div>
+  <div class="brow"><button class="btn ghost" id="copyKey">キーをコピー</button></div>
+  <div class="note" id="syncState" style="margin-top:8px">接続を確認しています…</div>
+
+  <div class="lb">キーを入れて復元</div>
+  <input class="ti" id="keyIn" placeholder="XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"
+         style="text-transform:uppercase;font-family:'Chakra Petch';letter-spacing:.1em">
+  <div class="brow"><button class="btn" id="keyGo">このキーで復元</button></div>
+  <div class="note" style="margin-top:8px">サーバーに預けるのはRP・日付・ランク・目標だけです。EA名やUIDは送信しません。</div>
+
+  <div class="hr"></div>
+
+  <div class="sec"><h3>バックアップコード<em>任意</em></h3>
+    <p>サーバーを使わず、記録そのものを文字列で持ち出す方法です。復元キーを使うなら、こちらは必須ではありません。</p></div>
   <div class="code" id="bkCode">-</div>
   <div class="brow"><button class="btn ghost" id="copyCode">コードをコピー</button></div>
 
@@ -544,10 +572,11 @@ function load(){
     if (raw) DB = Object.assign(DB, JSON.parse(raw));
   }catch(e){ toast("保存データを読めませんでした", true); }
 }
-function save(){
-  try{ STORE.setItem(KEY, JSON.stringify(DB)); }
-  catch(e){ toast("保存できませんでした。空き容量を確認してください", true); }
+function saveLocal(){
+  try{ STORE.setItem(KEY, JSON.stringify(DB)); return true; }
+  catch(e){ toast("保存できませんでした。空き容量を確認してください", true); return false; }
 }
+function save(){ saveLocal(); syncPush(); }
 
 /* ---- 描画 ---- */
 function render(){
@@ -1037,6 +1066,7 @@ function record(rp, src){
   rec.log = (before && Array.isArray(before.log)) ? before.log.slice() : [];
   rec.log.push({ rp: rec.rp, src, at: Date.now() });
   if (rec.log.length > 30) rec.log = rec.log.slice(-30);
+  rec.at = Date.now();
   DB.records[t] = rec;
   save();
   const sp = splitOf(t);
@@ -1084,7 +1114,283 @@ async function autoFetch(){
   }
 }
 
-/* ---- バックアップ ---- */
+
+/* =========================================================
+   サーバー保存（復元キー方式）
+
+   Safari の ITP は「7日開かないと localStorage を消す」ため、
+   端末内だけの保存では記録が失われる。ログインを増やさずに直すため、
+   12文字の復元キーを1つ発行し、それを鍵にして Worker + D1 に預ける。
+
+   キー自体も localStorage に置くので ITP で一緒に消える。
+   だから「キーを控えてもらう」ところまでが仕組みの一部になる。
+   （長いバックアップコードより、12文字の方が実際に控えてもらえる）
+
+   EA名 / UID はサーバーに送らない。送るのは日付・RP・ティア・目標だけ。
+   D1 が未設定のうちは 503 が返るので、その場合は静かに端末内保存のみに戻る。
+   ========================================================= */
+const SKEY_LS  = "apexwb_rp_key_v1";
+const SKEY_B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";   // I L O U を除く
+const SYNC_DEBOUNCE = 1500;
+const SYNC = { key:null, ok:false, busy:false, last:null, err:null };
+
+function newSyncKey(){
+  const a = new Uint8Array(12);
+  (crypto.getRandomValues ? crypto : window.msCrypto).getRandomValues(a);
+  let s = ""; for (let i=0;i<12;i++) s += SKEY_B32[a[i] & 31];   // 256は32の倍数なので偏りなし
+  return s;
+}
+function normSyncKey(v){
+  const t = String(v || "").toUpperCase().replace(/[^0-9A-Z]/g, "")
+    .replace(/[IL]/g, "1").replace(/O/g, "0");
+  return /^[0-9A-HJKMNP-TV-Z]{12}$/.test(t) ? t : null;
+}
+const fmtKey = k => k ? k.slice(0,4) + "-" + k.slice(4,8) + "-" + k.slice(8,12) : "-";
+
+function initSyncKey(){
+  let k = null;
+  try{ k = normSyncKey(STORE.getItem(SKEY_LS)); }catch(e){}
+  if (!k){
+    k = newSyncKey();
+    try{ STORE.setItem(SKEY_LS, k); }catch(e){}
+  }
+  SYNC.key = k;
+  return k;
+}
+function setSyncKey(k){
+  SYNC.key = k;
+  try{ STORE.setItem(SKEY_LS, k); }catch(e){}
+}
+
+/* 記録の更新時刻。古い記録は当日ログの末尾から拾う */
+function recAt(rec){
+  if (!rec) return 0;
+  if (Number.isFinite(rec.at)) return rec.at;
+  const l = Array.isArray(rec.log) ? rec.log : null;
+  const last = (l && l.length) ? l[l.length-1] : null;
+  return (last && Number(last.at)) || 0;
+}
+function syncState(){ DB.sync = DB.sync || {}; return DB.sync; }
+
+/* 更新時刻を持たない古い記録は、差分送信の対象から永久に漏れてしまう。
+   起動時に一度だけ「その日の日付」を時刻として埋めておく。
+   実際に記録した時刻より必ず古くなるので、後から入った本物の更新が勝つ。 */
+function backfillAt(){
+  let n = 0;
+  Object.keys(DB.records).forEach(day=>{
+    const r = DB.records[day];
+    if (!r || Number.isFinite(r.at)) return;
+    r.at = recAt(r) || parseD(day).getTime() || Date.now();
+    n++;
+  });
+  return n;
+}
+
+/* 送るぶんだけ組み立てる。当日ログは直近7日だけ（本文が膨らむのを防ぐ） */
+function syncDays(since){
+  const t = apexDate(), keep = addD(t, -7);
+  const out = [];
+  Object.keys(DB.records).sort().forEach(day=>{
+    const r = DB.records[day];
+    if (!r || !Number.isFinite(r.rp)) return;
+    const at = recAt(r);
+    if (at <= since) return;
+    const d = { day, rp: r.rp, at: at || Date.now() };
+    if (r.src)  d.src  = r.src;
+    if (r.tier) d.tier = r.tier;
+    if (r.div != null) d.div = r.div;
+    if (day >= keep && Array.isArray(r.log) && r.log.length) d.log = r.log;
+    out.push(d);
+  });
+  return out.slice(-400);
+}
+
+function syncProfile(){
+  return { platform: DB.profile.platform || null,
+           goal: DB.profile.goal || null,
+           at: syncState().profAt || 0 };
+}
+
+/* ---- 保存（デバウンス） ---- */
+let syncTimer = null, syncPending = false;
+function syncPush(){
+  if (!SYNC.key) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncPushNow, SYNC_DEBOUNCE);
+}
+
+async function syncPushNow(){
+  if (!SYNC.key) return;
+  if (SYNC.busy){ syncPending = true; return; }   // 送信中の記録を取りこぼさない
+  const st = syncState();
+  const days = syncDays(st.pushedAt || 0);
+  if (!days.length && st.pushedAt) return;              // 送るものが無い
+  if (!days.length && !Object.keys(DB.records).length) return;  // 記録ゼロなら行を作らない
+
+  SYNC.busy = true; paintSync("保存中…");
+  try{
+    const r = await fetch(API + "/rp-sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: SYNC.key, days, profile: syncProfile() })
+    });
+    const j = await r.json().catch(()=>({}));
+    if (!r.ok || !j.ok) throw new Error(j.error || ("http " + r.status));
+    st.pushedAt = days.length ? Math.max.apply(null, days.map(d => d.at)) : Date.now();
+    st.profAt   = st.profAt || Date.now();
+    SYNC.ok = true; SYNC.err = null; SYNC.last = st.pushedAt;
+    saveLocal();
+    ev("rp_sync_push", { days: days.length });
+  }catch(e){
+    SYNC.ok = false;
+    SYNC.err = String(e.message || e);
+    if (SYNC.err.indexOf("d1-unbound") < 0) ev("rp_sync_error", { where: "push" });
+  }finally{
+    SYNC.busy = false; paintSync(); updateWarn(); updateBkNudge();
+    if (syncPending){ syncPending = false; syncPush(); }
+  }
+}
+
+/* ---- 取り出して混ぜる ---- */
+async function syncPull(key){
+  const r = await fetch(API + "/rp-sync?id=" + encodeURIComponent(key));
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok || !j.ok) throw new Error(j.error || ("http " + r.status));
+  return j;
+}
+
+/* サーバー側が新しい日だけ差し替える（at 比較） */
+function syncMerge(j){
+  let added = 0, updated = 0;
+  (j.days || []).forEach(d=>{
+    if (!d || !Number.isFinite(d.rp)) return;
+    const cur = DB.records[d.day];
+    if (cur && recAt(cur) >= (d.at || 0)) return;
+    const rec = { rp: d.rp, src: d.src || "manual", at: d.at || 0 };
+    if (d.tier) rec.tier = d.tier;
+    if (d.div != null) rec.div = d.div;
+    rec.log = (Array.isArray(d.log) && d.log.length)
+      ? d.log
+      : [{ rp: d.rp, src: rec.src, at: d.at || null }];
+    if (cur) updated++; else added++;
+    DB.records[d.day] = rec;
+  });
+  const p = j.profile;
+  if (p){
+    if (p.platform && !DB.profile.name) DB.profile.platform = p.platform;
+    if (p.goal && !DB.profile.goal)     DB.profile.goal = p.goal;
+  }
+  return { added, updated };
+}
+
+/* ---- 起動時 ---- */
+async function syncBoot(){
+  initSyncKey();
+  if (backfillAt()) saveLocal();
+  paintSync();
+  try{
+    const j = await syncPull(SYNC.key);
+    SYNC.ok = true;
+    const m = syncMerge(j);
+    if (m.added || m.updated){
+      saveLocal(); render();
+      ev("rp_sync_restore", { added: m.added, updated: m.updated, from: "auto" });
+      if (m.added) toast(m.added + "日分の記録をサーバーから戻しました");
+    }
+  }catch(e){
+    SYNC.ok = false;
+    SYNC.err = String(e.message || e);
+  }
+  paintSync(); updateWarn(); updateBkNudge();
+  syncPushNow();
+}
+
+/* ---- キーを入れて復元 ---- */
+async function restoreByKey(){
+  const raw = document.getElementById("keyIn").value;
+  const k = normSyncKey(raw);
+  if (!k){ toast("キーは12文字です。形式を確認してください", true); return; }
+  const b = document.getElementById("keyGo");
+  b.disabled = true; b.textContent = "復元中…";
+  try{
+    const j = await syncPull(k);
+    const n = (j.days || []).length;
+    if (!n && !j.profile){ toast("このキーには記録がありません", true); return; }
+    const over = (j.days || []).filter(d => DB.records[d.day]).length;
+    if (!confirm(n + "日分の記録が見つかりました。\n新しく追加：" + (n - over) + "日\n上書きの可能性：" + over + "日\n\nこのキーに切り替えて復元しますか？")) return;
+    const m = syncMerge(j);
+    setSyncKey(k);
+    const st = syncState(); st.pushedAt = 0;        // 手元にしか無い日を送り直す
+    SYNC.ok = true;
+    saveLocal(); render(); paintSync(); updateWarn(); updateBkNudge();
+    ev("rp_sync_restore", { added: m.added, updated: m.updated, from: "manual" });
+    toast("復元しました（" + m.added + "日を追加）");
+    syncPushNow();
+    closeSheet();
+  }catch(e){
+    const msg = String(e.message || e);
+    toast(msg.indexOf("bad-id") >= 0 ? "キーの形式が違います"
+        : msg.indexOf("d1-unbound") >= 0 ? "サーバー保存はまだ準備中です"
+        : "復元できませんでした。通信状況を確認してください", true);
+  }finally{
+    b.disabled = false; b.textContent = "このキーで復元";
+  }
+}
+
+/* ---- 表示 ---- */
+function paintSync(force){
+  const el = document.getElementById("syncState");
+  const kc = document.getElementById("syncKeyBox");
+  if (kc) kc.textContent = fmtKey(SYNC.key);
+  const kn = document.getElementById("keyNudgeCode");
+  if (kn) kn.textContent = fmtKey(SYNC.key);
+  if (!el) return;
+  if (force){ el.textContent = force; return; }
+  if (SYNC.ok){
+    const t = SYNC.last ? new Date(SYNC.last) : null;
+    el.textContent = "サーバーに保存済み"
+      + (t ? "（" + String(t.getHours()).padStart(2,"0") + ":" + String(t.getMinutes()).padStart(2,"0") + "）" : "");
+    el.style.color = "var(--cyan)";
+  } else if (SYNC.err && SYNC.err.indexOf("d1-unbound") >= 0){
+    el.textContent = "サーバー保存は準備中です（記録はこの端末に保存されています）";
+    el.style.color = "";
+  } else if (SYNC.err){
+    el.textContent = "サーバーに接続できていません（記録はこの端末に保存されています）";
+    el.style.color = "";
+  } else {
+    el.textContent = "接続を確認しています…";
+    el.style.color = "";
+  }
+}
+
+/* 7日で消える警告は、サーバー保存が効いているなら文面を差し替える */
+function updateWarn(){
+  const w = document.querySelector(".warn");
+  if (!w) return;
+  const b = w.querySelector("b"), p = w.querySelector("p");
+  if (!b || !p) return;
+  if (SYNC.ok){
+    b.textContent = "復元キーを控えておいてください";
+    p.innerHTML = "記録はサーバーにも保存されています。端末の記録が消えても、設定の「記録の引き継ぎ」にある<b>12文字のキー</b>を入れれば元に戻せます。";
+    w.style.background = "#07222b"; w.style.borderColor = "#12525f";
+    w.style.borderLeftColor = "var(--cyan)";
+    b.style.color = "var(--cyan)";
+  } else {
+    b.textContent = "7日以上開かないと記録が消えることがあります";
+    p.textContent = "iPhoneのSafariの仕様です。ときどき「バックアップ」からコードをコピーして、メモなどに残しておいてください。";
+    w.style.background = ""; w.style.borderColor = "";
+    w.style.borderLeftColor = ""; b.style.color = "";
+  }
+}
+
+function copySyncKey(from){
+  return navigator.clipboard.writeText(fmtKey(SYNC.key))
+    .then(()=>{ bkState().keyCopiedAt = Date.now(); saveLocal(); updateBkNudge();
+                ev("rp_key_copy", { from }); toast("復元キーをコピーしました"); })
+    .catch(()=> toast("コピーできませんでした。長押しで選択してください", true));
+}
+
+/* ---- バックアップコード ---- */
 const enc = o => "awb1." + btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,"");
 function dec(s){
   s = s.trim();
@@ -1374,6 +1680,8 @@ function openSheet(){
   goalSel = DB.profile.goal ? { ...DB.profile.goal } : { t:null, d:4 };
   paintGoal();
   document.getElementById("bkCode").textContent = enc(DB);
+  document.getElementById("keyIn").value = "";
+  paintSync();
   document.getElementById("sheet").classList.add("open");
 }
 const closeSheet = ()=> document.getElementById("sheet").classList.remove("open");
@@ -1388,7 +1696,7 @@ document.getElementById("startBtn").onclick = ()=>{
   card.scrollIntoView({ behavior:"smooth", block:"center" });
   setTimeout(()=> document.getElementById("selTier").focus(), 380);
 };
-document.getElementById("restoreBtn").onclick = ()=>{ openSheet(); document.getElementById("bkIn").focus(); };
+document.getElementById("restoreBtn").onclick = ()=>{ openSheet(); document.getElementById("keyIn").focus(); };
 document.getElementById("openCfg").onclick  = openSheet;
 document.getElementById("closeCfg").onclick = closeSheet;
 document.getElementById("sheet").onclick = e => { if (e.target.id === "sheet") closeSheet(); };
@@ -1402,6 +1710,7 @@ document.getElementById("cfgSave").onclick = ()=>{
   DB.profile.platform = on ? on.dataset.pf : "X1";
   DB.profile.goal = goalSel.t ? { t: goalSel.t, d: goalSel.d } : null;
   ev("rp_settings_save", { has_name: DB.profile.name ? 1 : 0, has_goal: DB.profile.goal ? 1 : 0 });
+  syncState().profAt = Date.now();
   save(); render(); toast("保存しました");
 };
 /* ---- バックアップ促進 ----
@@ -1421,15 +1730,34 @@ function markBackedUp(){
 
 function updateBkNudge(count){
   const el = document.getElementById("bkNudge");
+  const kl = document.getElementById("keyNudge");
   if (!el) return;
   const all = (typeof count === "number") ? count : Object.keys(DB.records || {}).length;
   const b = bkState(), now = Date.now();
+  const enough  = all >= BK_MIN_DAYS;
+  const snoozed = (now - (b.snoozedAt || 0)) <= BK_SNOOZE;
+
+  const fn = document.getElementById("footNote");
+  if (fn) fn.textContent = SYNC.ok
+    ? "記録はこの端末とサーバーに保存されます（ログイン不要）"
+    : "記録はこの端末内に保存されます（ログイン不要）";
+
+  // サーバー保存が効いているなら、長いコードではなく12文字のキーを控えてもらう
+  if (SYNC.ok){
+    const show = enough && !b.keyCopiedAt && !snoozed;
+    el.classList.add("hide");
+    if (kl) kl.classList.toggle("hide", !show);
+    if (show && !bkShownLogged){
+      bkShownLogged = true;
+      ev("rp_key_nudge_shown", { total_days: all });
+    }
+    return;
+  }
+  if (kl) kl.classList.add("hide");
   // コピー時点の記録日数を基準にする。基準が無い古いデータは「今が基準」とみなす
   const base = (typeof b.copiedCount === "number") ? b.copiedCount : all;
   const needsBackup = !b.copiedAt || (all - base) >= BK_NEW_DAYS;
-  const show = all >= BK_MIN_DAYS
-            && needsBackup
-            && (now - (b.snoozedAt || 0)) > BK_SNOOZE;
+  const show = enough && needsBackup && !snoozed;
   el.classList.toggle("hide", !show);
   if (show && !bkShownLogged){
     bkShownLogged = true;
@@ -1449,6 +1777,17 @@ document.getElementById("bkNudgeLater").onclick = ()=>{
   ev("rp_backup_nudge_snooze");
   toast("設定の「バックアップ」からいつでもコピーできます");
 };
+document.getElementById("copyKey").onclick      = ()=> copySyncKey("sheet");
+document.getElementById("keyGo").onclick        = restoreByKey;
+document.getElementById("keyNudgeGo").onclick   = ()=> copySyncKey("nudge");
+document.getElementById("keyNudgeLater").onclick = ()=>{
+  bkState().snoozedAt = Date.now(); saveLocal(); updateBkNudge();
+  ev("rp_key_nudge_snooze");
+  toast("設定の「記録の引き継ぎ」からいつでもコピーできます");
+};
+document.getElementById("keyIn").addEventListener("keydown", e=>{
+  if (e.key === "Enter") document.getElementById("keyGo").click();
+});
 document.getElementById("copyCode").onclick = ()=> copyBackupCode("sheet");
 document.getElementById("loadCode").onclick = loadCode;
 document.getElementById("bkBtn").onclick = openSheet;
@@ -1460,9 +1799,13 @@ document.getElementById("shareModal").onclick = e => { if (e.target.id === "shar
 document.getElementById("wipe").onclick = ()=>{
   if (!confirm("すべての記録を削除します。取り消せません。よろしいですか？")) return;
   navigator.clipboard.writeText(enc(DB)).catch(()=>{});
-  DB.records = {}; DB.bk = {}; save();
+  if (SYNC.key){
+    fetch(API + "/rp-sync", { method:"POST", headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ id: SYNC.key, wipe: true }) }).catch(()=>{});
+  }
+  DB.records = {}; DB.bk = {}; DB.sync = {}; saveLocal();
   try{ STORE.removeItem(SUM_KEY); }catch(e){}
-  render(); closeSheet(); toast("削除しました");
+  render(); closeSheet(); toast("削除しました（サーバー側も含む）");
 };
 document.getElementById("rp").addEventListener("keydown", e=>{ if (e.key === "Enter") document.getElementById("saveBtn").click(); });
 document.getElementById("rp").addEventListener("input", e=>{
@@ -1534,6 +1877,7 @@ load();
 
 document.fonts && document.fonts.ready.then(render);
 render();
+syncBoot();
 
 (function(){
   var b=document.getElementById("burger"), d=document.getElementById("drawer");

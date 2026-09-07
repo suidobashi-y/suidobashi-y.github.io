@@ -9,6 +9,9 @@
  *   GET /feed        → 配信トレンド（Apex配信中のタイトルからモード・話題語を集計）
  *   GET /rp          → 指定プレイヤーの現在RP（RPトラッカーの自動取得用）
  *                       ?player=名前 または ?uid=数値 ＋ &platform=PC|PS4|X1
+ *   GET  /rp-sync?id=復元キー → RANK WORKBOOK の記録をサーバーから取り出す
+ *   POST /rp-sync            → RANK WORKBOOK の記録をサーバーへ保存する
+ *                              （D1 バインディング RPDB が必要。未設定なら503を返すだけ）
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -55,12 +58,14 @@ export default {
       if (url.pathname === "/feed")        return cors(await feed(request, env, ctx), origin);
       if (url.pathname === "/rp")          return cors(await playerRp(env, url), origin);
       if (url.pathname === "/players")     return cors(await steamPlayers(), origin);
+      if (url.pathname === "/rp-sync")     return cors(await rpSync(request, env, url), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players", "/rp-sync"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
-        twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定"
+        twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定",
+        d1: env.RPDB ? "設定済み" : "未設定"
       }), origin);
       return cors(json({ error: "Not found" }, 404), origin);
     } catch (e) {
@@ -479,6 +484,177 @@ async function steamPlayers() {
   }, 200, 60);
 }
 
+/* =========================================================
+   RANK WORKBOOK のサーバー保存（Cloudflare D1）
+
+   Safari の ITP は7日開かないと localStorage を消してしまうため、
+   端末内だけの保存では記録が失われる。ここではログイン不要のまま、
+   利用者が控えておける12文字の「復元キー」を主キーにして記録を預かる。
+
+   保存するもの : 日付 / RP / 取得元 / ティア / 当日ログ / プラットフォーム / 目標
+   保存しないもの: EA名・UID（個人が特定されうるものは受け取らない）
+
+   バインディング: wrangler.toml の [[d1_databases]] で binding = "RPDB"
+   未設定でも他のエンドポイントは動く（このエンドポイントだけ503を返す）
+   ========================================================= */
+
+const RPS_MAX_DAYS = 400;   // 1回に受け取る最大日数
+const RPS_CHUNK    = 50;    // batch の分割サイズ
+const RPS_KEY_RE   = /^[0-9A-HJKMNP-TV-Z]{12}$/;   // Crockford Base32（I L O U を除く）
+
+/* 打ち間違えやすい文字を吸収してから検証する */
+function rpsKey(v) {
+  const t = String(v || "").toUpperCase().replace(/[^0-9A-Z]/g, "")
+    .replace(/[IL]/g, "1").replace(/O/g, "0");
+  return RPS_KEY_RE.test(t) ? t : null;
+}
+const rpsStr = (v, n) => (v === null || v === undefined || v === "") ? null : String(v).slice(0, n);
+const rpsInt = (v) => Number.isFinite(Number(v)) ? Math.round(Number(v)) : null;
+function rpsParse(s) { try { return JSON.parse(s); } catch (e) { return undefined; } }
+
+/* テーブルは初回アクセス時に作る（管理画面でSQLを流さなくてよい） */
+let rpsReady = null;
+function rpsInit(db) {
+  if (!rpsReady) {
+    rpsReady = db.batch([
+      db.prepare(`CREATE TABLE IF NOT EXISTS rp_log (
+        anon_id TEXT    NOT NULL,
+        day     TEXT    NOT NULL,
+        rp      INTEGER NOT NULL,
+        src     TEXT,
+        tier    TEXT,
+        div     INTEGER,
+        log     TEXT,
+        at      INTEGER NOT NULL,
+        PRIMARY KEY (anon_id, day)
+      )`),
+      db.prepare(`CREATE TABLE IF NOT EXISTS rp_profile (
+        anon_id  TEXT PRIMARY KEY,
+        platform TEXT,
+        goal_t   TEXT,
+        goal_d   INTEGER,
+        at       INTEGER NOT NULL,
+        seen_at  INTEGER NOT NULL
+      )`)
+    ]).catch(e => { rpsReady = null; throw e; });
+  }
+  return rpsReady;
+}
+
+async function rpsBatch(db, stmts) {
+  for (let i = 0; i < stmts.length; i += RPS_CHUNK) {
+    await db.batch(stmts.slice(i, i + RPS_CHUNK));
+  }
+}
+
+async function rpSync(request, env, url) {
+  const db = env.RPDB;
+  if (!db) return json({ error: "d1-unbound" }, 503);
+  await rpsInit(db);
+
+  /* ---- 取り出し ---- */
+  if (request.method === "GET") {
+    const id = rpsKey(url.searchParams.get("id"));
+    if (!id) return json({ error: "bad-id" }, 400);
+
+    const rows = await db.prepare(
+      "SELECT day, rp, src, tier, div, log, at FROM rp_log WHERE anon_id = ?1 ORDER BY day"
+    ).bind(id).all();
+    const prof = await db.prepare(
+      "SELECT platform, goal_t, goal_d, at FROM rp_profile WHERE anon_id = ?1"
+    ).bind(id).first();
+
+    return json({
+      ok: true,
+      days: (rows.results || []).map(r => ({
+        day: r.day, rp: r.rp, src: r.src || undefined, tier: r.tier || undefined,
+        div: (r.div === null || r.div === undefined) ? undefined : r.div,
+        log: r.log ? rpsParse(r.log) : undefined,
+        at: r.at
+      })),
+      profile: prof ? {
+        platform: prof.platform || null,
+        goal: prof.goal_t ? { t: prof.goal_t, d: prof.goal_d || 0 } : null,
+        at: prof.at
+      } : null
+    });
+  }
+
+  if (request.method !== "POST") return json({ error: "method-not-allowed" }, 405);
+
+  let body;
+  try { body = await request.json(); } catch (e) { return json({ error: "bad-json" }, 400); }
+  const id = rpsKey(body && body.id);
+  if (!id) return json({ error: "bad-id" }, 400);
+
+  const now = Date.now();
+
+  /* ---- 全消去（トラッカー側の「すべての記録を削除」から） ---- */
+  if (body.wipe === true) {
+    await db.batch([
+      db.prepare("DELETE FROM rp_log WHERE anon_id = ?1").bind(id),
+      db.prepare("DELETE FROM rp_profile WHERE anon_id = ?1").bind(id)
+    ]);
+    return json({ ok: true, wiped: true });
+  }
+
+  /* ---- 保存（at が新しい方を残す＝古い端末が上書きしない） ---- */
+  const list  = Array.isArray(body.days) ? body.days.slice(0, RPS_MAX_DAYS) : [];
+  const stmts = [];
+  const up = db.prepare(
+    `INSERT INTO rp_log (anon_id, day, rp, src, tier, div, log, at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+     ON CONFLICT(anon_id, day) DO UPDATE SET
+       rp = excluded.rp, src = excluded.src, tier = excluded.tier,
+       div = excluded.div, log = excluded.log, at = excluded.at
+     WHERE excluded.at > rp_log.at`
+  );
+
+  let saved = 0;
+  for (const d of list) {
+    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(String(d.day || ""))) continue;
+    const rp = Math.round(Number(d.rp));
+    if (!Number.isFinite(rp) || rp < 0 || rp > 100000) continue;
+    const at = (Number(d.at) > 0) ? Math.min(Number(d.at), now + 864e5) : now;
+
+    let log = null;
+    if (Array.isArray(d.log) && d.log.length) {
+      log = JSON.stringify(d.log.slice(-30).map(x => ({
+        rp: Math.round(Number(x && x.rp)) || 0,
+        src: rpsStr(x && x.src, 8),
+        at: Number(x && x.at) || null
+      })));
+      if (log.length > 4000) log = null;
+    }
+    stmts.push(up.bind(id, d.day, rp, rpsStr(d.src, 8), rpsStr(d.tier, 16), rpsInt(d.div), log, at));
+    saved++;
+  }
+
+  const p = body.profile;
+  if (p && typeof p === "object") {
+    stmts.push(db.prepare(
+      `INSERT INTO rp_profile (anon_id, platform, goal_t, goal_d, at, seen_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+       ON CONFLICT(anon_id) DO UPDATE SET
+         platform = excluded.platform, goal_t = excluded.goal_t,
+         goal_d = excluded.goal_d, at = excluded.at, seen_at = excluded.seen_at
+       WHERE excluded.at >= rp_profile.at`
+    ).bind(id, rpsStr(p.platform, 8),
+              p.goal ? rpsStr(p.goal.t, 16) : null,
+              p.goal ? rpsInt(p.goal.d) : null,
+              (Number(p.at) > 0) ? Number(p.at) : now, now));
+  } else {
+    stmts.push(db.prepare(
+      `INSERT INTO rp_profile (anon_id, platform, goal_t, goal_d, at, seen_at)
+       VALUES (?1, NULL, NULL, NULL, 0, ?2)
+       ON CONFLICT(anon_id) DO UPDATE SET seen_at = excluded.seen_at`
+    ).bind(id, now));
+  }
+
+  await rpsBatch(db, stmts);
+  return json({ ok: true, saved });
+}
+
 function json(obj, status = 200, maxAge = 0) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -500,7 +676,8 @@ function cors(res, origin) {
     h.set("Access-Control-Allow-Origin", STRICT_ORIGINS[0]);
     h.set("Vary", "Origin");
   }
-  h.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  h.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  h.set("Access-Control-Allow-Headers", "Content-Type");
   h.set("Access-Control-Max-Age", "86400");
   return new Response(res.body, { status: res.status, headers: h });
 }
