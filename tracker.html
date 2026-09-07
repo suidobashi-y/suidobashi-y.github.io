@@ -162,7 +162,10 @@ canvas{display:block;width:100%;height:auto}
 .bkn p{font-size:11px;color:var(--muted);line-height:1.6}
 .bkn .brow{margin-top:11px}
 .bkn .btn{padding:9px 8px;font-size:12px}
-.warn{background:#1c1608;border:1px solid #5c4010;border-left:3px solid var(--amber);border-radius:3px;padding:10px 12px;margin-top:14px}
+.warn{background:#1c1608;border:1px solid #5c4010;border-left:3px solid var(--amber);border-radius:3px;padding:10px 12px;margin-top:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .12s}
+.warn:active{opacity:.65}
+.warn .tap{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--amber)}
+.warn.ok .tap{color:var(--cyan)}
 .warn b{display:block;font-size:12px;color:var(--amber);margin-bottom:4px}
 .warn p{font-size:11px;color:var(--muted);line-height:1.6}
 .code{background:#08101a;border:1px solid var(--line);border-radius:3px;padding:9px 10px;
@@ -448,11 +451,6 @@ canvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
-  <!-- 共有 -->
-  <div class="brow" style="margin-top:14px">
-    <button class="btn ghost" id="bkBtn">バックアップ</button>
-  </div>
-
   <div class="c cy" style="margin-top:20px">
     <div class="ch"><b>関連ページ</b></div>
     <a class="rel" href="./rank.html"><b>ランク分布</b><span>自分のRPが全体のどのあたりか</span></a>
@@ -460,9 +458,9 @@ canvas{display:block;width:100%;height:auto}
     <a class="rel" href="./zukai/s30/rank.html"><b>図解 / S30ランク</b><span>今シーズンのランク環境をグラフで</span></a>
   </div>
 
-  <div class="warn">
+  <div class="warn" id="warnBox" role="button" tabindex="0">
     <b>7日以上開かないと記録が消えることがあります</b>
-    <p>iPhoneのSafariの仕様です。ときどき「バックアップ」からコードをコピーして、メモなどに残しておいてください。</p>
+    <p>iPhoneのSafariの仕様です。ときどきコードをコピーして、メモなどに残しておいてください。<span class="tap">▸ タップでバックアップコードをコピー</span></p>
   </div>
 
   <div class="note" id="footNote" style="margin-top:18px">記録はこの端末内に保存されます（ログイン不要）</div>
@@ -1384,17 +1382,33 @@ function updateWarn(){
   if (!b || !p) return;
   if (SYNC.ok){
     b.textContent = "復元キーを控えておいてください";
-    p.innerHTML = "記録はサーバーにも保存されています。端末の記録が消えても、設定の「記録の引き継ぎ」にある<b>12文字のキー</b>を入れれば元に戻せます。";
+    p.innerHTML = "記録はサーバーにも保存されています。端末の記録が消えても、この<b>12文字のキー</b>を入れれば元に戻せます。"
+                + "<span class=\"tap\">▸ タップで復元キーをコピー</span>";
+    w.classList.add("ok");
     w.style.background = "#07222b"; w.style.borderColor = "#12525f";
     w.style.borderLeftColor = "var(--cyan)";
     b.style.color = "var(--cyan)";
   } else {
     b.textContent = "7日以上開かないと記録が消えることがあります";
-    p.textContent = "iPhoneのSafariの仕様です。ときどき「バックアップ」からコードをコピーして、メモなどに残しておいてください。";
+    p.innerHTML = "iPhoneのSafariの仕様です。ときどきコードをコピーして、メモなどに残しておいてください。"
+                + "<span class=\"tap\">▸ タップでバックアップコードをコピー</span>";
+    w.classList.remove("ok");
     w.style.background = ""; w.style.borderColor = "";
     w.style.borderLeftColor = ""; b.style.color = "";
   }
 }
+
+/* 注意喚起ボックスをタップ＝コピー（サーバー保存が効いていれば復元キー、そうでなければバックアップコード） */
+function warnCopy(){
+  if (SYNC.ok && SYNC.key) copySyncKey("warn");
+  else copyBackupCode("warn");
+}
+(function bindWarn(){
+  const w = document.getElementById("warnBox");
+  if (!w) return;
+  w.onclick = warnCopy;
+  w.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); warnCopy(); } };
+})();
 
 function copySyncKey(from){
   return navigator.clipboard.writeText(fmtKey(SYNC.key))
@@ -1789,7 +1803,7 @@ document.getElementById("bkNudgeGo").onclick = ()=> copyBackupCode("nudge");
 document.getElementById("bkNudgeLater").onclick = ()=>{
   bkState().snoozedAt = Date.now(); save(); updateBkNudge();
   ev("rp_backup_nudge_snooze");
-  toast("設定の「バックアップ」からいつでもコピーできます");
+  toast("下の注意書きをタップすればいつでもコピーできます");
 };
 document.getElementById("syncKeyBox").onclick   = ()=>{ keyShown = !keyShown; paintSync(); };
 document.getElementById("copyKey").onclick      = ()=> copySyncKey("sheet");
@@ -1805,7 +1819,6 @@ document.getElementById("keyIn").addEventListener("keydown", e=>{
 });
 document.getElementById("copyCode").onclick = ()=> copyBackupCode("sheet");
 document.getElementById("loadCode").onclick = loadCode;
-document.getElementById("bkBtn").onclick = openSheet;
 document.getElementById("shareBtn").onclick = ()=> openShare("line");
 document.getElementById("shareBtnToday").onclick = e => { e.preventDefault(); openShare("today"); };
 document.getElementById("shareSave").onclick = saveShare;
@@ -1883,7 +1896,7 @@ load();
   // すでに記録がある場合は、引き継ぎ方も案内する
   if (Object.keys(DB.records || {}).length){
     document.getElementById("iabHint").textContent +=
-      "　すでに記録がある場合は「バックアップ」でコードをコピーし、移動先で読み込んでください。";
+      "　すでに記録がある場合は設定の「バックアップコード」でコードをコピーし、移動先で読み込んでください。";
   }
   el.classList.remove("hide");
   try{ if (typeof gtag === "function")
