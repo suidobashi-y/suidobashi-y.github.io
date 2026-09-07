@@ -23,4 +23,4 @@ compatibility_date = "2026-08-05"
 [[d1_databases]]
 binding = "RPDB"
 database_name = "apexwb"
-database_id = "ここに Database ID を貼る"
+database_id = "16d76c18-e962-4d22-b454-e7336e72cf76"
