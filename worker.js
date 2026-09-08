@@ -735,7 +735,8 @@ function roomView(rows, now, meId) {
     const st  = (!r.left_at && age < ROOM_LIVE_MS) ? "live" : "ghost";
     if (st === "live") live++; else ghost++;
     if (meId && r.room_id === meId) me = r.seat_no;
-    return { n: r.seat_no, st, pub: r.pub, h: r.handle, tier: r.tier, rp: r.rp, age: Math.round(age / 1000) };
+    return { n: r.seat_no, st, pub: r.pub, h: r.handle, tier: r.tier, rp: r.rp,
+             age: Math.round(age / 1000), left: r.left_at ? 1 : 0 };
   }).sort((a, b) => a.n - b.n);
   return { ok: true, seats, total: ROOM_SEATS, live, ghost, me };
 }
@@ -809,7 +810,8 @@ async function roomApi(request, env, url) {
   if (hdl === undefined) return json({ error: "bad-handle" }, 400);
   const handle = hdl ? "@" + hdl : (mineRow ? mineRow.handle : null);
   const tier   = roomTier(body.tier) || (mineRow && mineRow.tier) || null;
-  const rp     = roomRp(body.rp);
+  /* 未指定のときは既存の値を残す。tier と同じ扱いにしないと座り直しでRPが消える */
+  const rp     = roomRp(body.rp) ?? (mineRow ? mineRow.rp : null);
 
   const rows   = await roomRows(db);
   const target = rows.find(r => r.seat_no === seat);

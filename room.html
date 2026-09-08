@@ -100,7 +100,8 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 .selfbar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:11px}
 .selfbar .txt{flex:1;min-width:0}
 .selfbar .txt.tap{cursor:pointer}
-.selfbar .txt.tap .l2 em{font-style:normal;color:var(--cyan);margin-left:6px}
+.selfbar .txt.tap .l2 em{font-style:normal;color:#5d6b82;margin-left:7px;border-bottom:1px solid #33415a}
+.selfbar .txt.tap:hover .l2 em{color:#9fb0c8}
 .selfbar .l1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .selfbar .l2{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btn{flex:0 0 auto;background:none;border:1px solid var(--line);color:var(--dim);font-family:"Noto Sans JP",sans-serif;font-size:12px;padding:8px 13px;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;text-decoration:none;display:inline-block}
@@ -116,8 +117,17 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 .sheet p{font-size:11.5px;color:var(--dim);margin-bottom:12px;line-height:1.7}
 .row{display:flex;gap:8px}
 .row .at{flex:1;display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:0 10px}
-.row .at span{color:var(--dim);font-family:"Chakra Petch",sans-serif;font-weight:600}
-.row input{flex:1;background:none;border:0;outline:none;color:var(--txt);font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:14px;padding:10px 0;min-width:0}
+.row .at span{color:var(--dim);font-family:"Chakra Petch",sans-serif;font-weight:600;flex:0 0 auto}
+.row input{flex:1;background:none;border:0;outline:none;color:var(--txt);font-family:"Chakra Petch",sans-serif;font-weight:600;
+  /* iOS Safari は16px未満の入力欄でフォーカスすると自動拡大し、そのまま戻らない */
+  font-size:16px;padding:9px 0;min-width:0}
+.row .at span{font-size:16px}
+/* 保存ボタンが画面外に出ないよう、狭い端末では縦に積む */
+@media(max-width:400px){
+  .row{flex-wrap:wrap}
+  .row .at{flex:1 1 100%}
+  .row .btn{flex:1 1 100%;padding:10px}
+}
 .row input::placeholder{color:#48566d;font-weight:500}
 .sheet .acts{display:flex;gap:8px;margin-top:10px}
 
@@ -150,7 +160,6 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
   <div class="note">
     在室の判定は「直近30分にRPを記録したか」。常時接続はしていません。<br>
     薄い席は直前に使っていた人。4時間で消えます。そのまま座れます(前の記録は自分の席と入れ替わります)。<br>
-    アイコンと PLAYER 番号は復元キーから作った別IDで、キー本体はこのページから送っていません。<br>
     Xのハンドルは自己申告です(照合はしていません)。
   </div>
 </div>
@@ -198,6 +207,8 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 const API      = "https://apex-map-streamer.suidobashi-y.workers.dev";
 const SKEY_LS  = "apexwb_rp_key_v1";
 const HDL_LS   = "apexwb_room_handle_v1";
+/* 「表示しない」を選んだかどうか。未設定と区別しないと座るたびに聞いてしまう */
+const HOPT_LS  = "apexwb_room_handle_optout_v1";
 const B32      = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const POLL_MS  = 60000;
 
@@ -210,7 +221,7 @@ const TIER_META = {
 const TIER_CODE = {"ルーキー":"roo","ブロンズ":"brz","シルバー":"slv","ゴールド":"gld",
                    "プラチナ":"pla","ダイヤ":"dia","マスター":"mas"};
 
-const ROOM = { id:null, pub:null, handle:null, rp:null, tier:null, seats:[], me:0, busy:false };
+const ROOM = { id:null, pub:null, handle:null, optout:false, rp:null, tier:null, seats:[], me:0, busy:false };
 
 /* ---- 復元キーから別IDを作る ---- */
 async function derive(salt, key, n){
@@ -285,10 +296,15 @@ function render(){
         '<div class="rp"><b>'+(s.rp!=null?Number(s.rp).toLocaleString():"–")+'</b> RP</div></div></div>'+
         (s.st==="live"
           ? '<div class="foot"><span class="pulse"></span>'+ago(s.age)+"に記録</div>"
-          : '<div class="foot">'+(s.age<60?"さっき":ago(s.age))+'まで在室<span class="sit">座る</span></div>');
+          : '<div class="foot">'
+            +(mine ? (s.left ? "離席中" : "在室が切れました")
+                   : (s.age<60?"さっき":ago(s.age))+"まで在室")
+            +'<span class="sit">'+(mine?"座り直す":"座る")+"</span></div>");
       drawIcon(el.querySelector("canvas"), s.pub);
       const a=el.querySelector(".h a"); if(a) a.onclick=e=>e.stopPropagation();
-      if(mine) el.onclick=leave;
+      /* 自分の席でも、在室が切れていれば押す意味は「座り直し」。
+         ここで leave を割り当てると、戻ってきた人がもう一度離席してしまう。 */
+      if(mine) el.onclick = (s.st==="live") ? leave : (()=>sit(n));
       else if(s.st==="ghost") el.onclick=()=>sit(n);
     }
     grid.appendChild(el);
@@ -314,7 +330,13 @@ function paintSelf(){
     act.innerHTML='<a class="btn pri" href="tracker.html">記録を始める</a>';
     return;
   }
-  document.getElementById("selfL1").textContent=seated?"SEAT "+pad(ROOM.me)+" に着席中":"まだ座っていません";
+  const mySeat=ROOM.seats.find(x=>x.n===ROOM.me);
+  const away=seated && mySeat && mySeat.st!=="live";
+  document.getElementById("selfL1").textContent =
+    !seated ? "まだ座っていません"
+    : !away ? "SEAT "+pad(ROOM.me)+" に着席中"
+    : mySeat.left ? "SEAT "+pad(ROOM.me)+" を離席中"
+                  : "SEAT "+pad(ROOM.me)+" の在室が切れています";
   const txt=document.getElementById("selfTxt");
   if(seated){
     /* 設定済みでも押せるようにしておく。ここが唯一の変更導線になる */
@@ -325,8 +347,10 @@ function paintSelf(){
     document.getElementById("selfL2").textContent="空席か、薄くなっている席をタップ";
     txt.className="txt"; txt.onclick=null;
   }
-  if(seated && !ROOM.handle)
+  if(seated && !ROOM.handle && !ROOM.optout)
     act.innerHTML='<button class="btn pri" id="aBtn">ハンドルを設定</button>', bind(openSheet);
+  else if(seated && away)
+    act.innerHTML='<button class="btn pri" id="aBtn">座り直す</button>', bind(()=>sit(ROOM.me));
   else if(seated)
     act.innerHTML='<button class="btn" id="aBtn">席を離れる</button>', bind(leave);
   else
@@ -388,7 +412,7 @@ function sit(n){
     if(!j) return;
     toast("SEAT "+pad(n)+" に座りました");
     gtag("event","room_sit",{seat:n,moved:was?1:0});
-    if(!ROOM.handle) setTimeout(openSheet,700);
+    if(!ROOM.handle && !ROOM.optout) setTimeout(openSheet,700);
   });
 }
 function leave(){
@@ -401,13 +425,19 @@ function openSheet(){ sheet.classList.add("on"); hIn.value=(ROOM.handle||"").rep
 function closeSheet(){ sheet.classList.remove("on"); hIn.blur(); }
 document.getElementById("hSkip").onclick=closeSheet;
 document.getElementById("hClear").onclick=()=>{
-  post({act:"handle",handle:""}).then(j=>{ if(j){ ROOM.handle=null; try{STORE.removeItem(HDL_LS)}catch(e){} paintSelf(); closeSheet(); toast("ハンドルを非表示にしました"); } });
+  post({act:"handle",handle:""}).then(j=>{
+    if(!j) return;
+    ROOM.handle=null; ROOM.optout=true;
+    try{ STORE.removeItem(HDL_LS); STORE.setItem(HOPT_LS,"1"); }catch(e){}
+    paintSelf(); closeSheet(); toast("ハンドルを表示しない設定にしました");
+  });
 };
 document.getElementById("hSave").onclick=()=>{
   const v=hIn.value.trim().replace(/^@/,"").replace(/[^A-Za-z0-9_]/g,"");
   if(!/^[A-Za-z0-9_]{1,15}$/.test(v)){ toast("半角英数字とアンダースコア、15文字までで入力してください","warn"); return; }
   post({act:"handle",handle:v}).then(j=>{
-    if(j){ ROOM.handle="@"+v; try{STORE.setItem(HDL_LS,ROOM.handle)}catch(e){}
+    if(j){ ROOM.handle="@"+v; ROOM.optout=false;
+      try{ STORE.setItem(HDL_LS,ROOM.handle); STORE.removeItem(HOPT_LS); }catch(e){}
       paintSelf(); closeSheet(); toast("ハンドルを設定しました"); gtag("event","room_handle",{}); }
   });
 };
@@ -428,7 +458,7 @@ function toast(msg,cls){
     key=String(key).toUpperCase();
     ROOM.id  = await derive("awb-room:v1:", key, 12);
     ROOM.pub = await derive("awb-pub:v1:",  key, 4);
-    try{ ROOM.handle=STORE.getItem(HDL_LS)||null; }catch(e){}
+    try{ ROOM.handle=STORE.getItem(HDL_LS)||null; ROOM.optout=!!STORE.getItem(HOPT_LS); }catch(e){}
     const r=readMyRank(); if(r){ ROOM.rp=r.rp; ROOM.tier=r.tier; }
   }
   paintSelf();
