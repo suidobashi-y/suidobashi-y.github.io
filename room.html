@@ -374,7 +374,8 @@ function paintSelf(){
 
 /* ---- 通信 ---- */
 function apply(j){
-  ROOM.seats=j.seats||[]; ROOM.me=j.me||0;
+  if(!j || !j.seats) return;          /* touch の応答には席一覧が無い */
+  ROOM.seats=j.seats; ROOM.me=j.me||0;
   const mine=ROOM.seats.find(s=>s.n===ROOM.me);
   if(mine) ROOM.handle=mine.h||null;
   /* 在室中のときだけ印を残す。離席・時間切れなら消す */
@@ -384,6 +385,24 @@ function apply(j){
   }catch(e){}
   render();
 }
+/* 席に出ているRPが手元の記録とずれていたら直す。
+   tracker からの通知が届かない経路（別タブでの記録など）の保険。 */
+async function healRp(){
+  if(!ROOM.id || !ROOM.me) return;
+  const mine=ROOM.seats.find(s=>s.n===ROOM.me);
+  if(!mine || mine.st!=="live") return;
+  const r=readMyRank();
+  if(!r || r.rp==null) return;
+  ROOM.rp=r.rp; ROOM.tier=r.tier;     /* 下部バーも最新にする */
+  if(mine.rp===r.rp && mine.tier===r.tier){ paintSelf(); return; }
+  try{
+    const res=await fetch(API+"/room",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({id:ROOM.id, act:"touch", rp:r.rp, tier:r.tier})});
+    const j=await res.json().catch(()=>({}));
+    if(j && j.seated) await pull(false);
+  }catch(e){}
+}
+
 async function pull(hb){
   if(!ROOM.id){ 
     try{
@@ -395,7 +414,7 @@ async function pull(hb){
   try{
     const r=await fetch(API+"/room?id="+ROOM.id+(hb&&ROOM.me?"&hb=1":""));
     const j=await r.json();
-    if(j.ok) apply(j); else fail(j.error);
+    if(j.ok){ apply(j); if(hb!==false) healRp(); } else fail(j.error);
   }catch(e){ fail(e.message); }
 }
 function fail(msg){
@@ -485,7 +504,7 @@ function toast(msg,cls){
     const r=readMyRank(); if(r){ ROOM.rp=r.rp; ROOM.tier=r.tier; }
   }
   paintSelf();
-  await pull(false);
+  await pull(true);          /* 起動時にもRPのずれを直す */
 
   /* 画面が見えている間だけ在室を延長する。
      裏に回っている間は延長しないので、放置した席は30分で自然に空く。 */

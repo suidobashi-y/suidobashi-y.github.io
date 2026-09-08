@@ -789,6 +789,22 @@ async function roomApi(request, env, url) {
     return json(roomView(await roomRows(db), now, id));
   }
 
+  /* ---- 在室の更新（tracker がRPを記録したときに呼ぶ） ----
+     席を持っている人の last_seen と RP を進めるだけ。
+     席が無ければ何もしない（記録しただけで勝手に着席させない）。
+     自分から離席した人（left_at あり）も対象外にする。 */
+  if (act === "touch") {
+    if (!mineRow) return json({ ok: true, seated: false });
+    const t = roomTier(body.tier), p = roomRp(body.rp);
+    const res = await db.prepare(
+      `UPDATE room_seat SET last_seen = ?2,
+         tier = COALESCE(?3, tier), rp = COALESCE(?4, rp)
+       WHERE room_id = ?1 AND left_at IS NULL`
+    ).bind(id, now, t, p).run();
+    const moved = !!(res && res.meta ? res.meta.changes : 1);
+    return json({ ok: true, seated: moved, seat: mineRow.seat_no });
+  }
+
   /* ---- ハンドルの設定・解除 ---- */
   if (act === "handle") {
     const h = roomHandle(body.handle);

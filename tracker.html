@@ -588,7 +588,7 @@ function saveLocal(){
   try{ STORE.setItem(KEY, JSON.stringify(DB)); return true; }
   catch(e){ toast("保存できませんでした。空き容量を確認してください", true); return false; }
 }
-function save(){ saveLocal(); syncPush(); }
+function save(){ saveLocal(); syncPush(); roomTouch(); }
 
 /* ---- 描画 ---- */
 function render(){
@@ -971,8 +971,9 @@ function calendar(){
         const txt = (v > 0 ? "+" : "") + v;
         c.textContent = txt;
         c.style.fontSize = (txt.length <= 3 ? 10.5 : txt.length === 4 ? 9.5 : txt.length === 5 ? 8 : 7) + "px";
-        c.style.color = v < 0 ? "var(--pink)"
-                      : a >= .55 ? "#06121c" : "rgba(196,242,255,.92)";
+        /* マイナスも同じ配色にする。赤は暗い画面でまぶしく、
+           数字の先頭の「-」だけで十分に見分けられる。 */
+        c.style.color = a >= .55 ? "#06121c" : "rgba(196,242,255,.92)";
       }
     }
     body.appendChild(c);
@@ -1260,6 +1261,61 @@ function syncProfile(){
   return { platform: DB.profile.platform || null,
            goal: DB.profile.goal || null,
            at: syncState().profAt || 0 };
+}
+
+/* =========================================================
+   ランクルームの在室更新
+
+   room.html で席に着いている人は、ここでRPを記録したときに
+   在室が延びる。席が無ければ何も送らない。
+   復元キーそのものは送らず、room.html と同じ導出IDを使う。
+   ========================================================= */
+const ROOM_SEAT_LS = "apexwb_room_seat_v1";
+const ROOM_TOUCH_DEBOUNCE = 3000;
+const ROOM_TIER_CODE = { "ルーキー":"roo","ブロンズ":"brz","シルバー":"slv","ゴールド":"gld",
+                         "プラチナ":"pla","ダイヤ":"dia","マスター":"mas" };
+let roomTimer = null;
+
+async function roomDeriveId(key){
+  const buf = new TextEncoder().encode("awb-room:v1:" + key);
+  const h = new Uint8Array(await crypto.subtle.digest("SHA-256", buf));
+  let s = ""; for (let i=0;i<12;i++) s += SKEY_B32[h[i] & 31];
+  return s;
+}
+
+function roomRank(){
+  try{
+    const days = Object.keys(DB.records || {}).sort();
+    if (!days.length) return {};
+    const rp = Number(DB.records[days[days.length-1]].rp);
+    if (!Number.isFinite(rp)) return {};
+    let t = TIERS[0];
+    for (const x of TIERS) if (rp >= x.rp) t = x;
+    return { rp, tier: ROOM_TIER_CODE[t.t] || null };
+  }catch(e){ return {}; }
+}
+
+function roomTouch(){
+  clearTimeout(roomTimer);
+  roomTimer = setTimeout(roomTouchNow, ROOM_TOUCH_DEBOUNCE);
+}
+
+async function roomTouchNow(){
+  if (!SYNC.key || !crypto.subtle) return;
+  let seat = null;
+  try{ seat = STORE.getItem(ROOM_SEAT_LS); }catch(e){}
+  if (!seat) return;                       // 部屋に席が無ければ送らない
+  try{
+    const id = await roomDeriveId(SYNC.key);
+    const rk = roomRank();
+    const r = await fetch(API + "/room", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, act: "touch", rp: rk.rp, tier: rk.tier })
+    });
+    const j = await r.json().catch(()=>({}));
+    /* 席が消えていたら印も消す。次からは送らない */
+    if (!j || j.seated === false){ try{ STORE.removeItem(ROOM_SEAT_LS); }catch(e){} }
+  }catch(e){}
 }
 
 /* ---- 保存（デバウンス） ---- */
