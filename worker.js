@@ -59,10 +59,11 @@ export default {
       if (url.pathname === "/rp")          return cors(await playerRp(env, url), origin);
       if (url.pathname === "/players")     return cors(await steamPlayers(), origin);
       if (url.pathname === "/rp-sync")     return cors(await rpSync(request, env, url), origin);
+      if (url.pathname === "/room")        return cors(await roomApi(request, env, url), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players", "/rp-sync"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players", "/rp-sync", "/room"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
         twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定",
         d1: env.RPDB ? "設定済み" : "未設定"
@@ -535,7 +536,20 @@ function rpsInit(db) {
         goal_d   INTEGER,
         at       INTEGER NOT NULL,
         seen_at  INTEGER NOT NULL
-      )`)
+      )`),
+      /* ランクルームの座席。room_id は復元キーそのものではなく、
+         端末側でハッシュして作った別ID（下の解説を参照）。 */
+      db.prepare(`CREATE TABLE IF NOT EXISTS room_seat (
+        room_id   TEXT PRIMARY KEY,
+        seat_no   INTEGER NOT NULL,
+        pub       TEXT,
+        handle    TEXT,
+        tier      TEXT,
+        rp        INTEGER,
+        last_seen INTEGER NOT NULL
+      )`),
+      /* 1席1人を DB 側で保証する。入れ替えで一時退避が要るのはこの制約のため。 */
+      db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS room_seat_no ON room_seat(seat_no)`)
     ]).catch(e => { rpsReady = null; throw e; });
   }
   return rpsReady;
@@ -653,6 +667,188 @@ async function rpSync(request, env, url) {
 
   await rpsBatch(db, stmts);
   return json({ ok: true, saved });
+}
+
+/* =========================================================
+   ランクルーム（/room）
+
+   記録中の人が席に着き、部屋として見える機能。room.html から使う。
+
+   ■ なぜ復元キーをそのまま使わないか
+   復元キーは「知っていれば全記録が読める」読み取り認証情報。
+   ルームは公開エンドポイントなので、ここにキーを流すと
+   経路のどこかで漏れたときに RP 履歴ごと持っていかれる。
+   そこで端末側で SHA-256 して別IDを2本作り、キー本体は送らない。
+     room_id … 席の所有者確認に使う（サーバーには来るが公開しない）
+     pub     … 画面に出す4文字（PLAYER 8C21 の部分）
+   別ソルトで導出しているので、pub から room_id は逆算できない。
+
+   ■ 在室の判定
+   last_seen が 30分以内 = live / 4時間以内 = ghost / それ以上は削除。
+   ========================================================= */
+
+const ROOM_SEATS    = 12;
+const ROOM_LIVE_MS  = 30 * 60 * 1000;
+const ROOM_GHOST_MS = 4 * 60 * 60 * 1000;
+const ROOM_ID_RE    = /^[0-9A-HJKMNP-TV-Z]{12}$/;
+const ROOM_PUB_RE   = /^[0-9A-HJKMNP-TV-Z]{4}$/;
+const ROOM_HDL_RE   = /^[A-Za-z0-9_]{1,15}$/;
+const ROOM_TIERS    = ["pred","mas","dia","pla","gld","slv","brz","roo"];
+
+const roomId  = v => ROOM_ID_RE.test(String(v || "").toUpperCase())  ? String(v).toUpperCase() : null;
+const roomPub = v => ROOM_PUB_RE.test(String(v || "").toUpperCase()) ? String(v).toUpperCase() : null;
+const roomTier = v => ROOM_TIERS.includes(String(v)) ? String(v) : null;
+/* 他人の画面に出る文字列なので、ここを通らないものは保存しない */
+function roomHandle(v) {
+  /* 未指定(undefined)と空文字はどちらも null にする。
+     sit では「今の値を保つ」、handle では「表示しない」の意味になる。 */
+  if (v === undefined || v === null || v === "") return null;
+  const t = String(v).replace(/^@/, "");
+  return ROOM_HDL_RE.test(t) ? t : undefined;   // undefined = 不正
+}
+const roomRp = v => Number.isFinite(Number(v)) ? Math.max(0, Math.min(99999, Math.round(Number(v)))) : null;
+
+/* 期限切れの席を落とす。読むたびに流すので cron は要らない */
+function roomSweep(db, now) {
+  return db.prepare("DELETE FROM room_seat WHERE last_seen < ?1").bind(now - ROOM_GHOST_MS).run();
+}
+
+async function roomRows(db) {
+  const r = await db.prepare(
+    "SELECT room_id, seat_no, pub, handle, tier, rp, last_seen FROM room_seat WHERE seat_no > 0"
+  ).all();
+  return r.results || [];
+}
+
+/* room_id は絶対に返さない */
+function roomView(rows, now, meId) {
+  let live = 0, ghost = 0, me = 0;
+  const seats = rows.map(r => {
+    const age = now - r.last_seen;
+    const st  = age < ROOM_LIVE_MS ? "live" : "ghost";
+    if (st === "live") live++; else ghost++;
+    if (meId && r.room_id === meId) me = r.seat_no;
+    return { n: r.seat_no, st, pub: r.pub, h: r.handle, tier: r.tier, rp: r.rp, age: Math.round(age / 1000) };
+  }).sort((a, b) => a.n - b.n);
+  return { ok: true, seats, total: ROOM_SEATS, live, ghost, me };
+}
+
+async function roomApi(request, env, url) {
+  const db = env.RPDB;
+  if (!db) return json({ error: "d1-unbound" }, 503);
+  await rpsInit(db);
+  const now = Date.now();
+  await roomSweep(db, now);
+
+  /* ---- 読み取り ---- */
+  if (request.method === "GET") {
+    const id = roomId(url.searchParams.get("id"));
+
+    /* tracker のウィジェット用。人数だけを返す軽い経路 */
+    if (url.searchParams.get("count")) {
+      const rows = await roomRows(db);
+      const v = roomView(rows, now, null);
+      return json({ ok: true, live: v.live, ghost: v.ghost, total: ROOM_SEATS });
+    }
+
+    /* hb=1 のときだけ在室を延長する。
+       ただの閲覧で延長すると「記録中の人の部屋」でなくなるため、
+       room.html は画面が見えている間だけ hb を送る。 */
+    if (id && url.searchParams.get("hb")) {
+      await db.prepare("UPDATE room_seat SET last_seen = ?2 WHERE room_id = ?1").bind(id, now).run();
+    }
+    return json(roomView(await roomRows(db), now, id));
+  }
+
+  if (request.method !== "POST") return json({ error: "method" }, 405);
+
+  const body = await request.json().catch(() => ({}));
+  const id   = roomId(body.id);
+  if (!id) return json({ error: "bad-id" }, 400);
+  const act  = String(body.act || "sit");
+
+  const mineRow = await db.prepare(
+    "SELECT seat_no, pub, handle, tier, rp FROM room_seat WHERE room_id = ?1"
+  ).bind(id).first();
+
+  /* ---- 離席 ---- */
+  if (act === "leave") {
+    /* 行は消さない。4時間はゴーストとして残り、戻れば同じ席に座り直せる */
+    await db.prepare("UPDATE room_seat SET last_seen = ?2 WHERE room_id = ?1")
+      .bind(id, now - ROOM_LIVE_MS - 1000).run();
+    return json(roomView(await roomRows(db), now, id));
+  }
+
+  /* ---- ハンドルの設定・解除 ---- */
+  if (act === "handle") {
+    const h = roomHandle(body.handle);
+    if (h === undefined) return json({ error: "bad-handle" }, 400);
+    if (!mineRow) return json({ error: "not-seated" }, 409);
+    await db.prepare("UPDATE room_seat SET handle = ?2 WHERE room_id = ?1")
+      .bind(id, h ? "@" + h : null).run();
+    return json(roomView(await roomRows(db), now, id));
+  }
+
+  /* ---- 着席・移動 ---- */
+  if (act !== "sit") return json({ error: "bad-act" }, 400);
+
+  const seat = Number(body.seat);
+  if (!Number.isInteger(seat) || seat < 1 || seat > ROOM_SEATS) return json({ error: "bad-seat" }, 400);
+
+  const pub  = roomPub(body.pub) || (mineRow && mineRow.pub) || null;
+  const hdl  = roomHandle(body.handle);
+  if (hdl === undefined) return json({ error: "bad-handle" }, 400);
+  const handle = hdl ? "@" + hdl : (mineRow ? mineRow.handle : null);
+  const tier   = roomTier(body.tier) || (mineRow && mineRow.tier) || null;
+  const rp     = roomRp(body.rp);
+
+  const rows   = await roomRows(db);
+  const target = rows.find(r => r.seat_no === seat);
+
+  if (target && target.room_id === id) {
+    /* 自分の席をもう一度タップした場合は在室の更新だけ */
+    await db.prepare("UPDATE room_seat SET last_seen=?2, tier=?3, rp=?4 WHERE room_id=?1")
+      .bind(id, now, tier, rp).run();
+    return json(roomView(await roomRows(db), now, id));
+  }
+  /* 在室中の人の席は奪えない */
+  if (target && (now - target.last_seen) < ROOM_LIVE_MS) return json({ error: "taken", seat }, 409);
+
+  const st = [];
+  if (mineRow) {
+    /* seat_no に UNIQUE があるので、いったん負の番号へ逃がしてから入れ替える */
+    st.push(db.prepare("UPDATE room_seat SET seat_no = ?2 WHERE room_id = ?1").bind(id, -mineRow.seat_no));
+    if (target) {
+      /* ゴーストを上書きせず、自分が今いた席へ移す */
+      st.push(db.prepare("UPDATE room_seat SET seat_no = ?2 WHERE room_id = ?1").bind(target.room_id, mineRow.seat_no));
+    }
+    st.push(db.prepare(
+      "UPDATE room_seat SET seat_no=?2, pub=?3, handle=?4, tier=?5, rp=?6, last_seen=?7 WHERE room_id=?1"
+    ).bind(id, seat, pub, handle, tier, rp, now));
+  } else {
+    if (target) {
+      /* 自分の席がまだ無い場合は、空いている番号へゴーストを退避。
+         空きが無ければ、いずれ4時間で消える行なのでここで手放す。 */
+      const used = new Set(rows.map(r => r.seat_no));
+      let free = 0;
+      for (let i = 1; i <= ROOM_SEATS; i++) if (!used.has(i)) { free = i; break; }
+      st.push(free
+        ? db.prepare("UPDATE room_seat SET seat_no = ?2 WHERE room_id = ?1").bind(target.room_id, free)
+        : db.prepare("DELETE FROM room_seat WHERE room_id = ?1").bind(target.room_id));
+    }
+    st.push(db.prepare(
+      "INSERT INTO room_seat (room_id, seat_no, pub, handle, tier, rp, last_seen) VALUES (?1,?2,?3,?4,?5,?6,?7)"
+    ).bind(id, seat, pub, handle, tier, rp, now));
+  }
+
+  try {
+    await db.batch(st);   // batch は1トランザクション。途中で落ちれば元に戻る
+  } catch (e) {
+    /* UNIQUE 違反 = 読んでから書くまでの間に他の人が座った */
+    if (String(e.message || e).indexOf("UNIQUE") >= 0) return json({ error: "taken", seat }, 409);
+    throw e;
+  }
+  return json(roomView(await roomRows(db), now, id));
 }
 
 function json(obj, status = 200, maxAge = 0) {

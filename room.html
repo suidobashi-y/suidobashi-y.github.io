@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ランクルーム | RANK WORKBOOK - APEX WORKBOOK</title>
+<meta name="description" content="Apexのランクを記録中の人が集まる部屋。誰が今ランクを回しているかが席として見えます。">
+<link rel="canonical" href="https://apex-workbook.com/room.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+gtag('js',new Date());gtag('config','G-JT68JRBHLK');
+</script>
+<style>
+:root{
+  --bg:#0e131d; --panel:#0d1321; --line:#202a3a;
+  --cyan:#00e5ff; --pink:#ff2d78; --amber:#ffb020;
+  --txt:#e6edf6; --dim:#7d8ba1; --pod:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--txt);font-family:"Noto Sans JP",sans-serif;font-size:14px;line-height:1.6;padding:0 0 92px}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px}
+a{color:var(--cyan)}
+
+.top{border-bottom:1px solid var(--line);padding:16px 0 14px;margin-bottom:14px}
+.crumb{font-size:11px;color:var(--dim);letter-spacing:.08em}
+.crumb a{color:var(--dim);text-decoration:none}
+.crumb a:hover{color:var(--cyan)}
+.crumb b{color:var(--cyan);font-weight:500}
+h1{font-family:"Chakra Petch",sans-serif;font-size:26px;font-weight:700;margin:4px 0 2px}
+h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;color:var(--dim);margin-left:10px}
+.rule{font-size:12px;color:var(--dim)}
+
+.meta{display:flex;align-items:baseline;gap:13px;padding:0 2px 11px}
+.meta .big{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+.meta .big i{font-style:normal;font-size:14px;color:var(--dim);font-weight:600}
+.meta .lbl{font-size:12px;color:var(--dim)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;padding:0 2px 13px;border-bottom:1px solid var(--line);margin-bottom:14px;font-size:12px;color:var(--dim);min-height:14px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:3px;height:13px;border-radius:1px;display:block}
+.legend b{font-family:"Chakra Petch",sans-serif;font-weight:600;color:#9fb0c8}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+@media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.seat{
+  position:relative;background:var(--panel);border:1px solid var(--line);
+  padding:9px 10px 10px;min-height:116px;
+  display:flex;flex-direction:column;text-align:left;color:inherit;font:inherit;width:100%;
+  clip-path:polygon(0 0,calc(100% - var(--pod)) 0,100% var(--pod),100% 100%,var(--pod) 100%,0 calc(100% - var(--pod)));
+  transition:background .15s,border-color .15s,opacity .15s;
+}
+.head{display:flex;align-items:center;gap:7px}
+.head .tick{width:3px;height:12px;border-radius:1px;background:#3a465c;flex:0 0 auto}
+.head .no{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:11px;letter-spacing:.14em;color:#4d5b72}
+.head .tier{margin-left:auto;font-size:10px;color:#5d6b82}
+.body{display:flex;gap:9px;align-items:center;margin-top:9px}
+.ico{width:34px;height:34px;flex:0 0 auto;border-radius:2px;display:block}
+.name{min-width:0}
+.name .h{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name .h.anon{color:#8695ab;font-weight:500}
+.name .h a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.14)}
+.name .h a:hover{color:var(--cyan);border-bottom-color:var(--cyan)}
+.name .rp{font-size:11px;color:var(--dim);margin-top:1px}
+.name .rp b{font-family:"Chakra Petch",sans-serif;color:#9fb0c8;font-weight:600}
+.foot{margin-top:auto;padding-top:8px;font-size:11px;color:#5d6b82;display:flex;align-items:center;gap:5px}
+.pulse{width:5px;height:5px;border-radius:50%;background:#37d6a8;flex:0 0 auto}
+
+.seat.fading{opacity:.6}
+.seat.fading .pulse{background:var(--amber)}
+.seat.fading .foot{color:var(--amber)}
+
+.seat.ghost{background:rgba(13,19,33,.5);border-style:dashed;border-color:#1e2a3d;cursor:pointer}
+.seat.ghost .ico{filter:grayscale(1);opacity:.32}
+.seat.ghost .name .h{color:#5d6b82;font-weight:500}
+.seat.ghost .name .h.anon{color:#556377}
+.seat.ghost .name .rp,.seat.ghost .name .rp b{color:#4a5668}
+.seat.ghost .head .tick{opacity:.35}
+.seat.ghost .foot{color:#4a5668}
+.seat.ghost .sit{margin-left:auto;color:#5d6b82;font-size:11px;transition:color .15s}
+.seat.ghost:hover,.seat.empty:hover{border-color:var(--cyan);background:rgba(0,229,255,.05)}
+.seat.ghost:hover .sit,.seat.ghost:hover .foot{color:var(--cyan)}
+
+.seat.empty{background:transparent;border-style:dashed;border-color:#233046;cursor:pointer;align-items:center;justify-content:center}
+.seat.empty .head{position:absolute;top:9px;left:10px;right:10px}
+.seat.empty .cta{font-size:12px;color:#5d6b82;transition:color .15s}
+.seat.empty:hover .cta{color:var(--cyan)}
+.seat.ghost:focus-visible,.seat.empty:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+.seat.mine{border-color:var(--cyan);border-style:solid;background:linear-gradient(180deg,rgba(0,229,255,.10),rgba(0,229,255,.02));cursor:pointer;opacity:1}
+.seat.mine .head .no,.seat.mine .head .tier{color:var(--cyan)}
+.seat.mine .foot{color:#7fd8e8}
+
+.selfbar{position:fixed;left:0;right:0;bottom:0;background:rgba(13,19,33,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.selfbar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:11px}
+.selfbar .txt{flex:1;min-width:0}
+.selfbar .l1{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selfbar .l2{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{flex:0 0 auto;background:none;border:1px solid var(--line);color:var(--dim);font-family:"Noto Sans JP",sans-serif;font-size:12px;padding:8px 13px;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;text-decoration:none;display:inline-block}
+.btn:hover{border-color:#3b4a66;color:var(--txt)}
+.btn.pri{border-color:rgba(0,229,255,.45);color:var(--cyan)}
+.btn.pri:hover{background:rgba(0,229,255,.08)}
+.btn[disabled]{opacity:.45;cursor:default}
+
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#111a2b;border-top:1px solid var(--line);padding:16px 14px calc(16px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .22s}
+.sheet.on{transform:translateY(0)}
+.sheet .in{max-width:760px;margin:0 auto}
+.sheet h2{font-size:14px;font-weight:700;margin-bottom:4px}
+.sheet p{font-size:11.5px;color:var(--dim);margin-bottom:12px;line-height:1.7}
+.row{display:flex;gap:8px}
+.row .at{flex:1;display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:2px;padding:0 10px}
+.row .at span{color:var(--dim);font-family:"Chakra Petch",sans-serif;font-weight:600}
+.row input{flex:1;background:none;border:0;outline:none;color:var(--txt);font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:14px;padding:10px 0;min-width:0}
+.row input::placeholder{color:#48566d;font-weight:500}
+.sheet .acts{display:flex;gap:8px;margin-top:10px}
+
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,10px);background:#141d2f;border:1px solid var(--line);border-left:2px solid var(--cyan);padding:9px 15px;font-size:12.5px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:90vw;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.warn{border-left-color:var(--pink)}
+
+.note{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:#5d6b82;line-height:1.85}
+.state{padding:26px 4px;text-align:center;color:var(--dim);font-size:13px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="crumb"><a href="tracker.html">RANK WORKBOOK</a> / <b>ランクルーム</b></div>
+    <h1>ROOM 01<span>記録中の12席</span></h1>
+    <div class="rule">RPを記録すると在室が続きます。30分記録がないと席は自動で空きます。</div>
+  </div>
+
+  <div class="meta">
+    <div class="big" id="cnt">–<i>/12</i></div>
+    <div class="lbl">在室</div>
+  </div>
+  <div class="legend" id="legend"></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="state" id="state">読み込み中…</div>
+
+  <div class="note">
+    在室の判定は「直近30分にRPを記録したか」。常時接続はしていません。<br>
+    薄い席は直前に使っていた人。4時間で消えます。そのまま座れます(前の記録は自分の席と入れ替わります)。<br>
+    アイコンと PLAYER 番号は復元キーから作った別IDで、キー本体はこのページから送っていません。<br>
+    Xのハンドルは自己申告です(照合はしていません)。
+  </div>
+</div>
+
+<div class="selfbar">
+  <div class="in">
+    <canvas class="ico" id="myIco" width="34" height="34"></canvas>
+    <div class="txt">
+      <div class="l1" id="selfL1">読み込み中…</div>
+      <div class="l2" id="selfL2"></div>
+    </div>
+    <span id="selfAct"></span>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="in">
+    <h2>Xのハンドルを表示する</h2>
+    <p>設定すると席にハンドルが出て、プロフィールへのリンクになります。未設定のままでも席は使えます。</p>
+    <div class="row">
+      <label class="at"><span>@</span><input id="hIn" placeholder="apexwidgets" maxlength="15" autocomplete="off" spellcheck="false"></label>
+      <button class="btn pri" id="hSave">保存</button>
+    </div>
+    <div class="acts">
+      <button class="btn" id="hSkip">あとで</button>
+      <button class="btn" id="hClear">表示しない</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="data.js"></script>
+<script src="rank-chart.js"></script>
+<script>
+/* =========================================================
+   ランクルーム
+
+   復元キー(apexwb_rp_key_v1)はサーバーに送らない。
+   SHA-256 でソルト違いの別IDを2本作り、それだけを送る。
+     ROOM.id  … 席の所有者確認（12文字・公開しない）
+     ROOM.pub … 画面に出る4文字（PLAYER 8C21）
+   pub から id は逆算できないので、部屋が漏れても記録は読まれない。
+   ========================================================= */
+const API      = "https://apex-map-streamer.suidobashi-y.workers.dev";
+const SKEY_LS  = "apexwb_rp_key_v1";
+const HDL_LS   = "apexwb_room_handle_v1";
+const B32      = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+const POLL_MS  = 60000;
+
+const TIER_META = {
+  pred:{n:"プレデター",c:"#ff2d78"}, mas:{n:"マスター",c:"#b06bff"},
+  dia :{n:"ダイヤ",    c:"#00e5ff"}, pla:{n:"プラチナ",c:"#37d6a8"},
+  gld :{n:"ゴールド",  c:"#ffb020"}, slv:{n:"シルバー",c:"#8fa3bd"},
+  brz :{n:"ブロンズ",  c:"#c08457"}, roo:{n:"ルーキー",c:"#6b7a91"}
+};
+const TIER_CODE = {"ルーキー":"roo","ブロンズ":"brz","シルバー":"slv","ゴールド":"gld",
+                   "プラチナ":"pla","ダイヤ":"dia","マスター":"mas"};
+
+const ROOM = { id:null, pub:null, handle:null, rp:null, tier:null, seats:[], me:0, busy:false };
+
+/* ---- 復元キーから別IDを作る ---- */
+async function derive(salt, key, n){
+  const buf = new TextEncoder().encode(salt + key);
+  const h   = new Uint8Array(await crypto.subtle.digest("SHA-256", buf));
+  let s = ""; for (let i=0;i<n;i++) s += B32[h[i] & 31];
+  return s;
+}
+
+/* ---- アイコン（pub から生成。ハンドルを変えても変わらない） ---- */
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function drawIcon(cv, seed){
+  if(!cv) return;
+  const h=hash(seed||"?"), c=cv.getContext("2d"), S=cv.width/5;
+  c.fillStyle="#111a2b"; c.fillRect(0,0,cv.width,cv.height);
+  c.fillStyle="hsl("+[188,330,40,265,160][h%5]+" 78% 58%)";
+  let b=h;
+  for(let x=0;x<3;x++)for(let y=0;y<5;y++){
+    b=Math.imul(b,48271)>>>0;
+    if(b>>>13&1){c.fillRect(x*S,y*S,S,S);c.fillRect((4-x)*S,y*S,S,S)}
+  }
+}
+
+/* ---- tracker の記録から現在のRPとティアを読む ---- */
+function readMyRank(){
+  try{
+    loadDB();
+    const days = Object.keys(DB.records||{}).sort();
+    if(!days.length) return null;
+    const rp = Number(DB.records[days[days.length-1]].rp);
+    if(!Number.isFinite(rp)) return null;
+    let t = TIERS[0];
+    for(const x of TIERS) if(rp >= x.rp) t = x;
+    return { rp, tier: TIER_CODE[t.t] || null };
+  }catch(e){ return null; }
+}
+
+const pad = n => String(n).padStart(2,"0");
+const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+function ago(sec){
+  if(sec < 60) return "たった今";
+  const m = Math.floor(sec/60);
+  if(m < 60) return m+"分前";
+  return Math.floor(m/60)+"時間前";
+}
+function label(s){
+  return s.h
+    ? '<a href="https://x.com/'+esc(s.h.slice(1))+'" rel="nofollow noopener" target="_blank">'+esc(s.h)+"</a>"
+    : "PLAYER "+esc(s.pub||"????");
+}
+
+/* ---- 描画 ---- */
+function render(){
+  const grid=document.getElementById("grid"), by={};
+  ROOM.seats.forEach(s=>by[s.n]=s);
+  grid.innerHTML="";
+  for(let n=1;n<=12;n++){
+    const s=by[n], mine = s && ROOM.me===n;
+    const el=document.createElement(s&&s.st==="live"&&!mine ? "div" : "button");
+    if(el.tagName==="BUTTON") el.type="button";
+    el.className="seat "+(s?s.st:"empty")+(mine?" mine":"")+((s&&s.st==="live"&&s.age>1500)?" fading":"");
+    if(!s){
+      el.innerHTML='<div class="head"><span class="tick"></span><span class="no">SEAT '+pad(n)+'</span></div><div class="cta">空席 · 座る</div>';
+      el.onclick=()=>sit(n);
+    }else{
+      const tm=TIER_META[s.tier]||{n:"",c:"#3a465c"};
+      el.innerHTML=
+        '<div class="head"><span class="tick" style="background:'+tm.c+'"></span>'+
+        '<span class="no">SEAT '+pad(n)+'</span><span class="tier">'+tm.n+'</span></div>'+
+        '<div class="body"><canvas class="ico" width="34" height="34"></canvas>'+
+        '<div class="name"><div class="h'+(s.h?"":" anon")+'">'+label(s)+'</div>'+
+        '<div class="rp"><b>'+(s.rp!=null?Number(s.rp).toLocaleString():"–")+'</b> RP</div></div></div>'+
+        (s.st==="live"
+          ? '<div class="foot"><span class="pulse"></span>'+ago(s.age)+"に記録</div>"
+          : '<div class="foot">'+ago(s.age)+'まで在室<span class="sit">座る</span></div>');
+      drawIcon(el.querySelector("canvas"), s.pub);
+      const a=el.querySelector(".h a"); if(a) a.onclick=e=>e.stopPropagation();
+      if(mine) el.onclick=leave;
+      else if(s.st==="ghost") el.onclick=()=>sit(n);
+    }
+    grid.appendChild(el);
+  }
+  const m={};
+  ROOM.seats.filter(s=>s.st==="live"&&s.tier).forEach(s=>m[s.tier]=(m[s.tier]||0)+1);
+  document.getElementById("legend").innerHTML=
+    Object.keys(TIER_META).filter(k=>m[k]).map(k=>
+      '<span><i style="background:'+TIER_META[k].c+'"></i>'+TIER_META[k].n+" <b>"+m[k]+"</b></span>").join("");
+  document.getElementById("cnt").innerHTML=
+    ROOM.seats.filter(s=>s.st==="live").length+"<i>/12</i>";
+  document.getElementById("state").style.display="none";
+  paintSelf();
+}
+
+function paintSelf(){
+  const seated=ROOM.me>0, act=document.getElementById("selfAct");
+  const nm=ROOM.handle||("PLAYER "+(ROOM.pub||"????"));
+  drawIcon(document.getElementById("myIco"), ROOM.pub);
+  if(!ROOM.id){
+    document.getElementById("selfL1").textContent="記録を始めると座れます";
+    document.getElementById("selfL2").textContent="ランクルームはRANK WORKBOOKの記録者向けです";
+    act.innerHTML='<a class="btn pri" href="tracker.html">記録を始める</a>';
+    return;
+  }
+  document.getElementById("selfL1").textContent=seated?"SEAT "+pad(ROOM.me)+" に着席中":"まだ座っていません";
+  document.getElementById("selfL2").textContent=seated
+    ? nm+(ROOM.rp!=null?" · "+ROOM.rp.toLocaleString()+" RP":"")
+    : "空席か、薄くなっている席をタップ";
+  if(seated && !ROOM.handle)
+    act.innerHTML='<button class="btn pri" id="aBtn">ハンドルを設定</button>', bind(openSheet);
+  else if(seated)
+    act.innerHTML='<button class="btn" id="aBtn">席を離れる</button>', bind(leave);
+  else
+    act.innerHTML='<button class="btn pri" id="aBtn">空席を探す</button>', bind(()=>{
+      const used=new Set(ROOM.seats.map(s=>s.n));
+      for(let i=1;i<=12;i++) if(!used.has(i)) return sit(i);
+      const g=ROOM.seats.find(s=>s.st==="ghost"); if(g) sit(g.n); else toast("空きがありません","warn");
+    });
+  function bind(fn){ const b=document.getElementById("aBtn"); if(b) b.onclick=fn; }
+}
+
+/* ---- 通信 ---- */
+function apply(j){
+  ROOM.seats=j.seats||[]; ROOM.me=j.me||0;
+  const mine=ROOM.seats.find(s=>s.n===ROOM.me);
+  if(mine) ROOM.handle=mine.h||null;
+  render();
+}
+async function pull(hb){
+  if(!ROOM.id){ 
+    try{
+      const r=await fetch(API+"/room");
+      const j=await r.json(); if(j.ok) apply(j); else fail(j.error);
+    }catch(e){ fail(e.message); }
+    return;
+  }
+  try{
+    const r=await fetch(API+"/room?id="+ROOM.id+(hb&&ROOM.me?"&hb=1":""));
+    const j=await r.json();
+    if(j.ok) apply(j); else fail(j.error);
+  }catch(e){ fail(e.message); }
+}
+function fail(msg){
+  const st=document.getElementById("state");
+  st.style.display="";
+  st.textContent = msg==="d1-unbound" ? "ランクルームは準備中です" : "読み込めませんでした";
+}
+async function post(payload){
+  if(ROOM.busy) return null;
+  ROOM.busy=true;
+  try{
+    const r=await fetch(API+"/room",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(Object.assign({id:ROOM.id,pub:ROOM.pub},payload))});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){
+      if(j.error==="taken"){ toast("SEAT "+pad(payload.seat)+" は他の人が座りました。別の席を選んでください","warn"); pull(false); }
+      else toast("うまくいきませんでした","warn");
+      return null;
+    }
+    apply(j); return j;
+  }catch(e){ toast("通信に失敗しました","warn"); return null; }
+  finally{ ROOM.busy=false; }
+}
+
+function sit(n){
+  if(!ROOM.id){ toast("先にRANK WORKBOOKで記録を始めてください","warn"); return; }
+  const was=ROOM.me;
+  post({act:"sit",seat:n,tier:ROOM.tier,rp:ROOM.rp,handle:ROOM.handle}).then(j=>{
+    if(!j) return;
+    toast("SEAT "+pad(n)+" に座りました");
+    gtag("event","room_sit",{seat:n,moved:was?1:0});
+    if(!ROOM.handle) setTimeout(openSheet,700);
+  });
+}
+function leave(){
+  post({act:"leave"}).then(j=>{ if(j){ toast("席を離れました"); gtag("event","room_leave",{}); } });
+}
+
+/* ---- ハンドル設定 ---- */
+const sheet=document.getElementById("sheet"), hIn=document.getElementById("hIn");
+function openSheet(){ sheet.classList.add("on"); hIn.value=(ROOM.handle||"").replace("@",""); setTimeout(()=>hIn.focus(),220); }
+function closeSheet(){ sheet.classList.remove("on"); hIn.blur(); }
+document.getElementById("hSkip").onclick=closeSheet;
+document.getElementById("hClear").onclick=()=>{
+  post({act:"handle",handle:""}).then(j=>{ if(j){ ROOM.handle=null; try{STORE.removeItem(HDL_LS)}catch(e){} paintSelf(); closeSheet(); toast("ハンドルを非表示にしました"); } });
+};
+document.getElementById("hSave").onclick=()=>{
+  const v=hIn.value.trim().replace(/^@/,"");
+  if(!/^[A-Za-z0-9_]{1,15}$/.test(v)){ toast("半角英数字とアンダースコア、15文字までで入力してください","warn"); return; }
+  post({act:"handle",handle:v}).then(j=>{
+    if(j){ ROOM.handle="@"+v; try{STORE.setItem(HDL_LS,ROOM.handle)}catch(e){}
+      paintSelf(); closeSheet(); toast("ハンドルを設定しました"); gtag("event","room_handle",{}); }
+  });
+};
+hIn.addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("hSave").click(); });
+
+let tid;
+function toast(msg,cls){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="on "+(cls||"");
+  clearTimeout(tid); tid=setTimeout(()=>t.className="",2600);
+}
+
+/* ---- 起動 ---- */
+(async function(){
+  let key=null;
+  try{ key=STORE.getItem(SKEY_LS); }catch(e){}
+  if(key && /^[0-9A-HJKMNP-TV-Z]{12}$/.test(String(key).toUpperCase())){
+    key=String(key).toUpperCase();
+    ROOM.id  = await derive("awb-room:v1:", key, 12);
+    ROOM.pub = await derive("awb-pub:v1:",  key, 4);
+    try{ ROOM.handle=STORE.getItem(HDL_LS)||null; }catch(e){}
+    const r=readMyRank(); if(r){ ROOM.rp=r.rp; ROOM.tier=r.tier; }
+  }
+  paintSelf();
+  await pull(false);
+
+  /* 画面が見えている間だけ在室を延長する。
+     裏に回っている間は延長しないので、放置した席は30分で自然に空く。 */
+  let timer=setInterval(()=>{ if(!document.hidden) pull(true); },POLL_MS);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) pull(true); });
+})();
+</script>
+</body>
+</html>

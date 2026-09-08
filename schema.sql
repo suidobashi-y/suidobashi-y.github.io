@@ -23,6 +23,24 @@ CREATE TABLE IF NOT EXISTS rp_profile (
   seen_at  INTEGER NOT NULL   -- 最終アクセス（将来の掃除用）
 );
 
+-- ===== ランクルーム（room.html） =====
+-- room_id は復元キーそのものではない。端末側で SHA-256 して作った別ID。
+-- 復元キーは「知っていれば全記録が読める」認証情報なので、公開エンドポイントには流さない。
+--   room_id = base32(SHA-256("awb-room:v1:" + 復元キー))[0:12]   所有者確認用
+--   pub     = base32(SHA-256("awb-pub:v1:"  + 復元キー))[0:4]    画面に出す4文字
+-- ソルトが違うので pub から room_id は逆算できない。
+CREATE TABLE IF NOT EXISTS room_seat (
+  room_id   TEXT PRIMARY KEY,   -- 1人1席（同じ人が2席を持てない）
+  seat_no   INTEGER NOT NULL,   -- 1..12。入れ替え中だけ負の値になる
+  pub       TEXT,               -- 公開ID（PLAYER 8C21 の部分）
+  handle    TEXT,               -- Xハンドル（任意 / 自己申告 / 形式検証済み）
+  tier      TEXT,
+  rp        INTEGER,
+  last_seen INTEGER NOT NULL    -- 30分以内=在室 / 4時間以内=ゴースト / 超過は削除
+);
+-- 1席1人を DB 側で保証する。着席の競合はこの制約が弾く（Worker は 409 に変換）。
+CREATE UNIQUE INDEX IF NOT EXISTS room_seat_no ON room_seat(seat_no);
+
 -- EA名 / UID は保存しません。
 -- 使われなくなった行を掃除するなら（例：1年触られていないキー）:
 --   DELETE FROM rp_log WHERE anon_id IN
