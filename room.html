@@ -49,6 +49,7 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
 
 .seat{
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
   position:relative;background:var(--panel);border:1px solid var(--line);
   padding:9px 10px 10px;min-height:116px;
   display:flex;flex-direction:column;text-align:left;color:inherit;font:inherit;width:100%;
@@ -83,13 +84,18 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 .seat.ghost .head .tick{opacity:.35}
 .seat.ghost .foot{color:#4a5668}
 .seat.ghost .sit{margin-left:auto;color:#5d6b82;font-size:11px;transition:color .15s}
-.seat.ghost:hover,.seat.empty:hover{border-color:var(--cyan);background:rgba(0,229,255,.05)}
-.seat.ghost:hover .sit,.seat.ghost:hover .foot{color:var(--cyan)}
+/* タッチ端末では :hover が指の触れた席に貼り付いて残るため、
+   マウスがある環境だけに限定する。タッチには :active で反応を返す。 */
+@media (hover:hover){
+  .seat.ghost:hover,.seat.empty:hover{border-color:var(--cyan);background:rgba(0,229,255,.05)}
+  .seat.ghost:hover .sit,.seat.ghost:hover .foot{color:var(--cyan)}
+  .seat.empty:hover .cta{color:var(--cyan)}
+}
+.seat.ghost:active,.seat.empty:active{border-color:rgba(0,229,255,.55);background:rgba(0,229,255,.05)}
 
 .seat.empty{background:transparent;border-style:dashed;border-color:#233046;cursor:pointer;align-items:center;justify-content:center}
 .seat.empty .head{position:absolute;top:9px;left:10px;right:10px}
 .seat.empty .cta{font-size:12px;color:#5d6b82;transition:color .15s}
-.seat.empty:hover .cta{color:var(--cyan)}
 .seat.ghost:focus-visible,.seat.empty:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 
 /* 自分の席は2段階。ふだんは在室が分かる程度に落としておき、
@@ -477,6 +483,21 @@ document.getElementById("hSave").onclick=()=>{
   });
 };
 hIn.addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("hSave").click(); });
+
+/* スクロール中に指が席へ触れただけで着席してしまうのを防ぐ。
+   押した位置から一定以上動いていたら、そのクリックは捨てる。 */
+let tapAt=null, tapMoved=false;
+addEventListener("pointerdown", e=>{ tapAt={x:e.clientX,y:e.clientY}; tapMoved=false; }, true);
+addEventListener("pointermove", e=>{
+  if(!tapAt) return;
+  if(Math.abs(e.clientX-tapAt.x)>10 || Math.abs(e.clientY-tapAt.y)>10) tapMoved=true;
+}, true);
+addEventListener("pointercancel", ()=>{ tapMoved=true; }, true);
+addEventListener("click", e=>{
+  if(!tapMoved) return;
+  tapMoved=false; tapAt=null;
+  e.stopPropagation(); e.preventDefault();
+}, true);
 
 /* 席・下部バー・シート以外を触ったら選択を解いて、在室表示に戻す */
 document.addEventListener("click", e=>{
