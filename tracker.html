@@ -39,7 +39,7 @@
 .ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
 .ch b{font-size:14px;font-weight:700}
 .ch span{font-size:11px;color:var(--muted)}
-/* カレンダー下の小さな導線。目立たせず、在室がいるときだけ人数を出す */
+/* カレンダー下の小さな導線。目立たせず、3人以上のときだけ人数を出す */
 .roomlnk{display:inline-flex;align-items:center;gap:7px;margin-top:11px;
   font-size:11.5px;color:var(--muted);text-decoration:none;
   border-bottom:1px solid rgba(125,139,161,.28);padding-bottom:1px}
@@ -1303,14 +1303,16 @@ function roomRank(){
   }catch(e){ return {}; }
 }
 
-/* リンクに在室数を添える。0人のときは何も出さない。 */
+/* リンクに在室数を添える。1〜2人は少なく見えて逆効果なので、3人以上でだけ出す。 */
+const ROOM_CNT_MIN = 3;
+
 async function roomCount(){
   const el = document.getElementById("roomCnt");
   if (!el) return;
   try{
     const r = await fetch(API + "/room?count=1");
     const j = await r.json();
-    if (j && j.ok && j.live > 0) el.textContent = j.live + "人が記録中";
+    if (j && j.ok && j.live >= ROOM_CNT_MIN) el.textContent = j.live + "人が記録中";
   }catch(e){}
 }
 addEventListener("load", () => setTimeout(roomCount, 1200));
