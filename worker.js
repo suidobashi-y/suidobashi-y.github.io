@@ -711,7 +711,11 @@ function roomHandle(v) {
   const t = String(v).replace(/^@/, "");
   return ROOM_HDL_RE.test(t) ? t : undefined;   // undefined = 不正
 }
-const roomRp = v => Number.isFinite(Number(v)) ? Math.max(0, Math.min(99999, Math.round(Number(v)))) : null;
+/* null / undefined / "" は「値なし」として扱う。Number(null) は 0 になるため、
+   ここを素通りさせると記録の無い人が 0 RP で着席できてしまう。
+   ルーキーIV は実際に 0 RP なので、0 と「値なし」は区別する必要がある。 */
+const roomRp = v => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)))
+  ? null : Math.max(0, Math.min(99999, Math.round(Number(v))));
 
 /* 期限切れの席を落とす。読むたびに流すので cron は要らない */
 function roomSweep(db, now) {
@@ -828,6 +832,10 @@ async function roomApi(request, env, url) {
   const tier   = roomTier(body.tier) || (mineRow && mineRow.tier) || null;
   /* 未指定のときは既存の値を残す。tier と同じ扱いにしないと座り直しでRPが消える */
   const rp     = roomRp(body.rp) ?? (mineRow ? mineRow.rp : null);
+
+  /* RPが分からない人は座れない。ランクルームは記録している人の部屋なので、
+     ここを開けると 0 RP の席が並んで、部屋の情報量が落ちる。 */
+  if (rp === null) return json({ error: "no-record" }, 409);
 
   const rows   = await roomRows(db);
   const target = rows.find(r => r.seat_no === seat);
