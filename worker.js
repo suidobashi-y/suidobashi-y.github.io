@@ -546,11 +546,16 @@ function rpsInit(db) {
         handle    TEXT,
         tier      TEXT,
         rp        INTEGER,
-        last_seen INTEGER NOT NULL
+        last_seen INTEGER NOT NULL,
+        left_at   INTEGER
       )`),
       /* 1席1人を DB 側で保証する。入れ替えで一時退避が要るのはこの制約のため。 */
       db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS room_seat_no ON room_seat(seat_no)`)
-    ]).catch(e => { rpsReady = null; throw e; });
+    ])
+      /* CREATE TABLE IF NOT EXISTS は既存テーブルの列追加を反映しない。
+         後から足した列はここで個別に入れる（すでにあればエラーを捨てる）。 */
+      .then(() => db.prepare(`ALTER TABLE room_seat ADD COLUMN left_at INTEGER`).run().catch(() => {}))
+      .catch(e => { rpsReady = null; throw e; });
   }
   return rpsReady;
 }
@@ -715,7 +720,7 @@ function roomSweep(db, now) {
 
 async function roomRows(db) {
   const r = await db.prepare(
-    "SELECT room_id, seat_no, pub, handle, tier, rp, last_seen FROM room_seat WHERE seat_no > 0"
+    "SELECT room_id, seat_no, pub, handle, tier, rp, last_seen, left_at FROM room_seat WHERE seat_no > 0"
   ).all();
   return r.results || [];
 }
@@ -725,7 +730,9 @@ function roomView(rows, now, meId) {
   let live = 0, ghost = 0, me = 0;
   const seats = rows.map(r => {
     const age = now - r.last_seen;
-    const st  = age < ROOM_LIVE_MS ? "live" : "ghost";
+    /* 離席は last_seen を巻き戻さず left_at で表す。
+       時刻を偽装すると「離席した瞬間に30分前」と出てしまうため。 */
+    const st  = (!r.left_at && age < ROOM_LIVE_MS) ? "live" : "ghost";
     if (st === "live") live++; else ghost++;
     if (meId && r.room_id === meId) me = r.seat_no;
     return { n: r.seat_no, st, pub: r.pub, h: r.handle, tier: r.tier, rp: r.rp, age: Math.round(age / 1000) };
@@ -755,7 +762,8 @@ async function roomApi(request, env, url) {
        ただの閲覧で延長すると「記録中の人の部屋」でなくなるため、
        room.html は画面が見えている間だけ hb を送る。 */
     if (id && url.searchParams.get("hb")) {
-      await db.prepare("UPDATE room_seat SET last_seen = ?2 WHERE room_id = ?1").bind(id, now).run();
+      await db.prepare("UPDATE room_seat SET last_seen = ?2 WHERE room_id = ?1 AND left_at IS NULL")
+        .bind(id, now).run();
     }
     return json(roomView(await roomRows(db), now, id));
   }
@@ -773,9 +781,10 @@ async function roomApi(request, env, url) {
 
   /* ---- 離席 ---- */
   if (act === "leave") {
-    /* 行は消さない。4時間はゴーストとして残り、戻れば同じ席に座り直せる */
-    await db.prepare("UPDATE room_seat SET last_seen = ?2 WHERE room_id = ?1")
-      .bind(id, now - ROOM_LIVE_MS - 1000).run();
+    /* 行は消さない。4時間はゴーストとして残り、戻れば同じ席に座り直せる。
+       last_seen はそのままなので、経過時間は実際の記録時刻から数えられる。 */
+    await db.prepare("UPDATE room_seat SET left_at = ?2 WHERE room_id = ?1")
+      .bind(id, now).run();
     return json(roomView(await roomRows(db), now, id));
   }
 
@@ -807,12 +816,13 @@ async function roomApi(request, env, url) {
 
   if (target && target.room_id === id) {
     /* 自分の席をもう一度タップした場合は在室の更新だけ */
-    await db.prepare("UPDATE room_seat SET last_seen=?2, tier=?3, rp=?4 WHERE room_id=?1")
+    await db.prepare("UPDATE room_seat SET last_seen=?2, tier=?3, rp=?4, left_at=NULL WHERE room_id=?1")
       .bind(id, now, tier, rp).run();
     return json(roomView(await roomRows(db), now, id));
   }
   /* 在室中の人の席は奪えない */
-  if (target && (now - target.last_seen) < ROOM_LIVE_MS) return json({ error: "taken", seat }, 409);
+  if (target && !target.left_at && (now - target.last_seen) < ROOM_LIVE_MS)
+    return json({ error: "taken", seat }, 409);
 
   const st = [];
   if (mineRow) {
@@ -823,7 +833,7 @@ async function roomApi(request, env, url) {
       st.push(db.prepare("UPDATE room_seat SET seat_no = ?2 WHERE room_id = ?1").bind(target.room_id, mineRow.seat_no));
     }
     st.push(db.prepare(
-      "UPDATE room_seat SET seat_no=?2, pub=?3, handle=?4, tier=?5, rp=?6, last_seen=?7 WHERE room_id=?1"
+      "UPDATE room_seat SET seat_no=?2, pub=?3, handle=?4, tier=?5, rp=?6, last_seen=?7, left_at=NULL WHERE room_id=?1"
     ).bind(id, seat, pub, handle, tier, rp, now));
   } else {
     if (target) {

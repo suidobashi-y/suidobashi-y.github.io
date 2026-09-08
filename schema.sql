@@ -36,8 +36,12 @@ CREATE TABLE IF NOT EXISTS room_seat (
   handle    TEXT,               -- Xハンドル（任意 / 自己申告 / 形式検証済み）
   tier      TEXT,
   rp        INTEGER,
-  last_seen INTEGER NOT NULL    -- 30分以内=在室 / 4時間以内=ゴースト / 超過は削除
+  last_seen INTEGER NOT NULL,   -- 最後にRPを記録した時刻。30分以内=在室 / 4時間で削除
+  left_at   INTEGER              -- 自分から離席した時刻。入っていればRPが新しくてもゴースト
 );
+-- last_seen を巻き戻して離席を表すと「離席した瞬間に30分前まで在室」と出てしまうため、
+-- 状態(left_at)と時刻(last_seen)は分けて持つ。座り直すと left_at は NULL に戻る。
+-- 後から足した列なので、既存のテーブルには Worker が ALTER TABLE で追加する。
 -- 1席1人を DB 側で保証する。着席の競合はこの制約が弾く（Worker は 409 に変換）。
 CREATE UNIQUE INDEX IF NOT EXISTS room_seat_no ON room_seat(seat_no);
 
