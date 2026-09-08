@@ -92,9 +92,14 @@ h1 span{font-family:"Noto Sans JP",sans-serif;font-size:15px;font-weight:500;col
 .seat.empty:hover .cta{color:var(--cyan)}
 .seat.ghost:focus-visible,.seat.empty:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 
-.seat.mine{border-color:var(--cyan);border-style:solid;background:linear-gradient(180deg,rgba(0,229,255,.10),rgba(0,229,255,.02));cursor:pointer;opacity:1}
-.seat.mine .head .no,.seat.mine .head .tier{color:var(--cyan)}
-.seat.mine .foot{color:#7fd8e8}
+/* 自分の席は2段階。ふだんは在室が分かる程度に落としておき、
+   座った直後だけ選択中として明るくする。 */
+.seat.mine{border-color:rgba(0,229,255,.34);border-style:solid;background:rgba(0,229,255,.035);cursor:pointer;opacity:1}
+.seat.mine .head .no,.seat.mine .head .tier{color:#5f93a6}
+.seat.mine .foot{color:#5d7f8c}
+.seat.mine.sel{border-color:var(--cyan);background:linear-gradient(180deg,rgba(0,229,255,.10),rgba(0,229,255,.02))}
+.seat.mine.sel .head .no,.seat.mine.sel .head .tier{color:var(--cyan)}
+.seat.mine.sel .foot{color:#7fd8e8}
 
 .selfbar{position:fixed;left:0;right:0;bottom:0;background:rgba(13,19,33,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
 .selfbar .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:11px}
@@ -209,6 +214,9 @@ const SKEY_LS  = "apexwb_rp_key_v1";
 const HDL_LS   = "apexwb_room_handle_v1";
 /* 「表示しない」を選んだかどうか。未設定と区別しないと座るたびに聞いてしまう */
 const HOPT_LS  = "apexwb_room_handle_optout_v1";
+/* 席を持っているかどうか。tracker がRPを記録したときに
+   在室を延ばすべきか判断するために読む。 */
+const SEAT_LS  = "apexwb_room_seat_v1";
 const B32      = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const POLL_MS  = 60000;
 
@@ -221,7 +229,8 @@ const TIER_META = {
 const TIER_CODE = {"ルーキー":"roo","ブロンズ":"brz","シルバー":"slv","ゴールド":"gld",
                    "プラチナ":"pla","ダイヤ":"dia","マスター":"mas"};
 
-const ROOM = { id:null, pub:null, handle:null, optout:false, rp:null, tier:null, seats:[], me:0, busy:false };
+const ROOM = { id:null, pub:null, handle:null, optout:false, rp:null, tier:null, seats:[], me:0, busy:false,
+               sel:false };   /* 自分の席が選択中か（座った直後だけ true） */
 
 /* ---- 復元キーから別IDを作る ---- */
 async function derive(salt, key, n){
@@ -282,7 +291,8 @@ function render(){
     const s=by[n], mine = s && ROOM.me===n;
     const el=document.createElement(s&&s.st==="live"&&!mine ? "div" : "button");
     if(el.tagName==="BUTTON") el.type="button";
-    el.className="seat "+(s?s.st:"empty")+(mine?" mine":"")+((s&&s.st==="live"&&s.age>1500)?" fading":"");
+    el.className="seat "+(s?s.st:"empty")+(mine?" mine":"")+(mine&&ROOM.sel?" sel":"")
+      +((s&&s.st==="live"&&s.age>1500)?" fading":"");
     if(!s){
       el.innerHTML='<div class="head"><span class="tick"></span><span class="no">SEAT '+pad(n)+'</span></div><div class="cta">空席 · 座る</div>';
       el.onclick=()=>sit(n);
@@ -367,6 +377,11 @@ function apply(j){
   ROOM.seats=j.seats||[]; ROOM.me=j.me||0;
   const mine=ROOM.seats.find(s=>s.n===ROOM.me);
   if(mine) ROOM.handle=mine.h||null;
+  /* 在室中のときだけ印を残す。離席・時間切れなら消す */
+  try{
+    if(mine && mine.st==="live") STORE.setItem(SEAT_LS, String(ROOM.me));
+    else STORE.removeItem(SEAT_LS);
+  }catch(e){}
   render();
 }
 async function pull(hb){
@@ -410,6 +425,7 @@ function sit(n){
   const was=ROOM.me;
   post({act:"sit",seat:n,tier:ROOM.tier,rp:ROOM.rp,handle:ROOM.handle}).then(j=>{
     if(!j) return;
+    ROOM.sel=true; render();
     toast("SEAT "+pad(n)+" に座りました");
     gtag("event","room_sit",{seat:n,moved:was?1:0});
     if(!ROOM.handle && !ROOM.optout) setTimeout(openSheet,700);
@@ -442,6 +458,13 @@ document.getElementById("hSave").onclick=()=>{
   });
 };
 hIn.addEventListener("keydown",e=>{ if(e.key==="Enter") document.getElementById("hSave").click(); });
+
+/* 席・下部バー・シート以外を触ったら選択を解いて、在室表示に戻す */
+document.addEventListener("click", e=>{
+  if(!ROOM.sel) return;
+  if(e.target.closest(".seat, .selfbar, .sheet")) return;
+  ROOM.sel=false; render();
+});
 
 let tid;
 function toast(msg,cls){
