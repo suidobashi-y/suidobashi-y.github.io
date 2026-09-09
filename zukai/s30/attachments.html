@@ -9,7 +9,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JT68JRBHLK');
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
 </script>
 <title>S30 破損アタッチメント 実数値一覧（武器別） | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legends シーズン30の破損アタッチメント5種を射撃訓練場で武器別に計測。オーバーフローマガジン・ヘッドシーカーバレル・タクティカルレーザー・アジャイル標準ストック・ラピッドスナイパーストックの装弾数・リロード・反動制御の実数値を、紫アタッチメント基準の差分で掲載。">

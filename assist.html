@@ -9,7 +9,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JT68JRBHLK');
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
 </script>
 <title>エイムアシスト仕様 | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legends のエイムアシスト値と変更履歴の早見ページ。2026年7月10日のアンチチート施策による挙動変化（命中率2〜4%低下）を公式が認めた件、デバイス規制の状況を、公式発表とコミュニティ検証を区別して掲載しています。">

@@ -9,7 +9,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JT68JRBHLK');
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
 </script>
 <title>ランクワークブック｜ApexのRPを毎日記録して推移を可視化 | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legendsのランクポイント（RP）を毎日記録して、推移グラフ・ティア・偏差値・スプリット合計を自動表示。ログイン不要、端末内保存のRP記録ツール。">

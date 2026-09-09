@@ -9,7 +9,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JT68JRBHLK');
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
 </script>
 <title>S30ランク分布の推移｜毎週の山の動きとリセットの仕組み | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legends シーズン30のランク分布を毎週月曜に計測し、26ディビジョンの形の変化を時系列で並べています。あわせて、リセットが表示ランクではなく隠しスキル値（MMR）を基準に決まる仕組みを整理。">

@@ -9,7 +9,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-JT68JRBHLK');
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
 </script>
 <title>Apexの人口・同時接続数はいくつ？正確な数字が存在しない理由 | APEX WORKBOOK</title>
 <meta name="description" content="Apex Legends の同時接続数（同接）とプレイヤー人口を、公開されているデータだけで整理。Steam同接の実数、全プラットフォーム合計が推定できない理由、「過疎った」説の検証まで。2026年8月時点の数値を掲載しています。">
