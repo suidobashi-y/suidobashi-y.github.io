@@ -121,6 +121,11 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .shape .cap b.g{color:#ffcc4d}
 .shape .cap b.p{color:#3fd3c8}
 .shape .cap b.d{color:#69b7ff}
+.splitmark{position:relative;margin:4px 0 16px;font-family:'Chakra Petch';font-size:11px;
+  letter-spacing:.18em;color:var(--amber)}
+.splitmark::before{content:"";position:absolute;left:-21px;top:4px;width:11px;height:11px;
+  background:var(--amber);transform:rotate(45deg)}
+.splitmark i{font-style:normal;color:var(--muted);letter-spacing:.06em;margin-left:9px}
 </style>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -157,14 +162,14 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   <h1>山は毎週、<span class="accent">右へ動いている</span></h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
-    <span class="upd">最終更新: 2026-09-14</span>
+    <span class="upd">最終更新: 2026-09-21</span>
   </div>
 <nav class="sib"><a href="./meta.html">メタ</a><a class="on" href="./rank.html">ランク</a><a href="./weapons.html">武器</a></nav>
 </header>
 
 <section>
   <h2>分布の推移</h2>
-  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月16日2:00まで。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。そもそもリセットで自分がどこに落とされるのかは<a href="#reset">下の記事</a>で扱っています。</p>
+  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月16日2:00に終わり、9/21の回からはスプリット2です。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。そもそもリセットで自分がどこに落とされるのかは<a href="#reset">下の記事</a>で扱っています。</p>
   <div class="rail">
 
     <div class="ent">
@@ -410,7 +415,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       </div>
     </div>
 
-    <div class="ent hi">
+    <div class="ent">
       <div class="day">09 / 14 <i>開幕41日目</i></div>
       <div class="t">スプリット1最終週、中央値がプラチナIIIまで上がった</div>
       <p>最多は先週に続いて<b>ダイヤIII 11.35%</b>。二番手はプラチナIIIではなく
@@ -461,17 +466,73 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       </div>
     </div>
 
+
+    <div class="splitmark">SPLIT 2<i>9/16 2:00 リセット</i></div>
+
+    <div class="ent hi">
+      <div class="day">09 / 21 <i>スプリット2 6日目</i></div>
+      <div class="t">スプリットリセット。山はプラチナIIIまで戻った</div>
+      <p>9月16日にスプリット2が始まり、分布はリセット後の形に戻った。最多は<b>プラチナIII 16.12%</b>で、
+      2位のプラチナII 10.67%を大きく離している。ダイヤ以上は30.3%→<b>11.7%</b>、
+      中央値はプラチナIII→プラチナIVに1つ下がった。</p>
+      <p>スプリット切り替えのソフトリセットは、実際には<b>いまいるティアのIVまで下がる</b>形だった。
+      例外はダイヤIV・IIIで、ここだけは<b>プラチナIII・II</b>に落ちている。
+      ブロンズIV 4.30%・シルバーIV 6.40%・ゴールドIV 9.42%が一つ上のIIIより大きく突き出ているのは、この着地点に人が溜まっているから。
+      プラチナIIIが突出しているのも、S1最終で最多だったダイヤIII・IV（合わせて20.3%）がまとめて降りてきたためと読める。
+      シーズン開幕のリセットとは仕組みが違うので、8/10の回とは並べていない。</p>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:5.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:2.5;--c:#9aa3b8"></i>
+      <i style="--h:26.7;--c:#c58b52"></i>
+      <i style="--h:9.4;--c:#c58b52"></i>
+      <i style="--h:8.6;--c:#c58b52"></i>
+      <i style="--h:8.9;--c:#c58b52"></i>
+      <i style="--h:39.7;--c:#b9c3d4"></i>
+      <i style="--h:20.5;--c:#b9c3d4"></i>
+      <i style="--h:14.2;--c:#b9c3d4"></i>
+      <i style="--h:10.7;--c:#b9c3d4"></i>
+      <i class="p1" style="--h:58.4;--c:#ffcc4d"></i>
+      <i style="--h:34.4;--c:#ffcc4d"></i>
+      <i style="--h:20.2;--c:#ffcc4d"></i>
+      <i style="--h:13.4;--c:#ffcc4d"></i>
+      <i style="--h:63.3;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
+      <i style="--h:66.2;--c:#3fd3c8"></i>
+      <i style="--h:44.3;--c:#3fd3c8"></i>
+      <i style="--h:32.3;--c:#69b7ff"></i>
+      <i style="--h:23.7;--c:#69b7ff"></i>
+      <i style="--h:8.4;--c:#69b7ff"></i>
+      <i style="--h:5.1;--c:#69b7ff"></i>
+      <i style="--h:1.5;--c:#b06bff"></i>
+      <i style="--h:1.9;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 各ティアの<b class="g">IV</b>と、ダイヤの着地点<b class="p">プラチナIII</b>が突出</div>
+  </div>
+      <div class="mv">
+        <span class="dn">最多<b>ダイヤIII → プラチナIII 16.12%</b></span>
+        <span class="dn">中央値<b>プラチナIII → プラチナIV</b></span>
+        <span class="dn">ダイヤ以上<b>30.3% → 11.7%</b></span>
+        <span class="fl">ゴールドIV / III<b>9.42% / 5.55%</b></span>
+      </div>
+    </div>
+
   </div>
 
-  <p class="note">5週間で山は<b>ゴールドIII → プラチナIII → ダイヤIII</b>と移り、今週は据え置きでした。
+  <p class="note">スプリット1の5週間で、山は<b>ゴールドIII → プラチナIII → ダイヤIII</b>と移り、最終週は据え置きでした。
   中央値はゴールドIVからプラチナIIIまで5ディビジョンぶん上がっています。
   山の位置はもう動かず、代わりに全体がゆっくり後ろから押し上がる形に変わりました。</p>
   <p class="note">S29最終のダイヤ以上は38.2%で、スプリット1の最終週は30.3%。残り8ポイントでした。
   壁は6週間ずっと<b>ダイヤIIIからダイヤII</b>にあり、ここで人数が半分以下に落ちます。
   <b>プラチナ帯で普通に戦えているならダイヤIIIまでは射程圏内、その先が本番</b>という構図は最後まで変わりませんでした。
   ただしこれはS30もS29と同程度にランクが緩む前提の目安で、RP調整が入れば到達率は変わります。</p>
+  <p class="note">スプリット2はソフトリセット後の<b>プラチナIII中心</b>の形から始まりました。
+  ここから山がどこまで右へ動くか、スプリット1と同じ形で毎週追っていきます。</p>
   <p class="note">自分が上位何％にいるかは<a href="../../rank.html">ランク分布</a>と<a href="../../deviation.html">ランク偏差値</a>、日々の推移は<a href="../../tracker.html">ランクワークブック</a>で確認できます。</p>
-  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.09.07 取得</p>
+  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.09.21 取得</p>
 </section>
 
 <section>
