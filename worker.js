@@ -12,6 +12,9 @@
  *   GET  /rp-sync?id=復元キー → RANK WORKBOOK の記録をサーバーから取り出す
  *   POST /rp-sync            → RANK WORKBOOK の記録をサーバーへ保存する
  *                              （D1 バインディング RPDB が必要。未設定なら503を返すだけ）
+ *   GET /players/baseline    → Steam同時接続数を「いつもの同時刻」と比べた結果
+ *                              ?series=1 で直近6時間の推移（今日の値といつもの幅）も返す
+ *   cron（10分ごと）          → Steam同時接続数を D1 の ccu_log に記録する
  *
  * ===== 設定するシークレット（Workersの管理画面で設定） =====
  *   APEX_API_KEY        必須  https://api.mozambiquehe.re/getkey で取得
@@ -58,12 +61,13 @@ export default {
       if (url.pathname === "/feed")        return cors(await feed(request, env, ctx), origin);
       if (url.pathname === "/rp")          return cors(await playerRp(env, url), origin);
       if (url.pathname === "/players")     return cors(await steamPlayers(), origin);
+      if (url.pathname === "/players/baseline") return cors(await ccuBaseline(env, url), origin);
       if (url.pathname === "/rp-sync")     return cors(await rpSync(request, env, url), origin);
       if (url.pathname === "/room")        return cors(await roomApi(request, env, url), origin);
       // ルート: 動作確認用
       if (url.pathname === "/" ) return cors(json({
         ok: true,
-        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players", "/rp-sync", "/room"],
+        endpoints: ["/maprotation", "/live", "/discover", "/feed", "/rp", "/players", "/players/baseline", "/rp-sync", "/room"],
         apexKey: env.APEX_API_KEY ? "設定済み" : "未設定",
         twitch: (env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) ? "設定済み" : "未設定",
         d1: env.RPDB ? "設定済み" : "未設定"
@@ -72,6 +76,11 @@ export default {
     } catch (e) {
       return cors(json({ error: String(e.message || e) }, 502), origin);
     }
+  },
+
+  // wrangler.toml の [triggers] crons で10分ごとに呼ばれる
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(ccuRecord(env, event.scheduledTime));
   }
 };
 
@@ -466,23 +475,164 @@ async function twitchToken(id, secret) {
 /* ---------- Steam同時接続数（Apex / appid 1172470） ---------- */
 const STEAM_APPID = "1172470";
 
-async function steamPlayers() {
-  const upstream =
-    "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=" + STEAM_APPID;
+const STEAM_URL =
+  "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=" + STEAM_APPID;
 
-  // Cloudflare側で60秒キャッシュ。Steamへの実リクエストは毎分1回に抑える
-  const res = await fetch(upstream, { cf: { cacheTtl: 60, cacheEverything: true } });
-  if (!res.ok) return json({ error: "Steam API error: " + res.status }, 502);
-
+/* 現在の同接を数値で返す。fresh=true はキャッシュを使わない（cron の記録用） */
+async function steamCount(fresh) {
+  // 通常はCloudflare側で60秒キャッシュ。Steamへの実リクエストは毎分1回に抑える
+  const opt = fresh ? { cache: "no-store" } : { cf: { cacheTtl: 60, cacheEverything: true } };
+  const res = await fetch(STEAM_URL, opt);
+  if (!res.ok) throw new Error("Steam API error: " + res.status);
   const data = await res.json();
   const n = data && data.response && data.response.player_count;
-  if (typeof n !== "number") return json({ error: "unexpected Steam response" }, 502);
+  if (typeof n !== "number") throw new Error("unexpected Steam response");
+  return n;
+}
+
+async function steamPlayers() {
+  let n;
+  try { n = await steamCount(false); }
+  catch (e) { return json({ error: String(e.message || e) }, 502); }
 
   return json({
     player_count: n,
     appid: STEAM_APPID,
     fetched_at: new Date().toISOString()
   }, 200, 60);
+}
+
+/* =========================================================
+   同接ベースライン（「いつもの同時刻」との比較）
+
+   記録 : cron が10分ごとに Steam の同接を ccu_log に1行書く。
+          slot = 10分単位の通し番号。同じ枠に2回書いても1行のまま。
+   比較 : 過去 CCU_DAYS 日それぞれについて「同時刻の前後20分」の平均を出し、
+          その日ごとの値の平均を「いつも」、ばらつきを標準偏差とする。
+   判定 : 増減率での段階と z値での段階のうち、0（いつも通り）に近い方を採用。
+          向きが食い違ったら「いつも通り」。
+   段階 : 集まった日数が少ないうちは表示を落とす
+            CCU_MIN_SIMPLE 日未満 → warmup（比較しない）
+            CCU_MIN_FULL   日未満 → simple（増減率だけで判定）
+            それ以上              → full（増減率とz値の控えめな方）
+   ========================================================= */
+
+const CCU_SLOT_MS    = 10 * 60 * 1000;
+const CCU_DAY_MS     = 24 * 60 * 60 * 1000;
+const CCU_WIN_MS     = 20 * 60 * 1000;   // 同時刻の前後20分
+const CCU_DAYS       = 14;
+const CCU_MIN_SIMPLE = 7;
+const CCU_MIN_FULL   = 12;               // 14日中12日あれば full（cron の取りこぼしを許容）
+const CCU_SERIES_MS  = 6 * 60 * 60 * 1000;
+const CCU_PCT_STEPS  = [5, 15];          // ±5%未満=いつも通り / 15%以上=かなり
+const CCU_Z_STEPS    = [1, 2];           // |z|<1=いつも通り / 2以上=かなり
+const CCU_LABELS     = { "-2": "かなり少ない", "-1": "少ない", "0": "いつも通り", "1": "多い", "2": "かなり多い" };
+
+let ccuReady = null;
+function ccuInit(db) {
+  if (!ccuReady) {
+    ccuReady = db.prepare(`CREATE TABLE IF NOT EXISTS ccu_log (
+      slot  INTEGER PRIMARY KEY,
+      ts    INTEGER NOT NULL,
+      count INTEGER NOT NULL
+    )`).run().catch((e) => { ccuReady = null; throw e; });
+  }
+  return ccuReady;
+}
+
+async function ccuRecord(env, when) {
+  const db = env.RPDB;
+  if (!db) return;
+  await ccuInit(db);
+  const n = await steamCount(true);
+  const ts = Number(when) || Date.now();
+  await db.prepare("INSERT OR REPLACE INTO ccu_log (slot, ts, count) VALUES (?1, ?2, ?3)")
+    .bind(Math.floor(ts / CCU_SLOT_MS), ts, n).run();
+}
+
+function ccuStep(v, steps) {
+  const a = Math.abs(v);
+  const lv = a >= steps[1] ? 2 : a >= steps[0] ? 1 : 0;
+  return v < 0 ? -lv : lv;
+}
+
+/* rows（ts昇順）から、時刻 t の「いつも」を求める */
+function ccuAt(rows, t) {
+  const days = [];
+  for (let d = 1; d <= CCU_DAYS; d++) {
+    const c = t - d * CCU_DAY_MS;
+    let sum = 0, k = 0;
+    for (const r of rows) {
+      if (r.ts < c - CCU_WIN_MS) continue;
+      if (r.ts > c + CCU_WIN_MS) break;
+      sum += r.count; k++;
+    }
+    if (k) days.push(sum / k);
+  }
+  const n = days.length;
+  if (!n) return { days: 0, mean: null, sd: null };
+  const mean = days.reduce((a, b) => a + b, 0) / n;
+  const sd = n > 1 ? Math.sqrt(days.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1)) : null;
+  return { days: n, mean, sd };
+}
+
+async function ccuBaseline(env, url) {
+  const db = env.RPDB;
+  if (!db) return json({ error: "d1-unbound" }, 503);
+  await ccuInit(db);
+
+  const now = Date.now();
+  const since = now - CCU_DAYS * CCU_DAY_MS - CCU_SERIES_MS - CCU_WIN_MS;
+  const { results } = await db.prepare(
+    "SELECT ts, count FROM ccu_log WHERE ts >= ?1 ORDER BY ts"
+  ).bind(since).all();
+  const rows = results || [];
+
+  const current = await steamCount(false);
+  const base = ccuAt(rows, now);
+
+  const out = {
+    current,
+    at: new Date(now).toISOString(),
+    days: base.days,
+    days_needed: CCU_DAYS,
+    mode: base.days >= CCU_MIN_FULL ? "full" : base.days >= CCU_MIN_SIMPLE ? "simple" : "warmup"
+  };
+
+  if (out.mode !== "warmup") {
+    const pct = (current - base.mean) / base.mean * 100;
+    const pLv = ccuStep(pct, CCU_PCT_STEPS);
+    let level = pLv, z = null;
+    if (out.mode === "full" && base.sd > 0) {
+      z = (current - base.mean) / base.sd;
+      const zLv = ccuStep(z, CCU_Z_STEPS);
+      level = (Math.sign(pLv) !== Math.sign(zLv)) ? 0
+            : (Math.abs(zLv) < Math.abs(pLv) ? zLv : pLv);
+    }
+    out.baseline = Math.round(base.mean);
+    out.pct = Math.round(pct * 10) / 10;
+    out.z = z === null ? null : Math.round(z * 100) / 100;
+    out.level = level;
+    out.label = CCU_LABELS[String(level)];
+  }
+
+  if (url.searchParams.get("series") === "1") {
+    const start = Math.floor((now - CCU_SERIES_MS) / CCU_SLOT_MS) * CCU_SLOT_MS;
+    const series = [];
+    for (let t = start; t <= now; t += 30 * 60 * 1000) {
+      const today = rows.filter((r) => Math.abs(r.ts - t) <= CCU_SLOT_MS / 2);
+      const b = ccuAt(rows, t);
+      series.push({
+        t: new Date(t).toISOString(),
+        today: today.length ? today[today.length - 1].count : null,
+        mean: b.mean === null ? null : Math.round(b.mean),
+        sd: b.sd === null ? null : Math.round(b.sd)
+      });
+    }
+    out.series = series;
+  }
+
+  return json(out, 200, 60);
 }
 
 /* =========================================================

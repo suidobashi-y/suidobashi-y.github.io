@@ -24,3 +24,9 @@ compatibility_date = "2026-08-05"
 binding = "RPDB"
 database_name = "apexwb"
 database_id = "16d76c18-e962-4d22-b454-e7336e72cf76"
+
+# ===== cron（Steam同時接続数の記録） =====
+# 10分ごとに Worker の scheduled() が動き、D1 の ccu_log に1行書きます。
+# テーブルは初回に自動で作られます。
+[triggers]
+crons = ["*/10 * * * *"]
