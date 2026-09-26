@@ -106,6 +106,7 @@
   display:flex;align-items:center;justify-content:center}
 .rksel.wait select#selTier{border-color:var(--cyan);animation:sel 1.6s ease-in-out infinite}
 @keyframes sel{0%,100%{box-shadow:0 0 0 rgba(0,229,255,0)}50%{box-shadow:0 0 12px rgba(0,229,255,.55)}}
+#devHint:not(.hide) ~ #firstHint{display:none}
 .firsthint{font-size:10.5px;line-height:1.7;color:var(--amber);background:#1c1608;
   border-radius:3px;padding:8px 10px;margin-bottom:10px}
 .absl{margin-top:9px;font-size:10.5px;color:var(--muted);
@@ -380,7 +381,8 @@ canvas{display:block;width:100%;height:auto}
   <!-- 入力 -->
   <div class="c cy" id="inputCard">
     <div class="ch"><b>今日のRPを記録</b><span id="today">-</span></div>
-    <p class="firsthint hide" id="firstHint">ゲーム内 → ランクリーグ で、いまのティアと「◯◯RP / 750RP」を確認してください</p>
+    <p class="firsthint hide" id="devHint"></p>
+    <p class="firsthint hide" id="firstHint">ゲーム内 → ランクリーグ で、いまのティアと「◯◯RP / ◯◯RP」を確認してください</p>
     <div class="msum hide" id="manualSum">
       <span id="manualSumTxt">—</span>
       <a id="manualTog" role="button" tabindex="0">手入力</a>
@@ -397,7 +399,7 @@ canvas{display:block;width:100%;height:auto}
         <span class="u" id="rpMax">/ 750 RP</span>
         <div class="stp"><button id="minus" aria-label="10減らす">−</button><button id="plus" aria-label="10増やす">＋</button></div>
       </div>
-      <div class="absl"><span>ゲーム画面の「◯◯RP / 750RP」をそのまま入力</span><b id="rpAbs">—</b></div>
+      <div class="absl"><span id="rpGuide">ゲーム画面の「◯◯RP / ◯◯RP」の左の数字を入力</span><b id="rpAbs">—</b></div>
     </div>
     <div class="brow">
       <button class="btn sub" id="fetchBtn">自動取得</button>
@@ -1054,6 +1056,7 @@ function syncRank(clamp){
     document.querySelector(".rksel").style.gridTemplateColumns = "1fr";
     document.getElementById("rpMax").textContent = "/ — RP";
     document.getElementById("rpAbs").textContent = "—";
+    document.getElementById("rpGuide").textContent = "ゲーム画面の「◯◯RP / ◯◯RP」の左の数字を入力";
     updateManual();
     return;
   }
@@ -1063,6 +1066,9 @@ function syncRank(clamp){
   const span = divSpan(t, d);
   const max = document.getElementById("rpMax");
   max.textContent = isM ? "RP（合計）" : "/ " + fmt(span) + " RP";
+  document.getElementById("rpGuide").textContent = isM
+    ? "ゲーム画面の合計RPをそのまま入力"
+    : "ゲーム画面の「◯◯RP / " + fmt(span) + "RP」の左の数字を入力";
   let v = parseInt(rpIn.value, 10);
   if (!Number.isFinite(v) || v < 0) v = 0;
   if (!isM && span && clamp && v > span) { v = span; rpIn.value = v; }
@@ -1840,7 +1846,14 @@ const closeSheet = ()=> document.getElementById("sheet").classList.remove("open"
 
 document.getElementById("plus").onclick  = ()=>{ const r=document.getElementById("rp"); r.value = (+r.value||0)+10; syncRank(true); };
 document.getElementById("minus").onclick = ()=>{ const r=document.getElementById("rp"); r.value = Math.max(0,(+r.value||0)-10); syncRank(true); };
-document.getElementById("saveBtn").onclick  = ()=> record(absRP(), "manual");
+document.getElementById("saveBtn").onclick  = ()=>{
+  // 偏差値ツールから来た直後は、RPが空のまま記録させない（ティアの下限で記録されるのを防ぐ）
+  const r = document.getElementById("rp");
+  if (r.dataset.need && r.value === ""){ toast("ディビジョン内のRPを入力してください", true); r.focus(); return; }
+  r.dataset.need = "";
+  document.getElementById("devHint").classList.add("hide");
+  record(absRP(), "manual");
+};
 document.getElementById("fetchBtn").onclick = autoFetch;
 (function bindManualTog(){
   const a = document.getElementById("manualTog");
@@ -2037,6 +2050,34 @@ load();
 
 document.fonts && document.fonts.ready.then(render);
 render();
+
+/* 偏差値ツールからの導線：ティアとディビジョンだけ受け取り、RP入力欄を開いた状態にする */
+(function devHandoff(){
+  let q; try{ q = new URLSearchParams(location.search); }catch(e){ return; }
+  if (q.get("from") !== "dev") return;
+  const t = q.get("t"), d = parseInt(q.get("d"), 10);
+  try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){}
+  if (!DIV_TIERS.includes(t)) return;
+  buildRankSelects();
+  manualOpen = true;                                   // 自動取得の人も手入力欄を開く
+  const isM = (t === "マスター");
+  document.getElementById("selTier").value = t;
+  if (!isM && d >= 1 && d <= 4) document.getElementById("selDiv").value = d;
+  const rp = document.getElementById("rp");
+  rp.value = ""; rp.dataset.touched = "1"; rp.dataset.need = "1";
+  syncRank(true);
+  const label = t + (!isM && d >= 1 && d <= 4 ? ROMAN[d] : "");
+  const hint = document.getElementById("devHint");
+  hint.innerHTML = "偏差値ツールから<b>" + label + "</b>を引き継ぎました。" +
+    (isM ? "ゲーム画面の合計RPを入れて記録してください"
+         : "ゲーム画面の「◯◯RP / ◯◯RP」の左側の数字を入れて記録してください");
+  hint.classList.remove("hide");
+  const card = document.getElementById("inputCard");
+  card.scrollIntoView({ block: "center" });
+  setTimeout(()=>{ try{ rp.focus({ preventScroll: true }); }catch(e){ rp.focus(); } }, 150);
+  ev("dev_handoff", { tier: t, div: (!isM && d) ? d : 0 });
+})();
+
 syncBoot();
 
 (function(){

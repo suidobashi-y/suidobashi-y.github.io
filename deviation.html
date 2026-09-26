@@ -515,6 +515,10 @@ function render(anim=true){
   const f=Math.min(1,Math.max(0,(dev-30)/60));
   $('arc').style.strokeDashoffset = 270*(1-f);
 
+  // tracker handoff: ティアとディビジョンだけ渡す（RPは向こうで入力）
+  const TRK_T={pred:'マスター',master:'マスター',dia:'ダイヤ',plat:'プラチナ',gold:'ゴールド',silver:'シルバー',bronze:'ブロンズ',rookie:'ルーキー'};
+  $('trkLink').href='./tracker.html?from=dev&t='+encodeURIComponent(TRK_T[t.id])+(t.divs?'&d='+(div+1):'');
+
   // chart
   const maxPct=Math.max(...TIERS.map(x=>x.pct));
   [...chartEl.children].forEach(row=>{
