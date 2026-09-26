@@ -121,12 +121,58 @@ footer{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;font-si
   <h1>エイムアシスト<span class="accent">仕様まとめ</span></h1>
   <div class="meta">
     <span>SEASON 30</span><span>|</span>
-    <span class="upd">最終更新: 2026-08-18</span>
+    <span class="upd">最終更新: 2026-09-26</span>
   </div>
 </header>
 
 <section>
-  <h2>公式が挙動の変化を認めた（8/18発表） <span class="tag official">公式</span></h2>
+<h2>9/29 PCのアンチチートが切り替え <span class="tag official">公式</span></h2>
+<div class="panel">
+<p><strong>9月29日から、PC版のアンチチートがEasy Anti-CheatからEA Javelin Anticheatに切り替わります。</strong>
+EAが自社で開発しているPC向けのアンチチートです。公式は切り替えの理由を「新しい不正の手口を早く把握し、検知を柔軟に作り直せるようにするため」と説明しています。</p>
+
+<table class="vals">
+<tr><th>項目</th><th>内容</th></tr>
+<tr><td>切り替え日</td><td>2026年9月29日</td></tr>
+<tr><td>対象</td><td><strong>PCのみ</strong><br><span style="font-size:11px;color:var(--muted)">コンソールは今回の切り替えの対象外</span></td></tr>
+<tr><td>移行方法</td><td>ゲームアップデート後に起動するだけで自動移行</td></tr>
+<tr><td>セキュアブート</td><td><strong style="color:var(--green)">現時点では設定不要</strong><br><span style="font-size:11px;color:var(--muted)">他のEAタイトルと違い、BIOSの操作はいらない</span></td></tr>
+<tr><td>コンソール側</td><td>サーバー側の検知とコンソール向けのデータモデルに引き続き投資</td></tr>
+</table>
+
+<p style="font-size:13.5px;margin-top:14px"><strong style="color:var(--amber)">エイムアシストへの影響:</strong>
+今回はPCの不正対策の土台を入れ替える変更で、エイムアシストの値や挙動についての言及はありません。
+7/10の施策のときのように挙動差が出た場合は、確認でき次第このページに追記します。</p>
+
+<p class="note">出典: <a href="https://www.ea.com/games/apex-legends/apex-legends/news/javelin-anticheat-announcement" target="_blank" rel="noopener">EA公式「EA Javelin Anticheat is Coming to Apex Legends」（2026-09-24）</a></p>
+</div>
+</section>
+
+<section>
+<h2>プレデター258人を60日停止（9/18） <span class="tag official">公式</span></h2>
+<div class="panel">
+<p><strong>コンソールのプレデター帯で、アカウント共有をしていた258人が60日間の利用停止になりました。</strong>
+ランクポイントもすべて剥奪されます。「異常に長い時間、ランクを連続で回している」というコミュニティの報告から調査が始まり、
+ログイン履歴と端末情報から、複数の人で1つのアカウントを回している形跡が見つかったものです。</p>
+
+<table class="vals">
+<tr><th>機種</th><th>停止人数</th><th>内訳</th></tr>
+<tr><td>PlayStation</td><td class="num">115</td><td style="font-size:12px">頻繁な共有 92 / 5台以上で共有 2 / 両方 21</td></tr>
+<tr><td>Xbox</td><td class="num">143</td><td style="font-size:12px">頻繁な共有 124 / 5台以上で共有 2 / 両方 17</td></tr>
+<tr><td>合計</td><td class="num">258</td><td style="font-size:12px">PCは今回の対象外</td></tr>
+</table>
+
+<p class="note">※処分理由は<strong>アカウント共有（利用規約違反）</strong>で、チートツールによるBANとは別枠です。永久BANではなく60日の一時停止です。
+同じ発表で、「Bot Royaleで誤BANされた」という報告を再調査した結果、いずれも正当な処分だったとしています。</p>
+<p class="note">あわせて9/2には、全機種（PC・PS・Xbox・Switch 2）で不正なコントローラー機器・ソフトの新しい検知を導入したと発表。
+直近2週間でプレデター帯96アカウントをBAN、チーターが混ざる試合の割合はシーズン開始時の5.7%から3.9%に下がったとしています。</p>
+<p class="note">出典: Apex Legends公式 Competitive Integrity Update（2026-09-18、<a href="https://store.steampowered.com/news/app/1172470" target="_blank" rel="noopener">Steamニュース</a>ほか） /
+<a href="https://x.com/ApexLiveComms/status/2095200405651386605" target="_blank" rel="noopener">ApexLiveComms（2026-09-02）</a></p>
+</div>
+</section>
+
+<section>
+<h2>公式が挙動の変化を認めた（8/18発表） <span class="tag official">公式</span></h2>
   <div class="panel">
     <p><strong>7月10日のアンチチート施策で、エイムアシストの挙動は実際に変わっていた。</strong>
     Respawnのアンチチートチームが8月18日、RCフィルターなどの不正な操作を制限する変更を7/10に適用していたこと、
@@ -205,7 +251,10 @@ footer{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;font-si
       <tr><td>RCフィルター<br><span style="font-size:11px;color:var(--muted)">アシスト悪用・リコイル抑制目的</span></td>
         <td style="color:var(--pink);font-weight:700">チート行為と認定 / BAN対象</td>
         <td><span class="tag official">公式</span></td></tr>
-      <tr><td>RCフィルター<br><span style="font-size:11px;color:var(--muted)">ノイズ低減目的の通常使用</span></td>
+      <tr><td>アカウント共有<br><span style="font-size:11px;color:var(--muted)">複数人で1アカウントを回す行為</span></td>
+<td style="color:var(--amber);font-weight:700">60日停止＋ランクポイント剥奪</td>
+<td><span class="tag official">公式</span></td></tr>
+<tr><td>RCフィルター<br><span style="font-size:11px;color:var(--muted)">ノイズ低減目的の通常使用</span></td>
         <td style="color:var(--amber)">技術自体は否定されず</td>
         <td><span class="tag official">開発者言及</span></td></tr>
     </table>
@@ -219,8 +268,26 @@ footer{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;font-si
 <section>
   <h2>変更履歴</h2>
   <ul class="log">
-    <li class="hot">
-      <div class="d">2026-08-18</div>
+<li class="hot">
+<div class="d">2026-09-29（予定）</div>
+<div class="t">PC版アンチチートをEA Javelinに切り替え <span class="tag official">公式</span></div>
+<p>Easy Anti-CheatからEA Javelin Anticheatへ。アップデート後の起動で自動移行、セキュアブートは現時点で不要。コンソールは対象外。</p>
+<div class="src">出典: <a href="https://www.ea.com/games/apex-legends/apex-legends/news/javelin-anticheat-announcement" target="_blank" rel="noopener">EA公式(2026-09-24発表)</a></div>
+</li>
+<li class="hot">
+<div class="d">2026-09-18</div>
+<div class="t">コンソールのプレデター258人を60日停止 <span class="tag official">公式</span></div>
+<p>アカウント共有による規約違反。PS 115人・Xbox 143人。ランクポイントは全剥奪。</p>
+<div class="src">出典: Apex Legends公式 Competitive Integrity Update</div>
+</li>
+<li class="hot">
+<div class="d">2026-09-02</div>
+<div class="t">不正コントローラーの新検知を全機種に導入 <span class="tag official">公式</span></div>
+<p>PC・PS・Xbox・Switch 2が対象。直近2週間でプレデター帯96アカウントをBAN。チーター混入率は5.7%→3.9%。</p>
+<div class="src">出典: <a href="https://x.com/ApexLiveComms/status/2095200405651386605" target="_blank" rel="noopener">ApexLiveComms(X)</a></div>
+</li>
+<li>
+<div class="d">2026-08-18</div>
       <div class="t">公式が7/10の挙動変化を認める <span class="tag official">公式</span></div>
       <p>アンチチート施策でRCフィルター等の不正な操作を制限した結果、エイムアシストの挙動に軽微な差(特に遠距離)が発生したと公表。
       コントローラーの命中率はデータ上2〜4%低下、うち一部は悪用していたプレイヤーが使えなくなった分。

@@ -72,32 +72,12 @@ body::after{
 }
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:20px 16px 56px}
 
-/* ---------- header ---------- */
-header{padding:10px 0 22px}
-.eyebrow{
-  font-family:'Chakra Petch';font-size:11px;letter-spacing:.32em;color:var(--cyan);
-  text-transform:uppercase;display:flex;align-items:center;gap:10px;
-}
-.eyebrow::before,.eyebrow::after{content:"";height:1px;background:linear-gradient(90deg,var(--cyan),transparent);flex:0 0 26px}
-.eyebrow::after{background:linear-gradient(90deg,transparent,var(--magenta));flex:1}
-h1{
-  font-family:'Chakra Petch';font-weight:700;font-size:clamp(30px,9vw,42px);
-  line-height:1.05;margin-top:10px;letter-spacing:.02em;
-  color:#fff;position:relative;display:inline-block;
-  text-shadow:0 0 18px rgba(0,229,255,.45);
-}
-h1 .jp{
-  background:linear-gradient(92deg,var(--cyan) 10%,#9be8ff 45%,var(--magenta) 95%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-h1.glitch::before,h1.glitch::after{
-  content:attr(data-text);position:absolute;inset:0;overflow:hidden;pointer-events:none;
-}
-h1.glitch::before{color:var(--magenta);clip-path:inset(12% 0 62% 0);transform:translate(-2px,-1px);opacity:.7;animation:gl1 3.4s infinite steps(1)}
-h1.glitch::after{color:var(--cyan);clip-path:inset(68% 0 8% 0);transform:translate(2px,1px);opacity:.7;animation:gl2 2.9s infinite steps(1)}
-@keyframes gl1{0%,92%{opacity:0}93%{opacity:.8;clip-path:inset(10% 0 70% 0)}96%{clip-path:inset(40% 0 30% 0)}100%{opacity:0}}
-@keyframes gl2{0%,88%{opacity:0}89%{opacity:.8;clip-path:inset(70% 0 5% 0)}94%{clip-path:inset(20% 0 55% 0)}100%{opacity:0}}
-.sub{margin-top:8px;color:var(--dim);font-size:12.5px;line-height:1.7}
+/* ---------- header（他ページと共通の見た目） ---------- */
+header{padding:0 0 6px}
+.eyebrow{font-family:'Chakra Petch';font-size:11px;letter-spacing:.25em;color:var(--cyan);text-transform:uppercase}
+h1{font-family:'Chakra Petch','Noto Sans JP',sans-serif;font-size:clamp(24px,5.5vw,34px);font-weight:700;line-height:1.2;margin:6px 0 10px;color:var(--text,#e8ecf5)}
+h1 .accent{color:var(--magenta)}
+.sub{color:var(--dim);font-size:13.5px;line-height:1.7}
 
 /* ---------- panels ---------- */
 .panel{
@@ -252,8 +232,8 @@ footer a{color:var(--cyan);text-decoration:none}
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">Apex Workbook // Rank Analyzer</div>
-  <h1 class="glitch" data-text="APEX 偏差値">APEX <span class="jp">偏差値</span></h1>
+  <div class="eyebrow">Rank Deviation</div>
+  <h1>ランク<span class="accent">偏差値</span></h1>
   <div class="sub">ランクを選ぶだけで、全プレイヤー分布の中でのあなたの偏差値と上位%を即時算出。<br><span id="dataline">DATA: —</span></div>
 </header>
 
@@ -430,13 +410,62 @@ function fracFromTopInTier(t){
   return (div + (1-lpFrac))/4;                     // フォールバック: Div均等
 }
 
-function verdictText(dev,topP){
+/* 任意のティア・ディビジョン・LP位置での上位% と偏差値 */
+const DIVN=['I','II','III','IV'];
+function topPAt(t,d,lp){
+  if(t.id==='pred') return above[t.id] + 0.5*t.pct;
+  if(!t.divs) return above[t.id] + (1-lp)*t.pct;
+  const w=DIVW[t.id];
+  if(w && t.pct>0){ let a=0; for(let i=0;i<d;i++) a+=w[i]; return above[t.id] + a + w[d]*(1-lp); }
+  return above[t.id] + (d+(1-lp))/4*t.pct;
+}
+const devOf = tp => 50 + 10*normInv(1 - tp/100);
+/* ひとつ上のディビジョン（ティアの最上位なら次のティアの最下位） */
+function nextUp(t,d){
+  const i=TIERS.indexOf(t);
+  if(t.divs && d>0) return {t, d:d-1, name:t.jp+DIVN[d-1]};
+  const up=TIERS[i-1]; if(!up) return null;
+  return up.divs ? {t:up, d:3, name:up.jp+'IV'} : {t:up, d:0, name:up.jp};
+}
+
+function verdictText(dev,topP,t){
   if(topP<=0.5) return `頂点領域。<b>200人ロビーならほぼ最強格</b>のポジションです。`;
   if(topP<=2)  return `全プレイヤーの<b>上位2%圏内</b>。60人ロビーで実力最上位クラス。`;
   if(topP<=10) return `<b>10人に1人</b>の上位層。ロビーの中で明確に「強い側」です。`;
   if(topP<=25) return `上位1/4に入るランク帯。<b>平均を大きく超えた実力</b>です。`;
-  if(topP<=55) return `プレイヤーの中央値付近。ここから<b>1ティア上げると偏差値が大きく動きます</b>。`;
+  if(dev>=46.5) return midVerdict(dev,topP,t);
   return `伸びしろゾーン。中央値まではあと少し — <b>1シーズンで一気に追い抜けます</b>。`;
+}
+
+/* 偏差値47〜57は人数が最も集まる帯なので、約1刻みで文面を分ける。
+   「次のディビジョンでの偏差値の伸び」と「60人ロビーでの位置」を差し込み、同じ文が続かないようにする */
+function midVerdict(dev,topP,t){
+  const lobby=Math.max(1,Math.round(60*topP/100));
+  const nx=t?nextUp(t,div):null;
+  const nDev=nx?devOf(topPAt(nx.t,nx.d,nx.t.divs?lpFrac:0)):null;   // 同じLP位置のまま1ディビジョン上がった場合
+  const gain=nx?nDev-dev:0;
+  const up = nx && gain>0.05 ? `次の<b>${nx.name}</b>に上がると偏差値<b>+${gain.toFixed(1)}</b>。` : '';
+  let head, tail=up;
+  if(dev>=55.5)      head=`上位3割の入口。60人ロビーなら<b>上から${lobby}番目前後</b>で、「上位1/4」まであと少しです。`;
+  else if(dev>=54)   head=`中央値から一段抜けた位置。60人ロビーでは<b>上から${lobby}番目前後</b>にいます。`;
+  else if(dev>=52.5) head=`平均より明確に上。ロビーの<b>上位4割</b>に入っています。`;
+  else if(dev>=51)   head=`中央値を少し越えたところ。<b>ロビーの半分より上</b>で戦えています。`;
+  else if(dev>=50)   head=`ほぼど真ん中の<b>わずかに上側</b>。全ランクでいちばん人が密集している帯です。`;
+  else if(dev>=49){
+    head=`ほぼど真ん中の<b>わずかに下側</b>。`;
+    if(nx && nDev>=50){ tail=`次の<b>${nx.name}</b>に上がれば<b>中央値を越えます</b>（偏差値+${gain.toFixed(1)}）。`; }
+  }
+  else if(dev>=48)   head=`中央値のすぐ下。60人ロビーなら<b>上から${lobby}番目前後</b>です。`;
+  else {
+    head=`中央値まであと一歩。<b>下から4割</b>を抜けかけている位置です。`;
+    if(nx && nDev>=50) tail=`次の<b>${nx.name}</b>で一気に中央値を越えます（偏差値+${gain.toFixed(1)}）。`;
+  }
+  let lpNote='';
+  if(t && t.divs){
+    if(lpFrac>=0.8) lpNote='ディビジョンの上端なので、昇格は目前です。';
+    else if(lpFrac<=0.2) lpNote='ディビジョンに上がったばかりの位置です。';
+  }
+  return head + tail + lpNote;
 }
 
 function render(anim=true){
@@ -467,7 +496,7 @@ function render(anim=true){
   $('peer').innerHTML = `${peer.toLocaleString()}<em>人に1人</em>`;
   $('verdict').innerHTML = (t.pct===0
     ? `<b style="color:var(--magenta)">${t.jp}はまだ到達者が集計されていません。</b>リセット直後のため、この判定は暫定です。<br>`
-    : '') + verdictText(dev,topP);
+    : '') + verdictText(dev,topP,t);
 
   // gauge: map dev 30..90 to arc
   const f=Math.min(1,Math.max(0,(dev-30)/60));

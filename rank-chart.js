@@ -227,7 +227,8 @@ function drawLine(d, pr, gc){
   if (!cc) return;
   const { x, w, h } = cc;
   if (!d.length) return;
-  const L = 42, R = 10, T = 16, B = 26;
+  /* 目盛ラベルをグラフ内（右端）に置き、左の余白を詰めて描画エリアを広げる */
+  const L = 6, R = 8, T = 16, B = 26;
   const vs = d.map(e=>e.rp);
   let lo = Math.min(...vs), hi = Math.max(...vs);
   const { cur, next } = tierAt(vs[vs.length-1]);
@@ -244,7 +245,7 @@ function drawLine(d, pr, gc){
   x.font = "600 9px 'Chakra Petch'"; x.textAlign = "right";
   for (let g = Math.ceil(lo/step)*step; g < hi; g += step){
     x.strokeStyle = "#141e30"; x.beginPath(); x.moveTo(L,py(g)); x.lineTo(w-R,py(g)); x.stroke();
-    x.fillStyle = "#5c6884"; x.fillText((g/1000)+"k", L-6, py(g)+3);
+    x.fillStyle = "#5c6884"; x.fillText((g/1000)+"k", w-R-2, py(g)-4);
   }
   /* 面 + 線（初期表示は左から伸ばす） */
   x.save();

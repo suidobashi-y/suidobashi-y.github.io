@@ -173,7 +173,7 @@ footer a{color:var(--cyan)}
 <header>
   <div class="eyebrow">Apex Workbook // Intel</div>
   <h1>開発<span class="accent">ロードマップ</span></h1>
-  <div class="meta"><span class="upd">最終更新: 2026-08-02</span> | 公式発表ベース</div>
+  <div class="meta"><span class="upd">最終更新: 2026-09-26</span> | 公式発表ベース</div>
 </header>
 
 <div class="count">
@@ -212,9 +212,9 @@ footer a{color:var(--cyan)}
           <line x1="584" y1="34" x2="584" y2="46"/>
         </g>
         <g font-family="Chakra Petch" font-size="10" fill="#8a93ad" letter-spacing="1">
-          <text x="116" y="56" text-anchor="middle">2026.08</text>
-          <text x="350" y="56" text-anchor="middle">2026.11</text>
-          <text x="584" y="56" text-anchor="middle">2027.02</text>
+                    <text x="116" y="56" text-anchor="middle">S30</text>
+          <text x="350" y="56" text-anchor="middle">S31</text>
+          <text x="584" y="56" text-anchor="middle">S32</text>
         </g>
         <!-- ノード -->
         <circle cx="116" cy="40" r="6" fill="#0a0e1a" stroke="#2dffa8" stroke-width="2.5"/>
@@ -232,7 +232,7 @@ footer a{color:var(--cyan)}
       <!-- シーズンカード -->
       <div class="track">
 
-        <div class="scard s30">
+                <div class="scard s30" data-start="2026-08-05T02:00:00+09:00" data-end="2026-11-04T02:00:00+09:00">
           <div class="head">
             <span class="status" id="s30-status">確定</span>
             <div class="sn">S30</div>
@@ -247,13 +247,15 @@ footer a{color:var(--cyan)}
             <li><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 13h5l2-3 3 6 2-4h6"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
               <span>武器&amp;アイテム探索システム刷新<span class="sub">コラプテッド・アタッチメント導入</span></span></li>
             <li><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 01-12 0z"/><path d="M18 5h3v2a3 3 0 01-3 3M6 5H3v2a3 3 0 003 3"/></svg>
+                            <span>ランク スプリット2<span class="sub">9/16開始 / レジェンド調整・物資調整</span></span></li>
+            <li><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21h8M12 17v4M6 4h12v5a6 6 0 01-12 0z"/><path d="M18 5h3v2a3 3 0 01-3 3M6 5H3v2a3 3 0 003 3"/></svg>
               <span>ALGS Split 2 プレイオフ</span></li>
             <li><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v14M16 5v14"/></svg>
               <span>ワイルドカードイベント<span class="sub">各スプリット1回</span></span></li>
           </ul>
         </div>
 
-        <div class="scard s31">
+                <div class="scard s31" data-start="2026-11-04T02:00:00+09:00" data-end="2027-02-03T02:00:00+09:00">
           <div class="head">
             <span class="status">進行中</span>
             <div class="sn">S31</div>
@@ -270,7 +272,7 @@ footer a{color:var(--cyan)}
           </ul>
         </div>
 
-        <div class="scard s32">
+                <div class="scard s32" data-start="2027-02-03T02:00:00+09:00" data-end="2027-05-05T02:00:00+09:00">
           <div class="head">
             <span class="status">計画中</span>
             <div class="sn">S32</div>
@@ -329,12 +331,51 @@ footer a{color:var(--cyan)}
 </section>
 
 <section>
+  <h2>スプリット2の調整内容（9/16〜） <span class="tag official">公式</span></h2>
+  <div class="panel">
+    <ul class="feat">
+      <li><span class="k">レジェンド強化: コンジット / フューズ / カタリスト / ブラッドハウンド</span>
+        コンジットはULTの展開が速くなり、レベル2アップグレードを2つとも新規に差し替え。
+        フューズはナックルジャンプが基本性能に入り、爆発ダメージ25%軽減のパッシブを追加。
+        カタリストは戦術のクールダウンが20秒→15秒、ULTの壁を味方が通っても減速・視界不良にならなくなった。
+        ブラッドハウンドは戦術のスナップショットが早く消えるように調整。</li>
+      <li><span class="k">レジェンド弱体化: アクセル / シア（8/25ホットフィックス分）</span>
+        アクセルはULTのHPが200→150、クールダウン90秒→120秒、スタン1.5秒→0.25秒。
+        シアは戦術を当てたときの旋回速度低下を削除。</li>
+      <li><span class="k">物資: 回復アイテムが増加</span>
+        回復アイテムの出現率を上げ、弾薬はやや減少。物資箱のリセット時は中身が増え、回復・弾薬・サバイバル枠・アンプが出やすくなった。
+        空の物資箱が出にくくなり、武器なしで最初に開ける箱から全種類のベース武器が出るように。</li>
+      <li><span class="k">長距離武器3種を強化</span>
+        トリプルテイク（ADS時の連射速度アップ、青マガジン8→9発）、
+        ボセック（矢の所持数40→60）、チャージライフル（最大距離ダメージ99→110）。</li>
+      <li><span class="k">その他</span>
+        破損アタッチメント「アジャイル標準ストック」の移動速度がマッドマギー・ジブラルタルの強化と重複しないよう修正。
+        エクセキューショナーの解放コストが375→275。ワールズエッジを中心にマップの修正が150件以上。
+        ランクのマップはワールズエッジ／オリンパス／ブロークンムーン。</li>
+      <li><span class="k">ランクラダー（9/22〜11/1）</span>
+        スプリット中に6回のラダー期間を実施。第1回 9/22〜9/27、最終 第6回 10/27〜11/1。</li>
+    </ul>
+    <p class="note">出典: <a href="https://www.ea.com/games/apex-legends/apex-legends/news/marked-midseason-patch-notes" target="_blank" rel="noopener">EA公式「Marked ミッドシーズン パッチノート」（2026-09-14）</a>。数値は主な変更のみ抜粋。</p>
+  </div>
+</section>
+
+<section>
   <h2>今後の予定</h2>
   <ul class="timeline" id="timeline">
     <li data-date="2026-08-05T02:00:00+09:00">
       <div class="d">2026-08-05</div>
       <div class="t">シーズン30「Marked」開幕 <span class="tag official">公式</span></div>
       <p>日本時間 午前2:00。ブラハリワーク・ルーティング刷新・ワールズエッジ改修。ランクも新スプリットへ。</p>
+    </li>
+        <li data-date="2026-09-16T02:00:00+09:00">
+      <div class="d">2026-09-16</div>
+      <div class="t">スプリット2 開始 <span class="tag official">公式</span></div>
+      <p>ランクがスプリット2へ。コンジット・フューズ・カタリストの強化、回復アイテムの増量、長距離武器3種の強化。</p>
+    </li>
+    <li data-date="2026-09-29T00:00:00+09:00">
+      <div class="d">2026-09-29</div>
+      <div class="t">PC版アンチチートがEA Javelinに <span class="tag official">公式</span></div>
+      <p>Easy Anti-Cheatからの切り替え。アップデート後の起動で自動移行。詳しくは<a href="./assist.html">エイムアシストまとめ</a>へ。</p>
     </li>
     <li data-date="2026-10-31T00:00:00+09:00">
       <div class="d">2026-10(予定)</div>
@@ -441,29 +482,33 @@ footer a{color:var(--cyan)}
     }
   })();
 
-  /* --- 現在地マーカー: 軸上の位置を日付から計算 --- */
-  (function(){
+  /* --- 現在地マーカー: 今いるシーズンのカードの上に、期間の進み具合で置く ---
+     軸(SVG 700幅)とカード列は同じ幅なので、カードの実際の位置を軸の座標に換算する */
+  function placeNow(){
     var g = document.getElementById("nowmark");
-    if(!g) return;
-    var A = [                                    /* 軸の目盛（x座標と日付） */
-      { x:116, t:new Date("2026-08-01T00:00:00+09:00").getTime() },
-      { x:350, t:new Date("2026-11-01T00:00:00+09:00").getTime() },
-      { x:584, t:new Date("2027-02-01T00:00:00+09:00").getTime() }
-    ];
-    var now = Date.now(), x;
-    if(now <= A[0].t)      x = 100;
-    else if(now >= A[2].t) x = 584;
-    else {
-      var i = now < A[1].t ? 0 : 1;
-      var r = (now - A[i].t) / (A[i+1].t - A[i].t);
-      x = A[i].x + (A[i+1].x - A[i].x) * r;
+    var svg = g && g.ownerSVGElement;
+    var cards = document.querySelectorAll(".track .scard[data-start]");
+    if(!g || !svg || !cards.length) return;
+    var sr = svg.getBoundingClientRect();
+    if(!sr.width) return;
+    var now = Date.now(), x = null;
+    for(var i=0;i<cards.length;i++){
+      var st = new Date(cards[i].getAttribute("data-start")).getTime(),
+          en = new Date(cards[i].getAttribute("data-end")).getTime();
+      var cr = cards[i].getBoundingClientRect();
+      var l = (cr.left - sr.left) / sr.width * 700, w = cr.width / sr.width * 700;
+      if(i===0 && now < st){ x = l; break; }
+      if(now >= st && now < en){ x = l + w * (now - st) / (en - st); break; }
+      if(i===cards.length-1) x = l + w;
     }
-    x = Math.round(x);
+    x = Math.max(34, Math.min(666, Math.round(x)));
     g.querySelector("line").setAttribute("x1", x);
     g.querySelector("line").setAttribute("x2", x);
     g.querySelector("rect").setAttribute("x", x - 34);
     g.querySelector("text").setAttribute("x", x);
-  })();
+  }
+  placeNow();
+  addEventListener("resize", placeNow);
 })();
 </script>
 <script>
