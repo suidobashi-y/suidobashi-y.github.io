@@ -197,6 +197,16 @@ footer a{color:var(--cyan);text-decoration:none}
 .share:active{transform:scale(.97)}
 .share.done{background:linear-gradient(92deg,var(--magenta),#ff7bb0);box-shadow:0 0 18px rgba(255,46,126,.45)}
 .sharehint{margin-top:8px;text-align:center;font-size:10.5px;color:var(--dim)}
+.trk{
+  display:block;margin-top:16px;width:100%;padding:12px 0;text-align:center;text-decoration:none;
+  font-family:'Chakra Petch','Noto Sans JP';font-weight:700;font-size:13.5px;letter-spacing:.08em;
+  color:var(--cyan);background:rgba(0,229,255,.06);border:1.5px solid rgba(0,229,255,.55);border-radius:3px;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  transition:transform .12s, background .2s;
+}
+.trk:active{transform:scale(.97)}
+.trk:hover{background:rgba(0,229,255,.12)}
+.trk:focus-visible{outline:2px solid var(--magenta);outline-offset:4px}
 @media (prefers-reduced-motion: reduce){
   *{animation:none!important;transition:none!important}
 }
@@ -271,6 +281,8 @@ footer a{color:var(--cyan);text-decoration:none}
       <div class="stat"><div class="k">同格プレイヤー</div><div class="v" id="peer">—<em>人に1人</em></div></div>
     </div>
     <div class="verdict" id="verdict"></div>
+    <a class="trk" id="trkLink" href="./tracker.html">⬡ この偏差値の推移を記録する</a>
+    <div class="sharehint">ランクワークブックに毎日のRPを入れると、偏差値の動きをグラフで追えます</div>
     <button class="share" id="shareBtn">⬢ 結果を画像でシェア</button>
     <div class="sharehint">Xの投稿に添付できる16:9カード（1200×675px・TLで見切れないサイズ）を生成します</div>
   </div>
@@ -383,6 +395,7 @@ TIERS.forEach(t=>{
   b.dataset.i=i; divsEl.appendChild(b);
 });
 $('lp').oninput=e=>{lpFrac=e.target.value/100;render(false);};
+$('trkLink').addEventListener('click',()=>{ if(window.gtag) gtag('event','dev_to_tracker',{tier:tier}); });
 
 // build chart rows
 const chartEl=$('chart');
