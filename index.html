@@ -261,11 +261,11 @@ a.lvmore:hover{border-style:solid}
 
 <!-- 期間限定: CRカップ特設ページへの導線（10/11以降は自動で非表示） -->
 <a class="crbn" id="crbn" href="./crcup11.html" onclick="if(window.gtag)gtag('event','crcup_banner_click')">
-  <span class="crbn-strip" aria-hidden="true"><i style="--c:#ff4d6d;flex:39"></i><i style="--c:#b06bff;flex:9"></i><i style="--c:#69b7ff;flex:7"></i><i style="--c:#3fd3c8;flex:2"></i><i style="--c:#8a93ad;flex:3"></i></span>
+  <span class="crbn-strip" aria-hidden="true"><i style="--c:var(--pink);flex:1"></i></span>
   <span class="crbn-body">
     <span class="crbn-k"><span class="crbn-dot" id="crbn-dot"></span><span id="crbn-k">CR CUP #11 特設ページ</span></span>
-    <b class="crbn-t">出場60人の最高ランク ティア表</b>
-    <span class="crbn-s" id="crbn-s">10/4(日) 17:00開始。全20チームの配信先リンクもまとめています</span>
+    <b class="crbn-t">出場20チームの配信先リンク</b>
+    <span class="crbn-s" id="crbn-s">10/4(日) 17:00開始。Twitchで配信中の人もひと目で分かります</span>
   </span>
   <svg class="crbn-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
 </a>
@@ -284,7 +284,7 @@ a.lvmore:hover{border-style:solid}
     s.textContent="全20チームの配信先へここから飛べます";
   }else if(now>=end){
     k.textContent="CR CUP #11 特設ページ";
-    s.textContent="出場者の最高ランクと、各チームのアーカイブへのリンク";
+    s.textContent="各チームのアーカイブへのリンク";
   }
 })();
 </script>
@@ -435,7 +435,8 @@ a.lvmore:hover{border-style:solid}
 <section>
   <h2>更新履歴</h2>
   <div class="panel">
-    <ul class="updates"><li><span class="d">10-03</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の麻倉シノさんを、ダイヤ4からマスターに直しました。初配信でシーズン11のマスター・シーズン12のソロマスターを公表していたとのご指摘をいただきました。ありがとうございます</span></li>
+    <ul class="updates"><li><span class="d">10-04</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の「最高ランクのティア表」を取り下げました。根拠を確認できていない情報を多く含んでいたためです。ご指摘くださった皆さま、関係する皆さまにお詫び申し上げます。ページは配信先リンク集として残しています</span></li>
+<li><span class="d">10-03</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の麻倉シノさんを、ダイヤ4からマスターに直しました。初配信でシーズン11のマスター・シーズン12のソロマスターを公表していたとのご指摘をいただきました。ありがとうございます</span></li>
 <li><span class="d">10-03</span><span><a href="./streamers.html">ライブ配信</a>に第11回CRカップの出場者39人を追加しました（Twitchで配信している人）。<a href="./crcup11.html">CRカップ特設ページ</a>でも、配信中の出場者に「配信中」が付くようになります。あわせて、ありさかさん・ボドカさんのTwitchの登録先が違っていたのを直しました。配信中の判定はTwitchのみのため、特設ページの表示は「Twitchで配信中」としています</span></li>
 <li><span class="d">10-03</span><span><a href="./crcup11.html">第11回CRカップ特設ページ</a>を公開しました。10/4（日）17:00開催の出場60人を、配信やSNSで見せた最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを載せています。配信中のメンバーはページ上でひと目で分かります。トップページの一番上からも開けます</span></li>
 <li><span class="d">09-28</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始13日目）。最多はプラチナIII（11.87%）のままですが、16.12%から減って山がなだらかになり、ダイヤ以上は11.7%から19.4%に戻りました。中央値もプラチナIVからプラチナIIIに上がっています。ダイヤIII（7.24%）からダイヤII（2.21%）で3分の1以下に落ちる形は、スプリット1と同じ位置にもうできています</span></li>
@@ -443,8 +444,7 @@ a.lvmore:hover{border-style:solid}
 <li><span class="d">09-26</span><span><a href="./deviation.html">ランク偏差値</a>の結果に「この偏差値の推移を記録する」ボタンを追加しました。押すと<a href="./tracker.html">RANK WORKBOOK</a>が、選んだティアとディビジョンが入った状態で開くので、あとはゲーム画面のRPを入れるだけで記録できます。毎日記録すると、偏差値がどう動いたかをグラフで追えます。あわせて、RANK WORKBOOKの入力欄の説明が「/ 750RP」固定だったのを、選んだランクの上限（ダイヤなら1,000RPなど）に合わせて変わるようにしました。</span></li>
 <li><span class="d">09-26</span><span><a href="./assist.html">エイムアシストまとめ</a>を更新。9/29からPC版のアンチチートがEasy Anti-CheatからEA Javelinに切り替わる件（アップデート後の起動で自動移行、セキュアブートは不要、コンソールは対象外）、EA Javelinの他タイトルでの実績と評判（20タイトル・検知精度99%以上／セキュアブートやLinux非対応などの不満点）、9/18にコンソールのプレデター258人がアカウント共有で60日停止・ランクポイント剥奪になった件を追加しました。</span></li>
 <li><span class="d">09-26</span><span><a href="./roadmap.html">ロードマップ</a>にスプリット2の調整内容（コンジット・フューズ・カタリストの強化、回復アイテムの増量、長距離武器3種の強化、ランクラダーの日程）を追加。あわせて、図の「現在地」が次のシーズンの上に表示されていたのを直しました。</span></li>
-<li><span class="d">09-26</span><span><a href="./zukai/s30/weapons.html">武器図解</a>のおすすめ構成を「G7＋プラウラー」から「ネメシス＋プラウラー」に変更しました。G7スカウトは実測の総合スコアが42.0（C帯）と低かったためです。ネメシスにはヘッドシーカーバレル（ヘッド+5）を合わせます。</span></li>
-<li><span class="d">09-26</span><span>ツールの手入れ。RANK WORKBOOKのRP推移グラフの左余白を詰めて、描画エリアを「今日の増減」と同じ幅に。ランクルームに「RANK WORKBOOKに戻る」ボタンを追加。ランク偏差値はヘッダーを他ページと揃え、偏差値47〜57の判定メッセージを8段階に分けて「次のディビジョンで偏差値がいくつ上がるか」も出すようにしました。</span></li></ul>
+<li><span class="d">09-26</span><span><a href="./zukai/s30/weapons.html">武器図解</a>のおすすめ構成を「G7＋プラウラー」から「ネメシス＋プラウラー」に変更しました。G7スカウトは実測の総合スコアが42.0（C帯）と低かったためです。ネメシスにはヘッドシーカーバレル（ヘッド+5）を合わせます。</span></li></ul>
   </div>
   <p class="note" style="margin-top:12px">それ以前の更新は
   <a href="./updates.html">更新履歴アーカイブ</a>に掲載しています。</p>
