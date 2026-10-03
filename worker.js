@@ -31,7 +31,7 @@ const STRICT_ORIGINS = [];   // 空配列 = 全オリジン許可
 
 /* 配信中を調べたいTwitchユーザー名（_data.js の twitch と揃える） */
 const TWITCH_USERS = [
-  "nniru", "shibuyahal", "vodka_", "selly55", "arisaka_", "akamikarubi",
+  "nniru", "shibuyahal", "vodkavdk", "selly55", "cr_arisakaaa", "akamikarubi",
   "hiiragitsurugi", "spygea", "darkmasuotv", "mondo", "euriece", "tie_ru",
   "kawase", "tttcheekyttt", "bobsappaim0304", "kinako_0707", "amakipururu",
   "iq200yukaf", "bijusan", "meltstella", "heshiko1", "satuking_",
@@ -42,7 +42,16 @@ const TWITCH_USERS = [
   "chitchat_ai", "imperialkaz", "iamfjk", "hoshimai_chill", "sapo_ten",
   "futon_moguri", "hashihimemikona", "amanehina", "89workers",
   "syachikusaku", "d0n__chqn_", "nishimura_honoka", "tsukiyurikira",
-  "sigma_e57"
+  "sigma_e57",
+  /* 2026-10-03 第11回CRカップ出場者 */
+  "hikakin", "ras_sama", "fps_shaka", "stylishnoob4", "cr_amatsuki",
+  "uruhaichinose", "lauren_iroas2434", "jasper7se", "cr_cpt", "kato_junichi0817",
+  "sumomo_x", "yaritaiji", "maronnv", "tsuna_nekota", "kinapoppo",
+  "hinanotachiba7", "alphaazur", "tokoyamitowa_holo", "ow_uruca", "yufuna",
+  "kamito_jp", "yakumobeni", "crazyraccoonyy", "neth3", "k4sen",
+  "yukiofps14", "nacchi081", "cr_vanilla", "kagasumire", "cr_wokka",
+  "kokagetsumugi", "sqla223", "963noah", "1tappytheworld", "akarindao",
+  "rprx", "4rmy_o", "met_komori", "petit2434"
 ];
 
 export default {
