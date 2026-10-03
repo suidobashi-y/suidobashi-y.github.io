@@ -206,6 +206,21 @@ a.lvmore:hover{border-style:solid}
 .tool.soon .badge{color:var(--muted);border-color:rgba(138,147,173,.4);background:rgba(138,147,173,.08)}
 
 /* 更新履歴 */
+/* CRカップ導線バナー（期間限定） */
+.crbn{display:flex;align-items:center;gap:14px;margin:16px 0 4px;padding:14px 14px 14px 16px;text-decoration:none;
+  color:var(--text);background:linear-gradient(100deg,rgba(255,45,120,.13),rgba(16,22,40,.9) 55%);
+  border:1px solid rgba(255,45,120,.45);border-radius:4px;position:relative;overflow:hidden;transition:border-color .15s}
+.crbn:hover,.crbn:focus-visible{border-color:var(--pink);outline:none}
+.crbn-strip{position:absolute;left:0;right:0;bottom:0;height:3px;display:flex}
+.crbn-strip i{background:var(--c)}
+.crbn-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.crbn-k{font-family:'Chakra Petch';font-size:11px;letter-spacing:.14em;color:var(--pink);display:flex;align-items:center;gap:7px}
+.crbn-dot{width:6px;height:6px;border-radius:50%;background:var(--pink);display:none;box-shadow:0 0 8px var(--pink)}
+.crbn.live .crbn-dot{display:inline-block}
+@media(prefers-reduced-motion:no-preference){.crbn.live .crbn-dot{animation:crbl 1.6s ease-in-out infinite}@keyframes crbl{50%{opacity:.35}}}
+.crbn-t{font-size:16px;font-weight:700;line-height:1.35}
+.crbn-s{font-size:12px;color:#c4cbdd;line-height:1.5}
+.crbn-go{width:20px;height:20px;flex:0 0 auto;color:var(--pink)}
 .updates{list-style:none}
 .updates li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid rgba(0,229,255,.08);font-size:13px}
 .updates li:last-child{border-bottom:none}
@@ -243,6 +258,36 @@ a.lvmore:hover{border-style:solid}
 <div class="wrap">
 
 <h1 class="sr-only">APEX WORKBOOK — エペの数値早見帳｜シーズン進行・ランク分布・レジェンドピック率・エイムアシスト仕様</h1>
+
+<!-- 期間限定: CRカップ特設ページへの導線（10/11以降は自動で非表示） -->
+<a class="crbn" id="crbn" href="./crcup11.html" onclick="if(window.gtag)gtag('event','crcup_banner_click')">
+  <span class="crbn-strip" aria-hidden="true"><i style="--c:#ff4d6d;flex:39"></i><i style="--c:#b06bff;flex:8"></i><i style="--c:#69b7ff;flex:8"></i><i style="--c:#3fd3c8;flex:2"></i><i style="--c:#8a93ad;flex:3"></i></span>
+  <span class="crbn-body">
+    <span class="crbn-k"><span class="crbn-dot" id="crbn-dot"></span><span id="crbn-k">CR CUP #11 特設ページ</span></span>
+    <b class="crbn-t">出場60人の最高ランク ティア表</b>
+    <span class="crbn-s" id="crbn-s">10/4(日) 17:00開始。全20チームの配信先リンクもまとめています</span>
+  </span>
+  <svg class="crbn-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+</a>
+<script>
+(function(){
+  var el=document.getElementById("crbn"); if(!el) return;
+  var now=Date.now(),
+      start=Date.parse("2026-10-04T17:00:00+09:00"),
+      end=Date.parse("2026-10-05T00:00:00+09:00"),
+      hide=Date.parse("2026-10-11T00:00:00+09:00");
+  if(now>=hide){ el.style.display="none"; return; }
+  var k=document.getElementById("crbn-k"), s=document.getElementById("crbn-s");
+  if(now>=start && now<end){
+    el.classList.add("live");
+    k.textContent="CR CUP #11 開催中";
+    s.textContent="全20チームの配信先へここから飛べます";
+  }else if(now>=end){
+    k.textContent="CR CUP #11 特設ページ";
+    s.textContent="出場者の最高ランクと、各チームのアーカイブへのリンク";
+  }
+})();
+</script>
 
 <!-- ファーストビュー（トップページはヒーローを持たず、ここから始まる） -->
 <div class="fv">
@@ -390,7 +435,8 @@ a.lvmore:hover{border-style:solid}
 <section>
   <h2>更新履歴</h2>
   <div class="panel">
-    <ul class="updates"><li><span class="d">09-28</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始13日目）。最多はプラチナIII（11.87%）のままですが、16.12%から減って山がなだらかになり、ダイヤ以上は11.7%から19.4%に戻りました。中央値もプラチナIVからプラチナIIIに上がっています。ダイヤIII（7.24%）からダイヤII（2.21%）で3分の1以下に落ちる形は、スプリット1と同じ位置にもうできています</span></li>
+    <ul class="updates"><li><span class="d">10-03</span><span><a href="./crcup11.html">第11回CRカップ特設ページ</a>を公開しました。10/4（日）17:00開催の出場60人を、配信やSNSで見せた最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを載せています。配信中のメンバーはページ上でひと目で分かります。トップページの一番上からも開けます</span></li>
+<li><span class="d">09-28</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始13日目）。最多はプラチナIII（11.87%）のままですが、16.12%から減って山がなだらかになり、ダイヤ以上は11.7%から19.4%に戻りました。中央値もプラチナIVからプラチナIIIに上がっています。ダイヤIII（7.24%）からダイヤII（2.21%）で3分の1以下に落ちる形は、スプリット1と同じ位置にもうできています</span></li>
 <li><span class="d">09-28</span><span>ランク図解の「分布の推移」に9/28の回を追加しました。スプリット2の2週目で、右側（プラチナI〜ダイヤIII）が一気に厚くなった形が見えます</span></li>
 <li><span class="d">09-26</span><span><a href="./deviation.html">ランク偏差値</a>の結果に「この偏差値の推移を記録する」ボタンを追加しました。押すと<a href="./tracker.html">RANK WORKBOOK</a>が、選んだティアとディビジョンが入った状態で開くので、あとはゲーム画面のRPを入れるだけで記録できます。毎日記録すると、偏差値がどう動いたかをグラフで追えます。あわせて、RANK WORKBOOKの入力欄の説明が「/ 750RP」固定だったのを、選んだランクの上限（ダイヤなら1,000RPなど）に合わせて変わるようにしました。</span></li>
 <li><span class="d">09-26</span><span><a href="./assist.html">エイムアシストまとめ</a>を更新。9/29からPC版のアンチチートがEasy Anti-CheatからEA Javelinに切り替わる件（アップデート後の起動で自動移行、セキュアブートは不要、コンソールは対象外）、EA Javelinの他タイトルでの実績と評判（20タイトル・検知精度99%以上／セキュアブートやLinux非対応などの不満点）、9/18にコンソールのプレデター258人がアカウント共有で60日停止・ランクポイント剥奪になった件を追加しました。</span></li>
@@ -398,9 +444,7 @@ a.lvmore:hover{border-style:solid}
 <li><span class="d">09-26</span><span><a href="./zukai/s30/weapons.html">武器図解</a>のおすすめ構成を「G7＋プラウラー」から「ネメシス＋プラウラー」に変更しました。G7スカウトは実測の総合スコアが42.0（C帯）と低かったためです。ネメシスにはヘッドシーカーバレル（ヘッド+5）を合わせます。</span></li>
 <li><span class="d">09-26</span><span>ツールの手入れ。RANK WORKBOOKのRP推移グラフの左余白を詰めて、描画エリアを「今日の増減」と同じ幅に。ランクルームに「RANK WORKBOOKに戻る」ボタンを追加。ランク偏差値はヘッダーを他ページと揃え、偏差値47〜57の判定メッセージを8段階に分けて「次のディビジョンで偏差値がいくつ上がるか」も出すようにしました。</span></li>
 <li><span class="d">09-25</span><span>ピック率を最新データに更新（開幕52日目・スプリット2開始10日目）。前回の9/3から3週間あいての更新です。パスファインダーが10.9%で首位を守り、アクセルが8.1%から10.6%に戻して2位に復帰、差は0.3ptです。スプリット2で大きく伸びたのはカタリスト（0.9%→2.7%、26位→13位）とコンジット（2.3%→4.2%、18位→9位）ですが、どちらも直近7日では2割以上落ちていて、伸びは一巡しつつあります</span></li>
-<li><span class="d">09-21</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始6日目）。リセットで最多ディビジョンはダイヤIIIからプラチナIII（16.12%）に移り、ダイヤ以上は30.3%から11.7%、中央値はプラチナIIIからプラチナIVに下がりました。スプリットのリセットは実際には各ティアのIVまで下がる形で（ダイヤIV・IIIのみプラチナIII・IIへ）、その着地点が分布の段差としてそのまま出ています</span></li>
-<li><span class="d">09-21</span><span>ランク図解の「分布の推移」にスプリット2の区切りと9/21の回を追加しました。あわせて出典の取得日表記を最新に直し、推移のまとめ文をスプリット1の総括として整理しています</span></li>
-</ul>
+<li><span class="d">09-21</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始6日目）。リセットで最多ディビジョンはダイヤIIIからプラチナIII（16.12%）に移り、ダイヤ以上は30.3%から11.7%、中央値はプラチナIIIからプラチナIVに下がりました。スプリットのリセットは実際には各ティアのIVまで下がる形で（ダイヤIV・IIIのみプラチナIII・IIへ）、その着地点が分布の段差としてそのまま出ています</span></li></ul>
   </div>
   <p class="note" style="margin-top:12px">それ以前の更新は
   <a href="./updates.html">更新履歴アーカイブ</a>に掲載しています。</p>

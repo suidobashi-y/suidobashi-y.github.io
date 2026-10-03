@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
+</script>
+<title>第11回CRカップ Apex 出場者の最高ランク・配信先一覧 | APEX WORKBOOK</title>
+<link rel="canonical" href="https://apex-workbook.com/crcup11.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="第11回CRカップ Apex 出場者の最高ランク・配信先一覧 | APEX WORKBOOK">
+<meta property="og:description" content="10月4日開催の第11回CRカップApex。出場60人をこれまでに到達した最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを掲載。配信中の人もひと目で分かります。">
+<meta property="og:url" content="https://apex-workbook.com/crcup11.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<meta name="description" content="10月4日開催の第11回CRカップApex。出場60人をこれまでに到達した最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを掲載。配信中の人もひと目で分かります。">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./shared.css">
+<style>
+/* ===== CRカップ特設 ===== */
+.hero{padding:22px 0 4px}
+.hero .date{font-family:'Chakra Petch';font-weight:700;font-size:clamp(30px,8vw,46px);line-height:1;letter-spacing:.02em;margin-top:14px}
+.hero .date small{font-size:.42em;color:var(--muted);margin-left:6px;letter-spacing:.08em}
+.hero .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin-top:10px}
+.hero .meta b{color:var(--text);font-weight:500}
+.livebar{background:linear-gradient(90deg,rgba(255,45,120,.1),transparent);border:1px solid rgba(255,45,120,.3);
+  border-radius:4px;padding:9px 13px;margin-top:16px;display:none;align-items:center;gap:9px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pink);box-shadow:0 0 8px var(--pink)}
+@media(prefers-reduced-motion:no-preference){.dot{animation:bl 1.6s ease-in-out infinite}@keyframes bl{50%{opacity:.35}}}
+.livebar .lb{font-family:'Chakra Petch';font-size:12px;letter-spacing:.08em;color:var(--pink)}
+.livebar .ln{font-size:12px;color:var(--muted)}
+
+/* ティア表 */
+.tiers{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--panel2)}
+.tr{display:grid;grid-template-columns:88px 1fr;border-bottom:1px solid rgba(0,229,255,.1)}
+.tr:last-child{border-bottom:none}
+.tl{background:var(--c);color:#0a0e1a;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:10px 4px;text-align:center}
+.tl b{font-family:'Chakra Petch';font-size:15px;letter-spacing:.06em;line-height:1.1}
+.tl span{font-size:10.5px;font-weight:700;margin-top:3px;opacity:.75}
+.tl i{font-style:normal;font-family:'Chakra Petch';font-size:20px;font-weight:700;margin-top:4px}
+.tc{display:flex;flex-wrap:wrap;gap:5px;padding:9px;align-content:flex-start;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 9%,transparent),transparent 60%)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text);text-decoration:none;
+  border:1px solid color-mix(in srgb,var(--c) 40%,transparent);background:rgba(10,14,26,.6);
+  padding:3px 8px 3px 4px;border-radius:2px;white-space:nowrap;transition:border-color .15s}
+.chip:hover,.chip:focus-visible{border-color:var(--c);outline:none}
+.chip em{font-style:normal;font-family:'Chakra Petch';font-size:10px;font-weight:700;color:var(--c);
+  background:color-mix(in srgb,var(--c) 14%,transparent);padding:0 4px;border-radius:2px;min-width:20px;text-align:center}
+.chip.live{border-color:var(--pink);box-shadow:0 0 0 1px rgba(255,45,120,.3)}
+.chip.live::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--pink);box-shadow:0 0 6px var(--pink)}
+sup.u{font-size:9px;color:var(--muted);margin-left:1px}
+.c-pred{--c:#ff4d6d}.c-master{--c:#b06bff}.c-dia{--c:#69b7ff}.c-plat{--c:#3fd3c8}.c-gold{--c:#ffb020}.c-unk{--c:#8a93ad}
+@media(max-width:420px){.tr{grid-template-columns:66px 1fr}.tl b{display:none}.tl span{font-size:11px;letter-spacing:-.02em;white-space:nowrap;opacity:1;margin:0}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+
+/* チーム */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.tm{background:var(--panel);border:1px solid var(--line);border-radius:4px;scroll-margin-top:64px}
+.tm:target{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+.tm .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:10px 13px 8px;
+  border-bottom:1px solid rgba(0,229,255,.1)}
+.tm .no{font-family:'Chakra Petch';font-weight:700;font-size:20px;letter-spacing:.04em}
+.tm .no span{font-size:11px;color:var(--muted);margin-right:4px;letter-spacing:.12em}
+.tm .cc{font-size:11px;color:var(--muted)}
+.tm .pw{display:flex;gap:3px;margin-left:auto}
+.tm .pw i{width:16px;height:5px;border-radius:1px;background:var(--c)}
+.pl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:9px 13px;
+  border-bottom:1px solid rgba(0,229,255,.06)}
+.pl:last-child{border-bottom:none}
+.pl .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px;min-width:0}
+.pl .nm .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .og{font-size:10.5px;color:var(--muted);font-weight:400}
+.pl .rk{font-family:'Chakra Petch';font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--c);
+  border:1px solid color-mix(in srgb,var(--c) 45%,transparent);padding:1px 6px;border-radius:2px;white-space:nowrap}
+.pl .sn{grid-column:1/-1;font-size:11px;color:var(--muted);line-height:1.45;margin-top:-2px}
+.chip .dv{font-family:'Chakra Petch';font-size:10px;color:var(--c);margin-left:-2px}
+.pl .oa{font-family:'Chakra Petch';font-size:9px;letter-spacing:.1em;color:#fff;background:var(--pink);padding:1px 5px;border-radius:2px}
+.lk{grid-column:1/-1;display:flex;gap:6px}
+.lk a{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;min-height:34px;font-family:'Chakra Petch';
+  font-size:11.5px;font-weight:600;letter-spacing:.04em;text-decoration:none;border-radius:3px;border:1px solid;transition:background .15s}
+.lk a svg{width:13px;height:13px}
+.lk .yt{color:#ff6b6b;border-color:rgba(255,80,80,.35);background:rgba(255,80,80,.06)}
+.lk .tw{color:#b48cff;border-color:rgba(160,107,255,.38);background:rgba(160,107,255,.07)}
+.lk .xx{color:var(--text);border-color:rgba(232,236,245,.2);background:rgba(232,236,245,.04);flex:0 0 44px}
+.lk a:hover{background:rgba(255,255,255,.08)}
+.lk .tw.on{color:#fff;border-color:var(--pink);background:linear-gradient(135deg,rgba(255,45,120,.85),rgba(255,45,120,.6))}
+.flt{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.flt::-webkit-scrollbar{display:none}
+.flt button{font-family:'Chakra Petch';font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);
+  padding:6px 12px;border-radius:2px;cursor:pointer;white-space:nowrap}
+.flt button.on{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px;font-size:12.5px}
+.rules dt{color:var(--muted);font-size:11px}
+.rules dd{margin:0 0 4px}
+/* 公開前チェック（?check=1） */
+body.chk .chip.u{outline:2px dashed var(--amber);outline-offset:1px}
+body.chk .pl.u{background:rgba(255,176,32,.08)}
+.chkbar{display:none;background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.45);color:var(--amber);
+  font-size:12px;padding:8px 12px;border-radius:4px;margin-top:12px}
+body.chk .chkbar{display:block}
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="./index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="./index.html">HOME</a>
+    <a href="./deviation.html">ランク偏差値</a>
+    <a href="./rank.html">ランク分布</a>
+    <a href="./tracker.html">ランクワークブック</a>
+    <a href="./pickrate.html">ピック率</a>
+    <a href="./streamers.html">ライブ配信</a>
+    <a href="./assist.html">エイムアシスト</a>
+    <a href="./players.html">プレイ人口</a>
+    <a href="./roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI（S30）</div>
+    <div class="grpbox">
+    <a href="./zukai/s30/meta.html">メタ</a>
+    <a href="./zukai/s30/rank.html">ランク</a>
+    <a href="./zukai/s30/weapons.html">武器</a>
+    </div>
+</div></div>
+
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Crazy Raccoon Cup Apex Legends #11</div>
+  <h1>第11回CRカップ<br>出場者の最高ランク</h1>
+  <p style="font-size:13.5px;color:var(--muted)">出場60人を、これまでに到達した最高ランクで並べました。名前を押すとチームに飛び、そこから各自のYouTube・Twitchを開けます。</p>
+  <div class="date">10.04 SUN 17:00<small>JST</small></div>
+  <div class="meta"><span>実況 <b>平岩康佑</b></span><span>解説 <b>Alelu</b></span><span>全20チーム／60人</span></div>
+  <div class="livebar" id="livebar"><span class="dot"></span><span class="lb" id="live-count"></span><span class="ln" id="live-note"></span></div>
+  <div class="chkbar" id="chkbar"></div>
+</header>
+
+<section>
+  <h2>最高ランク ティア表</h2>
+  <div class="tiers" id="tiers"></div>
+  <div class="legend"><span>数字はチーム番号</span><span>※は根拠を確認中</span><span id="lg-live" style="display:none">● 配信中（Twitch）</span></div>
+</section>
+
+<section>
+  <h2>チームと配信先</h2>
+  <div class="flt" id="flt"></div>
+  <div class="teams" id="teams"></div>
+</section>
+
+<section>
+  <h2>大会ルール</h2>
+  <div class="panel"><dl class="rules">
+    <div><dt>形式</dt><dd>マッチポイント制。50ptに届いたチームが、その後チャンピオンを取った時点で優勝</dd></div>
+    <div><dt>キルポイント</dt><dd>1キル1pt。マッチ1〜3は上限6pt、マッチ4以降は上限なし</dd></div>
+    <div><dt>順位ポイント</dt><dd>1位12／2位9／3位7／4位5／5位4／6-7位3／8-10位2／11-15位1</dd></div>
+    <div><dt>マップ</dt><dd>ワールズエッジ→オリンパスを2試合ごとに交互</dd></div>
+    <div><dt>レジェンドBAN</dt><dd>ALGSと同じ。各マッチで最も選ばれたレジェンドが以降使用不可</dd></div>
+    <div><dt>降下地点</dt><dd>ランダムで決定</dd></div>
+  </dl></div>
+  <p class="note">ルールは事前の公表内容をもとにしています。当日の変更は Crazy Raccoon 公式X（@crazyraccoon406）を確認してください。</p>
+</section>
+
+<section>
+  <h2>関連ページ</h2>
+  <div class="rel">
+    <a href="./streamers.html"><div class="k">Live</div><div class="n">ライブ配信</div><div class="s">いま配信中の国内Apex配信者を、タイプ別に探せます</div></a>
+    <a href="./rank.html"><div class="k">Rank</div><div class="n">ランク分布</div><div class="s">マスター・プレデターが全体の何%か、最新の分布で確認できます</div></a>
+  </div>
+</section>
+
+<p class="note">※最高ランクは、本人の配信・動画・SNSや各種まとめ・記事で確認できた、バトルロイヤルのランクマッチの最高到達ランクです（全シーズン通算・PC/CS問わず・一時的な到達も含む）。VTuberのデビュー前・移籍前の到達も、本人が公表しているものは含めています。アリーナランクは含めていません。ダイヤ以下は到達したディビジョンも表示しています（例：ダイヤ3）。各メンバーの欄に根拠を記載しています。「※」が付いた人と「確認中」の欄の人は、根拠の確認を進めている途中のため、表示が変わることがあります。誤りや追加の情報は X @apexwidgets までお知らせください。</p>
+
+<footer>
+  <p>掲載依頼・修正・掲載停止のご連絡: X @apexwidgets</p>
+  <p class="disc">非公式ファンサイトです。EA / Respawn Entertainment / Crazy Raccoon とは一切関係ありません。
+  Apex Legends is a trademark of Electronic Arts Inc.</p>
+</footer>
+</div>
+
+<script>
+var CR11 = [{"no":1,"coach":"satuki","m":[{"n":"LEO","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"2023年2月にプレデター到達（1tappy・cheekyと）","tw":"","yt":"","x":"room_leo_info"},{"n":"ヒカキン","o":"UUUM","r":"U","dv":"","ok":0,"s":"上位ランク到達を裏づける記録を確認中","tw":"hikakin","yt":"https://www.youtube.com/@HikakinGames","x":"hikakin"},{"n":"cheeky","o":"SBI e-Sports","r":"P","dv":"","ok":1,"s":"","tw":"tttcheekyttt","yt":"https://www.youtube.com/c/tttcheekyttt","x":"tttcheekyttt"}]},{"no":2,"coach":"YukaF","m":[{"n":"Ras","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"ras_sama","yt":"https://www.youtube.com/@Ras99","x":"Ras9915"},{"n":"SHAKA","o":"ZETA DIVISION","r":"P","dv":"","ok":1,"s":"2020年7月にプレデター到達","tw":"fps_shaka","yt":"https://www.youtube.com/@SHAKAch","x":"avashaka"},{"n":"葛葉","o":"にじさんじ","r":"D","dv":"3","ok":1,"s":"S12 Split1でダイヤ3","tw":"","yt":"https://www.youtube.com/@Kuzuha","x":"Vamp_Kuzu"}]},{"no":3,"coach":"5GC","m":[{"n":"天月","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"cr_amatsuki","yt":"https://www.youtube.com/@amatsuki_YHch","x":"_amatsuki_"},{"n":"関優太","o":"","r":"P","dv":"","ok":0,"s":"プレデター到達者一覧に掲載（本人の到達報告を確認中）","tw":"stylishnoob4","yt":"https://www.youtube.com/@StylishNoob4","x":"stylishnoob"},{"n":"ハセシン","o":"ZETA DIVISION","r":"P","dv":"","ok":1,"s":"","tw":"","yt":"https://www.youtube.com/@XxHASESHINxX","x":"HASESHIN_Rush"}]},{"no":4,"coach":"","m":[{"n":"ありさか","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"arisaka_","yt":"https://www.youtube.com/channel/UCLLuaTElO1eRGOo2qc_Rdsw","x":"ArisakaaaT"},{"n":"一ノ瀬うるは","o":"ぶいすぽっ！","r":"D","dv":"3","ok":1,"s":"S5・S7・S12でダイヤ3","tw":"uruhaichinose","yt":"https://www.youtube.com/channel/UC5LyYg6cCA4yHEYvtUsir3g","x":"uruha_ichinose"},{"n":"えでん","o":"","r":"P","dv":"","ok":1,"s":"","tw":"","yt":"https://www.youtube.com/@%E3%81%88%E3%81%A7%E3%82%93","x":"xEden07"}]},{"no":5,"coach":"Peace","m":[{"n":"ローレン・イロアス","o":"にじさんじ","r":"P","dv":"","ok":1,"s":"初期シーズンにプレデター","tw":"lauren_iroas2434","yt":"https://www.youtube.com/@LaurenIroas","x":"Lauren_iroas"},{"n":"じゃすぱー","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"jasper7se","yt":"https://www.youtube.com/@Jasper7se.","x":"Jasper7se"},{"n":"Cpt","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"cr_cpt","yt":"https://www.youtube.com/@cr_cpt","x":"ApexerCpt"}]},{"no":6,"coach":"Euriece","m":[{"n":"加藤純一","o":"","r":"M","dv":"","ok":1,"s":"2021年9月「カトマス」企画で到達","tw":"kato_junichi0817","yt":"https://www.youtube.com/@junchannel","x":"unkochan1234567"},{"n":"すもも","o":"DFM","r":"P","dv":"","ok":1,"s":"","tw":"sumomo_x","yt":"https://www.youtube.com/@sumomox1","x":"SUMOMOXqX"},{"n":"たいじ","o":"REJECT","r":"M","dv":"","ok":1,"s":"配信でマスター到達","tw":"yaritaiji","yt":"https://www.youtube.com/@Yaritaiji","x":"taijich0324"}]},{"no":7,"coach":"あおばじゃぱん","m":[{"n":"柊ツルギ","o":"Neo-Porte","r":"M","dv":"","ok":1,"s":"デビュー前のS8でマスター（デビュー後はプラチナ3）","tw":"hiiragitsurugi","yt":"https://www.youtube.com/@HiiragiTsurugi","x":"HiiragiTsurugi"},{"n":"まろん","o":"RIDDLE","r":"P","dv":"","ok":1,"s":"","tw":"maronnv","yt":"https://www.youtube.com/channel/UCVU9FJUDdsjIFbJijf9kxrg","x":"ridmaron"},{"n":"SPYGEA","o":"","r":"P","dv":"","ok":1,"s":"","tw":"spygea","yt":"https://www.youtube.com/@spygea","x":"spygea_jp"}]},{"no":8,"coach":"Xtsuvi","m":[{"n":"ボドカ","o":"RIDDLE","r":"P","dv":"","ok":1,"s":"","tw":"vodka_","yt":"https://www.youtube.com/@VodkaChaso","x":"VodkaChaso"},{"n":"猫汰つな","o":"ぶいすぽっ！","r":"M","dv":"","ok":1,"s":"S15・S17・S23・S30でマスター","tw":"tsuna_nekota","yt":"https://www.youtube.com/@tsuna_nekota","x":"tsuna_nekota"},{"n":"麻倉シノ","o":"Neo-Porte","r":"D","dv":"4","ok":1,"s":"S20・S21・S25でダイヤ4","tw":"","yt":"https://www.youtube.com/@Shino_Asakura","x":"Shino_Asakura5"}]},{"no":9,"coach":"Taida","m":[{"n":"kinako","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"kinako_0707","yt":"https://www.youtube.com/@kinapoppo","x":"kinako_pop"},{"n":"橘ひなの","o":"ぶいすぽっ！","r":"M","dv":"","ok":1,"s":"S6〜S12で何度もマスター","tw":"hinanotachiba7","yt":"https://www.youtube.com/channel/UCvUc0m317LWTTPZoBQV479A","x":"hinano_tachiba7"},{"n":"りんしゃんつかい","o":"","r":"P","dv":"","ok":1,"s":"","tw":"","yt":"https://www.youtube.com/@Rinshan","x":"Rinshannnn"}]},{"no":10,"coach":"Meltstera","m":[{"n":"AlphaAzur","o":"","r":"P","dv":"","ok":1,"s":"","tw":"alphaazur","yt":"https://www.youtube.com/@AlphaAzur","x":"AzurAlpha"},{"n":"叢雲カゲツ","o":"にじさんじ","r":"P","dv":"","ok":1,"s":"デビュー配信で本人が「元ソロプレデター」と発言。デビュー後はS16にソロマスター","tw":"","yt":"https://www.youtube.com/@MurakumoKagetsu","x":"Kagetsu_2434"},{"n":"イブラヒム","o":"にじさんじ","r":"D","dv":"3","ok":1,"s":"S7 Split1でダイヤ3","tw":"","yt":"https://www.youtube.com/@Ibrahim","x":"honmono_ibrahim"}]},{"no":11,"coach":"Yamato","m":[{"n":"常闇トワ","o":"ホロライブ","r":"U","dv":"","ok":0,"s":"2024年の大会紹介ではダイヤ3。その後の到達を確認中","tw":"tokoyamitowa_holo","yt":"https://www.youtube.com/@TokoyamiTowa","x":"tokoyamitowa"},{"n":"うるか","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"ow_uruca","yt":"https://www.youtube.com/@CR_uruca","x":"ow_uruca"},{"n":"ゆふな","o":"JOZ","r":"P","dv":"","ok":1,"s":"","tw":"yufuna","yt":"https://www.youtube.com/c/YufuNachannel","x":"_YFNA"}]},{"no":12,"coach":"れく・むかい","m":[{"n":"Kamito","o":"","r":"P","dv":"","ok":1,"s":"","tw":"kamito_jp","yt":"https://www.youtube.com/@-kamitochannel-2486","x":"kamito_otaku"},{"n":"八雲べに","o":"ぶいすぽっ！","r":"PL","dv":"3","ok":1,"s":"S10・S12でプラチナ3","tw":"yakumobeni","yt":"https://www.youtube.com/@%E5%85%AB%E9%9B%B2%E3%81%B9%E3%81%AB","x":"beni_yakumo"},{"n":"渋谷ハル","o":"Neo-Porte","r":"P","dv":"","ok":1,"s":"S13 Split1・S27 Split1でプレデター","tw":"shibuyahal","yt":"https://www.youtube.com/@ShibuyaHAL","x":"ShibuyaHAL"}]},{"no":13,"coach":"","m":[{"n":"わいわい","o":"Crazy Raccoon","r":"P","dv":"","ok":0,"s":"","tw":"crazyraccoonyy","yt":"https://www.youtube.com/@ABCDYY","x":"ABCDYY"},{"n":"NIRU","o":"","r":"P","dv":"","ok":1,"s":"シーズン30でプレデター達成（本人の動画）","tw":"nniru","yt":"https://www.youtube.com/c/NIRU1218","x":"nirunno"},{"n":"neth","o":"Crazy Raccoon","r":"P","dv":"","ok":0,"s":"","tw":"neth3","yt":"https://www.youtube.com/@neth","x":"neth_vz"}]},{"no":14,"coach":"Axis","m":[{"n":"k4sen","o":"ZETA DIVISION","r":"U","dv":"","ok":0,"s":"ソロでダイヤ到達。それ以上の到達を確認中","tw":"k4sen","yt":"https://www.youtube.com/user/zzxk4sen","x":"k4sen"},{"n":"ゆきお","o":"RIDDLE","r":"P","dv":"","ok":1,"s":"","tw":"yukiofps14","yt":"https://www.youtube.com/@YUKIOMELTDOWN","x":"YukioFPS"},{"n":"Biju","o":"MURASH GAMING","r":"P","dv":"","ok":0,"s":"","tw":"bijusan","yt":"https://www.youtube.com/@biju_valo","x":"Biju_valo"}]},{"no":15,"coach":"IeNaGa","m":[{"n":"なっち","o":"","r":"P","dv":"","ok":1,"s":"本人の配信でプレデター到達","tw":"nacchi081","yt":"https://www.youtube.com/@nacchi0816","x":"Nacchi081181"},{"n":"VanilLa","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"cr_vanilla","yt":"https://www.youtube.com/@CR.VanilLa","x":"VanilLaaa12"},{"n":"花芽すみれ","o":"ぶいすぽっ！","r":"M","dv":"","ok":1,"s":"S8・S10・S12でマスター","tw":"kagasumire","yt":"https://www.youtube.com/@KagaSumire","x":"sumire_kaga"}]},{"no":16,"coach":"ちゃんりよ","m":[{"n":"小柳ロウ","o":"にじさんじ","r":"M","dv":"","ok":1,"s":"2026年4月の配信でマスター","tw":"","yt":"https://www.youtube.com/@KoyanagiRou","x":"Rou_2434"},{"n":"うぉっか","o":"Crazy Raccoon","r":"P","dv":"","ok":1,"s":"","tw":"cr_wokka","yt":"https://www.youtube.com/@sprwokka","x":"sprWokka"},{"n":"紡木こかげ","o":"ぶいすぽっ！","r":"M","dv":"","ok":1,"s":"デビュー前にマスター","tw":"kokagetsumugi","yt":"https://www.youtube.com/@Kokage_Tsumugi","x":"kokage_tsumugi"}]},{"no":17,"coach":"L1ng","m":[{"n":"不破湊","o":"にじさんじ","r":"D","dv":"4","ok":1,"s":"ソロでダイヤ4","tw":"","yt":"https://www.youtube.com/@FuwaMinato","x":"Fuwa_Minato"},{"n":"でっぴー","o":"JOZ","r":"P","dv":"","ok":1,"s":"","tw":"","yt":"https://www.youtube.com/@Depp0923","x":"depp0923"},{"n":"SqLA","o":"RIDDLE","r":"P","dv":"","ok":1,"s":"","tw":"sqla223","yt":"https://www.youtube.com/channel/UCItf9xRYdHYlGwAw9JnsnJw","x":"imsqla"}]},{"no":18,"coach":"Lykq","m":[{"n":"胡桃のあ","o":"ぶいすぽっ！","r":"P","dv":"","ok":1,"s":"S17でプレデター","tw":"963noah","yt":"https://www.youtube.com/@963Noah","x":"n0ah_kurumi"},{"n":"1tappy","o":"REJECT","r":"P","dv":"","ok":1,"s":"","tw":"1tappytheworld","yt":"https://www.youtube.com/channel/UCR77BYqfZTZG_tusffddpnw","x":"1TAPPYTHEWORLD"},{"n":"樋口楓","o":"にじさんじ","r":"PL","dv":"4","ok":1,"s":"バトロワはプラチナ4。アリーナランクではマスター","tw":"","yt":"https://www.youtube.com/@HiguchiKaede","x":"HiguchiKaede"}]},{"no":19,"coach":"もやし9","m":[{"n":"夢野あかり","o":"ぶいすぽっ！","r":"D","dv":"3","ok":1,"s":"CS版でダイヤ3","tw":"akarindao","yt":"https://www.youtube.com/@akarindao","x":"AKARINdaooo"},{"n":"rpr","o":"KINOTROPE","r":"P","dv":"","ok":1,"s":"","tw":"rprx","yt":"https://www.youtube.com/@rprxx","x":"rpr"},{"n":"Ru","o":"TIE","r":"P","dv":"","ok":1,"s":"","tw":"tie_ru","yt":"https://www.youtube.com/@TIE_Ru","x":"Poulmt"}]},{"no":20,"coach":"4rufa","m":[{"n":"4rmy","o":"SCARZ","r":"P","dv":"","ok":1,"s":"","tw":"4rmy_o","yt":"https://www.youtube.com/@4rmy_o","x":"4rmy_o"},{"n":"小森めと","o":"ぶいすぽっ！","r":"D","dv":"3","ok":1,"s":"移籍前にダイヤ3","tw":"met_komori","yt":"https://www.youtube.com/@Met_Komori","x":"Met_Komori"},{"n":"ラトナ・プティ","o":"にじさんじ","r":"D","dv":"3","ok":1,"s":"S7でダイヤ3","tw":"petit2434","yt":"https://www.youtube.com/@RatnaPetit","x":"ratna_petit"}]}];
+var TIER = {
+  P:{k:"pred",  b:"PREDATOR", j:"プレデター"},
+  G:{k:"gold", b:"GOLD", j:"ゴールド"},
+  U:{k:"unk", b:"PENDING", j:"確認中"},
+  M:{k:"master",b:"MASTER",   j:"マスター"},
+  D:{k:"dia",   b:"DIAMOND",  j:"ダイヤ"},
+  PL:{k:"plat", b:"PLATINUM", j:"プラチナ"}
+};
+var ORDER = ["P","M","D","PL","G","U"];
+var LIVE_API = "https://apex-map-streamer.suidobashi-y.workers.dev/live";
+var LIVE = [], GAMES = {}, FLT = "all";
+var CHECK = new URLSearchParams(location.search).get("check")==="1";
+
+function esc(t){ return String(t).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function pad(n){ return (n<10?"0":"")+n; }
+function isLive(p){
+  if(!p.tw || LIVE.indexOf(p.tw)<0) return false;
+  var g = GAMES[p.tw]; return !g || String(g.id||g)==="511224";
+}
+var ALL = [];
+CR11.forEach(function(t){ t.m.forEach(function(p){ p.team=t.no; ALL.push(p); }); });
+
+function renderTiers(){
+  document.getElementById("tiers").innerHTML = ORDER.map(function(r){
+    var ps = ALL.filter(function(p){return p.r===r});
+    if(!ps.length) return "";
+    var T = TIER[r];
+    return '<div class="tr c-'+T.k+'"><div class="tl"><b>'+T.b+'</b><span>'+T.j+'</span><i>'+ps.length+'</i></div><div class="tc">'
+      + ps.map(function(p){
+          return '<a class="chip'+(p.ok?'':' u')+(isLive(p)?' live':'')+'" href="#t'+pad(p.team)+'"><em>'+p.team+'</em>'
+            + esc(p.n)+(p.dv?'<span class="dv">'+p.dv+'</span>':'')+(p.ok||p.r==="U"?'':'<sup class="u">※</sup>')+'</a>';
+        }).join("")
+      + '</div></div>';
+  }).join("");
+}
+
+var ICON = {
+  yt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12a31 31 0 0 0 .5 4.8 3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8zM9.7 15.1V8.9l5.8 3.1z"/></svg>',
+  tw:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 2 2.5 6v13h4.5v3h3l3-3h4l5-5V2zm16 11-3 3h-4.5l-3 3v-3H5.5V4H20zM15.5 7h2v5.5h-2zm-5 0h2v5.5h-2z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.8 3h3.2l-7 8 8.2 10h-6.4l-5-6.5L5 21H1.8l7.5-8.6L1.5 3H8l4.5 6zm-1.1 16.2h1.8L7.4 4.7H5.5z"/></svg>'
+};
+var IS_MOBILE=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent), IS_INAPP=/Twitter|FBAN|FBAV|Instagram|Line\//i.test(navigator.userAgent);
+function openTwitch(e,login){
+  if(!IS_MOBILE||!IS_INAPP) return;
+  e.preventDefault();
+  var t=setTimeout(function(){location.href="https://www.twitch.tv/"+login},900);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)clearTimeout(t)},{once:true});
+  location.href="twitch://stream/"+login;
+}
+
+function teamStrength(t){
+  return t.m.map(function(p){ return '<i class="c-'+TIER[p.r].k+'" title="'+TIER[p.r].j+'"></i>'; }).join("");
+}
+function renderFilter(){
+  var opts=[["all","全チーム"],["live","配信中"],["P","プレデター"],["M","マスター"],["D","ダイヤ以下"]];
+  document.getElementById("flt").innerHTML = opts.map(function(o){
+    if(o[0]==="live" && !LIVE.length) return "";
+    return '<button data-f="'+o[0]+'"'+(FLT===o[0]?' class="on"':'')+'>'+o[1]+'</button>';
+  }).join("");
+  document.querySelectorAll("#flt button").forEach(function(b){ b.onclick=function(){ FLT=b.dataset.f; renderFilter(); renderTeams(); }; });
+}
+function hit(p){
+  if(FLT==="all") return true;
+  if(FLT==="live") return isLive(p);
+  if(FLT==="D") return p.r==="D"||p.r==="PL"||p.r==="G";
+  return p.r===FLT;
+}
+function renderTeams(){
+  var rows = CR11.filter(function(t){ return t.m.some(hit); });
+  document.getElementById("teams").innerHTML = rows.map(function(t){
+    return '<div class="tm" id="t'+pad(t.no)+'"><div class="hd"><span class="no"><span>TEAM</span>'+pad(t.no)+'</span>'
+      + (t.coach?'<span class="cc">コーチ '+esc(t.coach)+'</span>':'')
+      + '<span class="pw">'+teamStrength(t)+'</span></div>'
+      + t.m.map(function(p){
+          var T=TIER[p.r], lv=isLive(p);
+          return '<div class="pl c-'+T.k+(p.ok?'':' u')+'" style="'+(hit(p)?'':'opacity:.4')+'">'
+            + '<span class="nm"><span class="t">'+esc(p.n)+'</span>'+(lv?'<span class="oa">配信中</span>':'')
+            + (p.o?'<span class="og">'+esc(p.o)+'</span>':'')+'</span>'
+            + '<span class="rk">'+T.j+(p.dv||'')+(p.ok||p.r==="U"?'':'※')+'</span>'
+            + (p.s?'<span class="sn">'+esc(p.s)+'</span>':'')
+            + '<div class="lk">'
+            + (p.tw?'<a class="tw'+(lv?' on':'')+'" href="https://www.twitch.tv/'+p.tw+'" target="_blank" rel="noopener" onclick="openTwitch(event,\''+p.tw+'\')">'+ICON.tw+(lv?'配信を見る':'Twitch')+'</a>':'')
+            + (p.yt?'<a class="yt" href="'+p.yt+'" target="_blank" rel="noopener">'+ICON.yt+'YouTube</a>':'')
+            + (p.x?'<a class="xx" href="https://x.com/'+p.x+'" target="_blank" rel="noopener" aria-label="'+esc(p.n)+'のX">'+ICON.x+'</a>':'')
+            + '</div></div>';
+        }).join("")
+      + '</div>';
+  }).join("") || '<p class="note">該当するチームがありません。「全チーム」に戻してください。</p>';
+}
+
+function loadLive(){
+  fetch(LIVE_API).then(function(r){ if(!r.ok) throw 0; return r.json(); }).then(function(j){
+    LIVE = j.live||[]; GAMES = j.games||{};
+    var on = ALL.filter(isLive);
+    if(on.length){
+      var bar=document.getElementById("livebar"); bar.style.display="flex";
+      document.getElementById("live-count").textContent = on.length+"人がApexを配信中";
+      document.getElementById("live-note").textContent = on.map(function(p){return p.n}).join("・");
+      document.getElementById("lg-live").style.display="";
+    }
+    renderTiers(); renderFilter(); renderTeams();
+  }).catch(function(){});
+}
+
+if(CHECK){
+  document.body.classList.add("chk");
+  var u = ALL.filter(function(p){return !p.ok});
+  document.getElementById("chkbar").textContent = "公開前チェック: 未確認 "+u.length+"人 — "+u.map(function(p){return p.n}).join("、");
+}
+renderTiers(); renderFilter(); renderTeams(); loadLive();
+if(location.hash){ var el=document.querySelector(location.hash); if(el) el.scrollIntoView(); }
+</script>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>
