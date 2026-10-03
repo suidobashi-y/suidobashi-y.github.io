@@ -157,7 +157,7 @@ body.chk .chkbar{display:block}
 <section>
   <h2>最高ランク ティア表</h2>
   <div class="tiers" id="tiers"></div>
-  <div class="legend"><span>数字はチーム番号</span><span>※は根拠を確認中</span><span id="lg-live" style="display:none">● 配信中（Twitch）</span></div>
+  <div class="legend"><span>数字はチーム番号</span><span>※は根拠を確認中</span><span id="lg-live" style="display:none">● Twitchで配信中</span></div>
 </section>
 
 <section>
@@ -294,7 +294,7 @@ function loadLive(){
     var on = ALL.filter(isLive);
     if(on.length){
       var bar=document.getElementById("livebar"); bar.style.display="flex";
-      document.getElementById("live-count").textContent = on.length+"人がApexを配信中";
+      document.getElementById("live-count").textContent = on.length+"人がTwitchで配信中";
       document.getElementById("live-note").textContent = on.map(function(p){return p.n}).join("・");
       document.getElementById("lg-live").style.display="";
     }
