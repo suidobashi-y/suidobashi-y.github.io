@@ -38,7 +38,15 @@ section{margin-top:36px}
 h3{font-size:15px;margin:18px 0 6px;color:var(--text)}
 p{font-size:14px}
 .panel{margin-bottom:12px}
-/* 結論ボックス */
+section.first{margin-top:18px}
+/* 注釈（旧・結論） */
+.annot{margin:14px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:4px;background:rgba(138,147,173,.04)}
+.annot .ah{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.annot ol{margin:0;padding-left:1.3em;font-size:12.5px;line-height:1.75;color:var(--muted)}
+.annot li{margin-bottom:5px}
+.annot li:last-child{margin-bottom:0}
+.annot strong{color:var(--text);font-weight:700}
+/* 旧・結論ボックス */
 .tldr{background:linear-gradient(180deg,rgba(0,229,255,.07),rgba(0,229,255,0));
   border:1px solid var(--line);border-left:3px solid var(--cyan);border-radius:4px;padding:16px}
 .tldr ol{margin:0;padding-left:1.2em;font-size:14px}
@@ -195,23 +203,11 @@ p{font-size:14px}
   <h1>Apexの人口と<span class="accent">同時接続数</span></h1>
   <div class="meta">
     <span>CROSS-SEASON</span><span>|</span>
-    <span class="upd">最終更新: 2026-10-05</span>
+    <span class="upd">最終更新: 2026-10-07</span>
   </div>
 </header>
 
-<section>
-  <h2>結論</h2>
-  <div class="tldr">
-    <ol>
-      <li><strong>公開されている実数はSteamの同時接続数だけ。</strong>2026年8月時点で、日中は9万人前後、ピーク帯で25万人前後を推移しています。</li>
-      <li><strong>PlayStation・Xbox・EA app・Switch 2の人数は公表されていない。</strong>したがってApex全体の正確なプレイ人数を知っている人は、EA社内を除いて存在しません。</li>
-      <li><strong>「全プラットフォーム合計◯◯万人」と書いているサイトの数字は推定値です。</strong>出所を確認すると、公表データではなく各サイト独自の計算であることがほとんどです。本サイトが公開データから試算した範囲は<strong>約17万〜65万人</strong>で、手法によって3.8倍の幅が出ます（<a href="#master">試算の詳細</a>）。</li>
-    </ol>
-  </div>
-</section>
-
-<section>
-  <h2>現在のSteam同時接続数</h2>
+<section class="first" aria-label="現在のSteam同時接続数">
   <div class="panel live stale" id="liveBox">
     <div class="lbl">STEAM CONCURRENT PLAYERS</div>
     <div class="big" id="liveNum" style="font-size:clamp(22px,6vw,34px)">90,000〜250,000</div>
@@ -220,7 +216,7 @@ p{font-size:14px}
 
     <div class="cmp" id="ccuCmp">
       <div class="row">
-        <div><div class="k">いつもの同時刻</div><div class="base" id="ccuBase">-</div></div>
+        <div><div class="k" id="ccuBaseK">過去2週間の同時刻</div><div class="base" id="ccuBase">-</div></div>
         <div><div class="pct" id="ccuPct">-</div><div class="lab" id="ccuLab">-</div></div>
       </div>
       <div class="meter" id="ccuMeter"><i></i><i></i><i></i><i></i><i></i></div>
@@ -242,13 +238,24 @@ p{font-size:14px}
         <span><i style="height:8px;background:rgba(0,229,255,.2)"></i>いつもの幅</span>
       </div>
     </div>
-    <svg id="ccuSvg" viewBox="0 0 320 150" role="img" aria-label="直近6時間のSteam同時接続数と、いつもの同時刻の幅"></svg>
+    <svg id="ccuSvg" viewBox="0 0 320 150" role="img" aria-label="直近6時間のSteam同時接続数と、過去2週間の同時刻の幅"></svg>
   </div>
   <p class="ccunote" id="ccuNote" hidden></p>
   <p class="note">Steamの公式API（GetNumberOfCurrentPlayers）から取得しています。取得できない場合は下の表の目安値をご参照ください。
   日本時間の夜間（21〜24時）とシーズン開幕直後に最も高くなります。</p>
 
-  <h3>Steam同接の主要な数字</h3>
+  <div class="annot">
+    <div class="ah">注釈：この数字でわかること・わからないこと</div>
+    <ol>
+      <li><strong>公開されている実数はSteamの同時接続数だけ。</strong>2026年8月時点で、日中は9万人前後、ピーク帯で25万人前後を推移しています。</li>
+      <li><strong>PlayStation・Xbox・EA app・Switch 2の人数は公表されていない。</strong>したがってApex全体の正確なプレイ人数を知っている人は、EA社内を除いて存在しません。</li>
+      <li><strong>「全プラットフォーム合計◯◯万人」と書いているサイトの数字は推定値です。</strong>出所を確認すると、公表データではなく各サイト独自の計算であることがほとんどです。本サイトが公開データから試算した範囲は<strong>約17万〜65万人</strong>で、手法によって3.8倍の幅が出ます（<a href="#master">試算の詳細</a>）。</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>Steam同接の主要な数字</h2>
   <div class="panel">
     <table class="vals">
       <tr><th>項目</th><th>数値</th><th>時点</th></tr>
@@ -479,6 +486,7 @@ p{font-size:14px}
     box.insertBefore(v,num);
     /* 数値 */
     $("ccuBase").textContent=fmt(j.baseline);
+    if(j.days<14) $("ccuBaseK").textContent="過去"+j.days+"日の同時刻";
     var p=$("ccuPct");
     p.textContent=(j.pct>0?"+":j.pct<0?"−":"±")+Math.abs(j.pct).toFixed(1)+"%";
     p.className="pct "+cls;
@@ -496,7 +504,7 @@ p{font-size:14px}
     var d=j.days||0, need=7;
     $("ccuWarmBar").style.width=Math.min(100,d/need*100)+"%";
     $("ccuWarmTxt").textContent="同じ時刻の人数を10分ごとに記録しています（"+d+"/"+need+"日）。"+
-      need+"日分たまると「いつもの同時刻」との比較を表示します。";
+      need+"日分たまると「過去2週間の同時刻」との比較を表示します。";
     $("ccuWarm").classList.add("on");
   }
 
