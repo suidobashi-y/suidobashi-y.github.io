@@ -165,6 +165,22 @@ a.card::before{background:var(--cyan);box-shadow:0 0 10px rgba(0,229,255,.5)}
 .ccucard .prim{font-size:30px;color:var(--cyan);letter-spacing:.02em;margin:3px 0 0}
 .ccucard .prim .u{font-family:'Noto Sans JP';font-size:12.5px;font-weight:400;
   color:var(--muted);margin-left:7px;letter-spacing:0}
+.ccutop{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.ccuvd{text-align:right;display:none;flex:0 0 auto}
+.ccuvd.on{display:block}
+.ccuvd .p{font-family:'Chakra Petch';font-size:20px;font-weight:700;line-height:1}
+.ccuvd .l{font-size:11.5px;font-weight:700;margin-top:3px}
+.ccuvd .l small{font-family:'Chakra Petch';font-size:9px;font-weight:400;letter-spacing:.1em;color:var(--muted);
+  border:1px solid rgba(138,147,173,.4);border-radius:2px;padding:0 4px;margin-left:5px;vertical-align:1px}
+.ccuvd.n{color:var(--cyan)} .ccuvd.z{color:var(--green)} .ccuvd.p2{color:var(--amber)}
+.ccuspark{display:none;width:100%;height:auto;margin:8px 0 2px}
+.ccuspark.on{display:block}
+.ccuwarm{display:none;margin-top:6px}
+.ccuwarm.on{display:block}
+.ccuwarm .bar{height:4px;border-radius:2px;background:rgba(138,147,173,.18);overflow:hidden}
+.ccuwarm .bar b{display:block;height:100%;background:var(--cyan)}
+.ccucard .foot{display:none}
+.ccucard .foot.on{display:flex}
 .ccudot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
   box-shadow:0 0 8px var(--green);margin-right:6px;vertical-align:1px}
 @media(prefers-reduced-motion:no-preference){.ccudot{animation:lvbl 1.6s ease-in-out infinite}}
@@ -340,7 +356,13 @@ a.lvmore:hover{border-style:solid}
 
   <a class="card ccucard wide" href="./players.html" id="ccucard" style="display:none">
     <div class="eyeb"><span class="ccudot"></span>STEAM CCU // 現在のSteam同時接続数</div>
-    <div class="prim"><span id="ccu-num">—</span><span class="u">人</span></div>
+    <div class="ccutop">
+      <div class="prim"><span id="ccu-num">—</span><span class="u">人</span></div>
+      <div class="ccuvd" id="ccu-vd"><div class="p" id="ccu-pct"></div><div class="l" id="ccu-lab"></div></div>
+    </div>
+    <svg class="ccuspark" id="ccu-spark" viewBox="0 0 320 44" aria-hidden="true"></svg>
+    <div class="ccuwarm" id="ccu-warm"><div class="bar"><b id="ccu-warmbar"></b></div></div>
+    <div class="foot" id="ccu-foot"><span class="src" id="ccu-src">—</span><span class="more">いつもと比べる →</span></div>
   </a>
 
   <div class="card livecard wide" id="livecard" style="display:none">
@@ -435,7 +457,8 @@ a.lvmore:hover{border-style:solid}
 <section>
   <h2>更新履歴</h2>
   <div class="panel">
-    <ul class="updates"><li><span class="d">10-04</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の「最高ランクのティア表」を取り下げました。根拠を確認できていない情報を多く含んでいたためです。ご指摘くださった皆さま、関係する皆さまにお詫び申し上げます。ページは配信先リンク集として残しています</span></li>
+    <ul class="updates"><li><span class="d">10-05</span><span><a href="./players.html">プレイ人口</a>のSteam同時接続数に「いつもとの比較」を追加しました。今の人数が、過去の同じ時刻（前後20分）と比べて多いか少ないかを、増減率と5段階のメーターで表示します。直近6時間の推移も、いつもの幅と重ねて見られます。9/24から10分ごとに記録しているデータを使っており、12日分そろうまでは増減率だけの簡易判定です。トップページの同接カードにも、増減率と直近6時間の推移を出すようにしました。Steam版のみの数字です</span></li>
+<li><span class="d">10-04</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の「最高ランクのティア表」を取り下げました。根拠を確認できていない情報を多く含んでいたためです。ご指摘くださった皆さま、関係する皆さまにお詫び申し上げます。ページは配信先リンク集として残しています</span></li>
 <li><span class="d">10-03</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の麻倉シノさんを、ダイヤ4からマスターに直しました。初配信でシーズン11のマスター・シーズン12のソロマスターを公表していたとのご指摘をいただきました。ありがとうございます</span></li>
 <li><span class="d">10-03</span><span><a href="./streamers.html">ライブ配信</a>に第11回CRカップの出場者39人を追加しました（Twitchで配信している人）。<a href="./crcup11.html">CRカップ特設ページ</a>でも、配信中の出場者に「配信中」が付くようになります。あわせて、ありさかさん・ボドカさんのTwitchの登録先が違っていたのを直しました。配信中の判定はTwitchのみのため、特設ページの表示は「Twitchで配信中」としています</span></li>
 <li><span class="d">10-03</span><span><a href="./crcup11.html">第11回CRカップ特設ページ</a>を公開しました。10/4（日）17:00開催の出場60人を、配信やSNSで見せた最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを載せています。配信中のメンバーはページ上でひと目で分かります。トップページの一番上からも開けます</span></li>
@@ -443,8 +466,7 @@ a.lvmore:hover{border-style:solid}
 <li><span class="d">09-28</span><span>ランク図解の「分布の推移」に9/28の回を追加しました。スプリット2の2週目で、右側（プラチナI〜ダイヤIII）が一気に厚くなった形が見えます</span></li>
 <li><span class="d">09-26</span><span><a href="./deviation.html">ランク偏差値</a>の結果に「この偏差値の推移を記録する」ボタンを追加しました。押すと<a href="./tracker.html">RANK WORKBOOK</a>が、選んだティアとディビジョンが入った状態で開くので、あとはゲーム画面のRPを入れるだけで記録できます。毎日記録すると、偏差値がどう動いたかをグラフで追えます。あわせて、RANK WORKBOOKの入力欄の説明が「/ 750RP」固定だったのを、選んだランクの上限（ダイヤなら1,000RPなど）に合わせて変わるようにしました。</span></li>
 <li><span class="d">09-26</span><span><a href="./assist.html">エイムアシストまとめ</a>を更新。9/29からPC版のアンチチートがEasy Anti-CheatからEA Javelinに切り替わる件（アップデート後の起動で自動移行、セキュアブートは不要、コンソールは対象外）、EA Javelinの他タイトルでの実績と評判（20タイトル・検知精度99%以上／セキュアブートやLinux非対応などの不満点）、9/18にコンソールのプレデター258人がアカウント共有で60日停止・ランクポイント剥奪になった件を追加しました。</span></li>
-<li><span class="d">09-26</span><span><a href="./roadmap.html">ロードマップ</a>にスプリット2の調整内容（コンジット・フューズ・カタリストの強化、回復アイテムの増量、長距離武器3種の強化、ランクラダーの日程）を追加。あわせて、図の「現在地」が次のシーズンの上に表示されていたのを直しました。</span></li>
-<li><span class="d">09-26</span><span><a href="./zukai/s30/weapons.html">武器図解</a>のおすすめ構成を「G7＋プラウラー」から「ネメシス＋プラウラー」に変更しました。G7スカウトは実測の総合スコアが42.0（C帯）と低かったためです。ネメシスにはヘッドシーカーバレル（ヘッド+5）を合わせます。</span></li></ul>
+<li><span class="d">09-26</span><span><a href="./roadmap.html">ロードマップ</a>にスプリット2の調整内容（コンジット・フューズ・カタリストの強化、回復アイテムの増量、長距離武器3種の強化、ランクラダーの日程）を追加。あわせて、図の「現在地」が次のシーズンの上に表示されていたのを直しました。</span></li></ul>
   </div>
   <p class="note" style="margin-top:12px">それ以前の更新は
   <a href="./updates.html">更新履歴アーカイブ</a>に掲載しています。</p>
@@ -586,21 +608,85 @@ var SEASON = currentSeason();   /* 開幕時刻を過ぎると自動で次シー
   });
 })();
 
-/* Steam同接カード（取得できなければカードごと非表示） */
+/* Steam同接カード（取得できなければカードごと非表示）
+   /players/baseline で「いつもの同時刻」との比較と直近6時間の推移も出す。
+   それが落ちたら /players で人数だけ出す。 */
 (function(){
-  var CCU_API = "https://apex-map-streamer.suidobashi-y.workers.dev/players";
+  var API  = "https://apex-map-streamer.suidobashi-y.workers.dev";
   var card = document.getElementById("ccucard");
   if(!card || typeof fetch !== "function") return;
+  var $ = function(id){ return document.getElementById(id); };
+  var fmt = function(n){ return Math.round(n).toLocaleString("ja-JP"); };
 
-  fetch(CCU_API, {cache:"no-store"})
+  function showNum(n){
+    if(typeof n !== "number" || !isFinite(n) || n <= 0) throw 0;
+    $("ccu-num").textContent = fmt(n);
+    card.style.display = "";
+  }
+
+  function spark(j){
+    var S = (j.series||[]).filter(function(p){ return p.today!=null || p.mean!=null; });
+    if(S.length < 3) return;
+    var now = new Date(j.at).getTime();
+    var pts = S.map(function(p){ return { t:new Date(p.t).getTime(), y:p.today, m:p.mean, sd:p.sd||0 }; });
+    pts.push({ t:now, y:j.current, m:null, sd:0 });
+    var t0 = pts[0].t, lo = Infinity, hi = -Infinity;
+    pts.forEach(function(p){
+      if(p.y!=null){ lo=Math.min(lo,p.y); hi=Math.max(hi,p.y); }
+      if(p.m!=null){ lo=Math.min(lo,p.m-p.sd); hi=Math.max(hi,p.m+p.sd); }
+    });
+    var pad = (hi-lo)*0.1 || 1000; lo -= pad; hi += pad;
+    var X = function(t){ return ((t-t0)/(now-t0||1)*312+4).toFixed(1); };
+    var Y = function(v){ return (40-(v-lo)/(hi-lo)*36).toFixed(1); };
+    var g = "", band = pts.filter(function(p){ return p.m!=null; });
+    if(band.length > 1){
+      g += '<polygon fill="rgba(0,229,255,.16)" points="'
+        + band.map(function(p){ return X(p.t)+","+Y(p.m+p.sd); })
+          .concat(band.slice().reverse().map(function(p){ return X(p.t)+","+Y(p.m-p.sd); })).join(" ")+'"/>';
+    }
+    var seg = [], segs = [];
+    pts.forEach(function(p){ if(p.y==null){ if(seg.length) segs.push(seg); seg=[]; } else seg.push(X(p.t)+","+Y(p.y)); });
+    if(seg.length) segs.push(seg);
+    segs.forEach(function(sg){
+      g += '<polyline fill="none" stroke="var(--amber)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="'+sg.join(" ")+'"/>';
+    });
+    g += '<circle r="3.5" fill="var(--amber)" cx="'+X(now)+'" cy="'+Y(j.current)+'"/>';
+    $("ccu-spark").innerHTML = g;
+    $("ccu-spark").classList.add("on");
+  }
+
+  function legacy(){
+    fetch(API+"/players", {cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(j){ showNum((j && j.player_count != null) ? j.player_count : (j && j.count)); })
+      .catch(function(){ /* 取得できなければ出さない */ });
+  }
+
+  fetch(API+"/players/baseline?series=1", {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw 0; return r.json(); })
     .then(function(j){
-      var n = (j && j.player_count != null) ? j.player_count : (j && j.count);
-      if(typeof n !== "number" || !isFinite(n) || n <= 0) throw 0;
-      document.getElementById("ccu-num").textContent = n.toLocaleString("ja-JP");
-      card.style.display = "";
+      showNum(j.current);
+      try{
+        var foot = $("ccu-foot"), src = $("ccu-src");
+        if(j.mode === "warmup"){
+          var d = j.days||0;
+          $("ccu-warmbar").style.width = Math.min(100, d/7*100)+"%";
+          $("ccu-warm").classList.add("on");
+          src.textContent = "いつもとの比較：データ蓄積中（"+d+"/7日）";
+          card.querySelector(".more").textContent = "詳しく見る →";
+        } else if(typeof j.level === "number" && j.baseline > 0){
+          var lv = j.level, vd = $("ccu-vd");
+          vd.className = "ccuvd on " + (lv<0 ? "n" : lv>0 ? "p2" : "z");
+          $("ccu-pct").textContent = (j.pct>0?"+":j.pct<0?"−":"±")+Math.abs(j.pct).toFixed(1)+"%";
+          $("ccu-lab").innerHTML = (lv===0 ? "いつも通り" : "いつもより"+(lv<0?"少ない":"多い"))
+            + (j.mode==="simple" ? "<small>簡易</small>" : "");
+          src.textContent = "いつもの同時刻 "+fmt(j.baseline)+"人";
+          spark(j);
+        }
+        foot.classList.add("on");
+      }catch(e){}
     })
-    .catch(function(){ /* 取得できなければ出さない */ });
+    .catch(legacy);
 })();
 
 /* ライブ配信カード（Apex配信中の人だけ / 0人ならカードごと非表示） */

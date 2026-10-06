@@ -54,6 +54,37 @@ p{font-size:14px}
 .live .dot{display:inline-block;width:7px;height:7px;border-radius:50%;
   background:var(--green);margin-right:5px;vertical-align:1px}
 .live.stale .dot{background:var(--muted)}
+/* いつもとの比較 */
+.live .verdict{font-size:clamp(18px,5vw,22px);font-weight:700;margin:2px 0 4px;display:none}
+.live .verdict.on{display:block}
+.cmp{display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);text-align:left}
+.cmp.on{display:block}
+.cmp .row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.cmp .k{font-size:11.5px;color:var(--muted)}
+.cmp .base{font-family:'Chakra Petch';font-weight:600;font-size:20px;line-height:1.2}
+.cmp .pct{font-family:'Chakra Petch';font-weight:700;font-size:26px;line-height:1;text-align:right}
+.cmp .lab{font-size:12px;font-weight:700;text-align:right;margin-top:4px}
+.cmp .meter{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:14px}
+.cmp .meter i{height:8px;border-radius:2px;background:rgba(138,147,173,.18)}
+.cmp .scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px}
+.cmp .mode{display:inline-block;font-family:'Chakra Petch';font-size:10px;letter-spacing:.12em;color:var(--muted);
+  border:1px solid rgba(138,147,173,.4);border-radius:2px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.lv-n{color:var(--cyan)} .lv-0{color:var(--green)} .lv-p{color:var(--amber)}
+.warm{display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);text-align:left}
+.warm.on{display:block}
+.warm .t{font-size:13px;font-weight:700}
+.warm .bar{height:6px;border-radius:3px;background:rgba(138,147,173,.18);margin:9px 0 6px;overflow:hidden}
+.warm .bar b{display:block;height:100%;background:var(--cyan);width:0}
+.warm p{font-size:12px;color:var(--muted);line-height:1.6}
+.trend{display:none;padding:16px 16px 10px}
+.trend.on{display:block}
+.trend .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.trend .hd b{font-size:14px}
+.trend .lg{display:flex;gap:12px;font-size:11px;color:var(--muted)}
+.trend .lg span{display:flex;align-items:center;gap:4px}
+.trend .lg i{display:inline-block;width:12px}
+.trend svg{display:block;width:100%;height:auto;margin-top:8px}
+.ccunote{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:8px}
 /* テーブル */
 .vals{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px}
 .vals th,.vals td{padding:9px 6px;border-bottom:1px solid rgba(0,229,255,.1);text-align:left;vertical-align:top}
@@ -160,7 +191,7 @@ p{font-size:14px}
   <h1>Apexの人口と<span class="accent">同時接続数</span></h1>
   <div class="meta">
     <span>CROSS-SEASON</span><span>|</span>
-    <span class="upd">最終更新: 2026-08-24</span>
+    <span class="upd">最終更新: 2026-10-05</span>
   </div>
 </header>
 
@@ -182,7 +213,34 @@ p{font-size:14px}
     <div class="big" id="liveNum" style="font-size:clamp(22px,6vw,34px)">90,000〜250,000</div>
     <div class="unit">人が今Steamでプレイ中</div>
     <div class="stamp" id="liveStamp"><span class="dot"></span>2026年8月の目安値を表示中</div>
+
+    <div class="cmp" id="ccuCmp">
+      <div class="row">
+        <div><div class="k">いつもの同時刻</div><div class="base" id="ccuBase">-</div></div>
+        <div><div class="pct" id="ccuPct">-</div><div class="lab" id="ccuLab">-</div></div>
+      </div>
+      <div class="meter" id="ccuMeter"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="scale"><span>少ない</span><span>いつも通り</span><span>多い</span></div>
+    </div>
+
+    <div class="warm" id="ccuWarm">
+      <div class="t">いつもとの比較：データを集めています</div>
+      <div class="bar"><b id="ccuWarmBar"></b></div>
+      <p id="ccuWarmTxt">同じ時刻の人数を毎日記録しています。7日分たまると比較を表示します。</p>
+    </div>
   </div>
+
+  <div class="panel trend" id="ccuTrend">
+    <div class="hd">
+      <b>直近6時間の推移</b>
+      <div class="lg">
+        <span><i style="height:3px;background:var(--amber)"></i>今日</span>
+        <span><i style="height:8px;background:rgba(0,229,255,.2)"></i>いつもの幅</span>
+      </div>
+    </div>
+    <svg id="ccuSvg" viewBox="0 0 320 150" role="img" aria-label="直近6時間のSteam同時接続数と、いつもの同時刻の幅"></svg>
+  </div>
+  <p class="ccunote" id="ccuNote" hidden></p>
   <p class="note">Steamの公式API（GetNumberOfCurrentPlayers）から取得しています。取得できない場合は下の表の目安値をご参照ください。
   日本時間の夜間（21〜24時）とシーズン開幕直後に最も高くなります。</p>
 
@@ -387,26 +445,141 @@ p{font-size:14px}
 
 (function(){
   var API="https://apex-map-streamer.suidobashi-y.workers.dev";
-  var box=document.getElementById("liveBox"),
-      num=document.getElementById("liveNum"),
-      stamp=document.getElementById("liveStamp");
+  var $=function(id){ return document.getElementById(id); };
+  var box=$("liveBox"), num=$("liveNum"), stamp=$("liveStamp");
+  var fmt=function(n){ return Math.round(n).toLocaleString("ja-JP"); };
+  var hm=function(d){ return d.toLocaleTimeString("ja-JP",{timeZone:"Asia/Tokyo",hour:"2-digit",minute:"2-digit"}); };
 
   if(typeof fetch!=="function") return;
 
-  fetch(API+"/players",{cache:"no-store"})
+  /* 今の人数（比較が取れなくてもこれだけは出す） */
+  function showNow(n, when){
+    box.classList.remove("stale");
+    num.textContent=fmt(n);
+    num.style.fontSize="";
+    var t=when?new Date(when):new Date();
+    stamp.innerHTML='<span class="dot"></span>'+
+      t.toLocaleString("ja-JP",{timeZone:"Asia/Tokyo",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})+
+      " 時点 / Steam公式APIより";
+  }
+
+  function lvClass(lv){ return lv<0?"lv-n":lv>0?"lv-p":"lv-0"; }
+
+  function showCompare(j){
+    var lv=j.level, cls=lvClass(lv);
+    /* 見出し */
+    var v=document.createElement("div");
+    v.className="verdict on";
+    v.innerHTML=lv===0?'いま、<span class="lv-0">いつも通り</span>'
+                      :'いま、いつもより<span class="'+cls+'">'+(lv<0?"少ない":"多い")+'</span>';
+    box.insertBefore(v,num);
+    /* 数値 */
+    $("ccuBase").textContent=fmt(j.baseline);
+    var p=$("ccuPct");
+    p.textContent=(j.pct>0?"+":j.pct<0?"−":"±")+Math.abs(j.pct).toFixed(1)+"%";
+    p.className="pct "+cls;
+    var lab=$("ccuLab");
+    lab.textContent=j.label;
+    lab.className="lab "+cls;
+    if(j.mode==="simple") lab.insertAdjacentHTML("beforeend",'<span class="mode">簡易判定</span>');
+    /* 5段階メーター（-2〜+2） */
+    var cells=$("ccuMeter").children, col={ "lv-n":"var(--cyan)","lv-0":"var(--green)","lv-p":"var(--amber)" }[cls];
+    cells[lv+2].style.background=col;
+    $("ccuCmp").classList.add("on");
+  }
+
+  function showWarm(j){
+    var d=j.days||0, need=7;
+    $("ccuWarmBar").style.width=Math.min(100,d/need*100)+"%";
+    $("ccuWarmTxt").textContent="同じ時刻の人数を10分ごとに記録しています（"+d+"/"+need+"日）。"+
+      need+"日分たまると「いつもの同時刻」との比較を表示します。";
+    $("ccuWarm").classList.add("on");
+  }
+
+  function showNote(j){
+    var n=$("ccuNote"), lines=[];
+    if(j.mode!=="warmup"){
+      lines.push("比較：過去"+j.days+"日の同時刻（前後20分）の平均と、日ごとのばらつき");
+      lines.push(j.mode==="full"
+        ?"判定：増減率とばらつき（z値）のうち、控えめな方で表示"
+        :"判定：いまは増減率だけで判定しています（12日分そろうと、ばらつきも加味した判定に切り替わります）");
+    }
+    lines.push("Steam版のみの数字です。PS・Xbox・EA app・Switch 2の人数や、ランク／カジュアルの内訳は含みません");
+    n.innerHTML=lines.join("<br>");
+    n.hidden=false;
+  }
+
+  /* 直近6時間：今日の線と「いつもの幅」（平均±標準偏差） */
+  function showTrend(j){
+    var S=(j.series||[]).filter(function(p){ return p.today!=null||p.mean!=null; });
+    if(S.length<3) return;
+    var now=new Date(j.at).getTime();
+    var pts=S.map(function(p){ return { t:new Date(p.t).getTime(), y:p.today, m:p.mean, sd:p.sd||0 }; });
+    pts.push({ t:now, y:j.current, m:null, sd:0, last:true });
+    var t0=pts[0].t, t1=now, lo=Infinity, hi=-Infinity;
+    pts.forEach(function(p){
+      if(p.y!=null){ lo=Math.min(lo,p.y); hi=Math.max(hi,p.y); }
+      if(p.m!=null){ lo=Math.min(lo,p.m-p.sd); hi=Math.max(hi,p.m+p.sd); }
+    });
+    if(!isFinite(lo)) return;
+    var pad=(hi-lo)*0.12||1000; lo-=pad; hi+=pad;
+    var W=320, T=10, B=126;
+    var X=function(t){ return (t-t0)/(t1-t0||1)*(W-8)+4; };
+    var Y=function(v){ return B-(v-lo)/(hi-lo)*(B-T); };
+    var f=function(n){ return n.toFixed(1); };
+    var g='<line x1="0" y1="'+B+'" x2="'+W+'" y2="'+B+'" stroke="rgba(0,229,255,.18)"/>';
+    /* 幅（帯） */
+    var band=pts.filter(function(p){ return p.m!=null; });
+    if(band.length>1){
+      var up=band.map(function(p){ return f(X(p.t))+","+f(Y(p.m+p.sd)); });
+      var dn=band.slice().reverse().map(function(p){ return f(X(p.t))+","+f(Y(p.m-p.sd)); });
+      g+='<polygon points="'+up.concat(dn).join(" ")+'" fill="rgba(0,229,255,.16)"/>';
+      g+='<polyline points="'+band.map(function(p){ return f(X(p.t))+","+f(Y(p.m)); }).join(" ")+
+         '" fill="none" stroke="rgba(0,229,255,.55)" stroke-width="1.5" stroke-dasharray="3 3"/>';
+    }
+    /* 今日の線（欠けた所は途切れさせる） */
+    var seg=[], segs=[];
+    pts.forEach(function(p){
+      if(p.y==null){ if(seg.length) segs.push(seg); seg=[]; }
+      else seg.push(f(X(p.t))+","+f(Y(p.y)));
+    });
+    if(seg.length) segs.push(seg);
+    segs.forEach(function(sg){
+      g+='<polyline points="'+sg.join(" ")+'" fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    });
+    g+='<circle cx="'+f(X(now))+'" cy="'+f(Y(j.current))+'" r="4.5" fill="var(--amber)"/>';
+    /* 時刻ラベル */
+    var mid=t0+(t1-t0)/2;
+    g+='<text x="2" y="144" fill="#8a93ad" font-size="11" font-family="Chakra Petch">'+hm(new Date(t0))+'</text>';
+    g+='<text x="'+f(W/2)+'" y="144" fill="#8a93ad" font-size="11" font-family="Chakra Petch" text-anchor="middle">'+hm(new Date(mid))+'</text>';
+    g+='<text x="'+(W-2)+'" y="144" fill="#8a93ad" font-size="11" font-family="Chakra Petch" text-anchor="end">'+hm(new Date(t1))+'</text>';
+    $("ccuSvg").innerHTML=g;
+    $("ccuTrend").classList.add("on");
+  }
+
+  function legacy(){
+    fetch(API+"/players",{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(j){
+        var n=j.player_count!=null?j.player_count:j.count;
+        if(typeof n!=="number"||!isFinite(n)) throw 0;
+        showNow(n);
+      })
+      .catch(function(){ /* 目安値の初期表示のまま */ });
+  }
+
+  fetch(API+"/players/baseline?series=1",{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw 0; return r.json(); })
     .then(function(j){
-      var n=j.player_count!=null?j.player_count:j.count;
-      if(typeof n!=="number"||!isFinite(n)) throw 0;
-      box.classList.remove("stale");
-      num.textContent=n.toLocaleString("ja-JP");
-      num.style.fontSize="";
-      var t=new Date();
-      stamp.innerHTML='<span class="dot"></span>'+
-        t.toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})+
-        " 時点 / Steam公式APIより";
+      if(typeof j.current!=="number"||!isFinite(j.current)) throw 0;
+      showNow(j.current, j.at);
+      try{
+        if(j.mode==="warmup") showWarm(j);
+        else if(typeof j.level==="number"&&j.baseline>0){ showCompare(j); showTrend(j); }
+        showNote(j);
+      }catch(e){}
     })
-    .catch(function(){ /* 目安値の初期表示のまま */ });
+    .catch(legacy);
 })();
 </script>
 </body>
