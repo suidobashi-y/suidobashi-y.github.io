@@ -262,6 +262,10 @@ a.lvmore:hover{border-style:solid}
     <a href="./streamers.html">ライブ配信</a>
     <a href="./assist.html">エイムアシスト</a>
     <a href="./players.html">プレイ人口</a>
+    <div class="grp">APEX大会</div>
+    <div class="grpbox">
+    <a href="./crcup11.html">CRカップ #11（10/4）</a>
+    </div>
     <a href="./roadmap.html">ロードマップ</a>
     <div class="grp">図解 / ZUKAI（S30）</div>
     <div class="grpbox">
@@ -275,7 +279,7 @@ a.lvmore:hover{border-style:solid}
 
 <h1 class="sr-only">APEX WORKBOOK — エペの数値早見帳｜シーズン進行・ランク分布・レジェンドピック率・エイムアシスト仕様</h1>
 
-<!-- 期間限定: CRカップ特設ページへの導線（10/11以降は自動で非表示） -->
+<!-- 期間限定: CRカップ特設ページへの導線（10/7以降は自動で非表示） -->
 <a class="crbn" id="crbn" href="./crcup11.html" onclick="if(window.gtag)gtag('event','crcup_banner_click')">
   <span class="crbn-strip" aria-hidden="true"><i style="--c:var(--pink);flex:1"></i></span>
   <span class="crbn-body">
@@ -291,7 +295,7 @@ a.lvmore:hover{border-style:solid}
   var now=Date.now(),
       start=Date.parse("2026-10-04T17:00:00+09:00"),
       end=Date.parse("2026-10-05T00:00:00+09:00"),
-      hide=Date.parse("2026-10-11T00:00:00+09:00");
+      hide=Date.parse("2026-10-07T00:00:00+09:00");
   if(now>=hide){ el.style.display="none"; return; }
   var k=document.getElementById("crbn-k"), s=document.getElementById("crbn-s");
   if(now>=start && now<end){
@@ -457,16 +461,16 @@ a.lvmore:hover{border-style:solid}
 <section>
   <h2>更新履歴</h2>
   <div class="panel">
-    <ul class="updates"><li><span class="d">10-05</span><span><a href="./players.html">プレイ人口</a>のSteam同時接続数に「いつもとの比較」を追加しました。今の人数が、過去の同じ時刻（前後20分）と比べて多いか少ないかを、増減率と5段階のメーターで表示します。直近6時間の推移も、いつもの幅と重ねて見られます。9/24から10分ごとに記録しているデータを使っており、12日分そろうまでは増減率だけの簡易判定です。トップページの同接カードにも、増減率と直近6時間の推移を出すようにしました。Steam版のみの数字です</span></li>
+    <ul class="updates"><li><span class="d">10-06</span><span><a href="./pickrate.html">レジェンドピック率</a>を更新（シーズン30開幕63日目・約3,470万プレイヤー）。パスファインダーが11.1%で首位、アクセルは10.6%→6.6%と大きく落ちて2位から4位に後退しました。2位はローバ7.3%、3位はオクタン7.1%。ブラッドハウンドは2.0%→2.7%で21位から15位に戻しています</span></li>
+<li><span class="d">10-06</span><span><a href="./zukai/s30/meta.html">メタ早見</a>の「人気の推移」に10/6の回を追加しました。アクセルの後退で、首位パスファインダーと2位の差が3.8ptに開いています</span></li>
+<li><span class="d">10-05</span><span><a href="./players.html">プレイ人口</a>のSteam同時接続数に「いつもとの比較」を追加しました。今の人数が、過去の同じ時刻（前後20分）と比べて多いか少ないかを、増減率と5段階のメーターで表示します。直近6時間の推移も、いつもの幅と重ねて見られます。9/24から10分ごとに記録しているデータを使っており、12日分そろうまでは増減率だけの簡易判定です。トップページの同接カードにも、増減率と直近6時間の推移を出すようにしました。Steam版のみの数字です</span></li>
+<li><span class="d">10-05</span><span><a href="./rank.html">ランク分布</a>をスプリット2の最新データに更新（スプリット2開始20日目）。最多がプラチナIII（11.87%→8.89%）からダイヤIII（10.39%）に入れ替わり、ダイヤ以上は19.4%から26.9%に増えました。スプリット1でダイヤIIIが最多になった9/7（26.3%）の形に、3週目で並んでいます。中央値はプラチナIIIのまま。ダイヤIII（10.39%）からダイヤII（3.88%）で4割以下に落ちる壁は変わっていません</span></li>
+<li><span class="d">10-05</span><span><a href="./zukai/s30/rank.html">ランク図解</a>の「分布の推移」に10/5の回を追加しました。山の頂上がプラチナIIIからダイヤIIIに移った形が見えます</span></li>
+<li><span class="d">10-05</span><span>メニューに「APEX大会」を追加し、<a href="./crcup11.html">CRカップ特設ページ</a>をここに入れました。トップページの一番上の案内は10/6（火）までの表示です</span></li>
 <li><span class="d">10-04</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の「最高ランクのティア表」を取り下げました。根拠を確認できていない情報を多く含んでいたためです。ご指摘くださった皆さま、関係する皆さまにお詫び申し上げます。ページは配信先リンク集として残しています</span></li>
 <li><span class="d">10-03</span><span><a href="./crcup11.html">CRカップ特設ページ</a>の麻倉シノさんを、ダイヤ4からマスターに直しました。初配信でシーズン11のマスター・シーズン12のソロマスターを公表していたとのご指摘をいただきました。ありがとうございます</span></li>
 <li><span class="d">10-03</span><span><a href="./streamers.html">ライブ配信</a>に第11回CRカップの出場者39人を追加しました（Twitchで配信している人）。<a href="./crcup11.html">CRカップ特設ページ</a>でも、配信中の出場者に「配信中」が付くようになります。あわせて、ありさかさん・ボドカさんのTwitchの登録先が違っていたのを直しました。配信中の判定はTwitchのみのため、特設ページの表示は「Twitchで配信中」としています</span></li>
-<li><span class="d">10-03</span><span><a href="./crcup11.html">第11回CRカップ特設ページ</a>を公開しました。10/4（日）17:00開催の出場60人を、配信やSNSで見せた最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを載せています。配信中のメンバーはページ上でひと目で分かります。トップページの一番上からも開けます</span></li>
-<li><span class="d">09-28</span><span>ランク分布をスプリット2の最新データに更新（スプリット2開始13日目）。最多はプラチナIII（11.87%）のままですが、16.12%から減って山がなだらかになり、ダイヤ以上は11.7%から19.4%に戻りました。中央値もプラチナIVからプラチナIIIに上がっています。ダイヤIII（7.24%）からダイヤII（2.21%）で3分の1以下に落ちる形は、スプリット1と同じ位置にもうできています</span></li>
-<li><span class="d">09-28</span><span>ランク図解の「分布の推移」に9/28の回を追加しました。スプリット2の2週目で、右側（プラチナI〜ダイヤIII）が一気に厚くなった形が見えます</span></li>
-<li><span class="d">09-26</span><span><a href="./deviation.html">ランク偏差値</a>の結果に「この偏差値の推移を記録する」ボタンを追加しました。押すと<a href="./tracker.html">RANK WORKBOOK</a>が、選んだティアとディビジョンが入った状態で開くので、あとはゲーム画面のRPを入れるだけで記録できます。毎日記録すると、偏差値がどう動いたかをグラフで追えます。あわせて、RANK WORKBOOKの入力欄の説明が「/ 750RP」固定だったのを、選んだランクの上限（ダイヤなら1,000RPなど）に合わせて変わるようにしました。</span></li>
-<li><span class="d">09-26</span><span><a href="./assist.html">エイムアシストまとめ</a>を更新。9/29からPC版のアンチチートがEasy Anti-CheatからEA Javelinに切り替わる件（アップデート後の起動で自動移行、セキュアブートは不要、コンソールは対象外）、EA Javelinの他タイトルでの実績と評判（20タイトル・検知精度99%以上／セキュアブートやLinux非対応などの不満点）、9/18にコンソールのプレデター258人がアカウント共有で60日停止・ランクポイント剥奪になった件を追加しました。</span></li>
-<li><span class="d">09-26</span><span><a href="./roadmap.html">ロードマップ</a>にスプリット2の調整内容（コンジット・フューズ・カタリストの強化、回復アイテムの増量、長距離武器3種の強化、ランクラダーの日程）を追加。あわせて、図の「現在地」が次のシーズンの上に表示されていたのを直しました。</span></li></ul>
+<li><span class="d">10-03</span><span><a href="./crcup11.html">第11回CRカップ特設ページ</a>を公開しました。10/4（日）17:00開催の出場60人を、配信やSNSで見せた最高ランクでティア表にまとめ、全20チームのYouTube・Twitch・Xへのリンクを載せています。配信中のメンバーはページ上でひと目で分かります。トップページの一番上からも開けます</span></li></ul>
   </div>
   <p class="note" style="margin-top:12px">それ以前の更新は
   <a href="./updates.html">更新履歴アーカイブ</a>に掲載しています。</p>
