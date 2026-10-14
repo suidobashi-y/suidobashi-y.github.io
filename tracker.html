@@ -2058,7 +2058,8 @@ render();
 /* 偏差値ツールからの導線：ティアとディビジョンだけ受け取り、RP入力欄を開いた状態にする */
 (function devHandoff(){
   let q; try{ q = new URLSearchParams(location.search); }catch(e){ return; }
-  if (q.get("from") !== "dev") return;
+  const src = q.get("from");
+  if (src !== "dev" && src !== "zukai") return;
   const t = q.get("t"), d = parseInt(q.get("d"), 10);
   try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){}
   if (!DIV_TIERS.includes(t)) return;
@@ -2072,14 +2073,14 @@ render();
   syncRank(true);
   const label = t + (!isM && d >= 1 && d <= 4 ? ROMAN[d] : "");
   const hint = document.getElementById("devHint");
-  hint.innerHTML = "偏差値ツールから<b>" + label + "</b>を引き継ぎました。" +
+  hint.innerHTML = (src === "zukai" ? "ランク図解から<b>" : "偏差値ツールから<b>") + label + "</b>を引き継ぎました。" +
     (isM ? "ゲーム画面の合計RPを入れて記録してください"
          : "ゲーム画面の「◯◯RP / ◯◯RP」の左側の数字を入れて記録してください");
   hint.classList.remove("hide");
   const card = document.getElementById("inputCard");
   card.scrollIntoView({ block: "center" });
   setTimeout(()=>{ try{ rp.focus({ preventScroll: true }); }catch(e){ rp.focus(); } }, 150);
-  ev("dev_handoff", { tier: t, div: (!isM && d) ? d : 0 });
+  ev("dev_handoff", { tier: t, div: (!isM && d) ? d : 0, src: src });
 })();
 
 syncBoot();

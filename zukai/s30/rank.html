@@ -126,6 +126,41 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
 .splitmark::before{content:"";position:absolute;left:-21px;top:4px;width:11px;height:11px;
   background:var(--amber);transform:rotate(45deg)}
 .splitmark i{font-style:normal;color:var(--muted);letter-spacing:.06em;margin-left:9px}
+/* 自分の位置ウィジェット */
+.where{margin-top:18px;border:1px solid rgba(0,229,255,.4);border-radius:4px;padding:16px 16px 14px;
+  background:linear-gradient(180deg,rgba(0,229,255,.07),rgba(0,229,255,.02))}
+.where .lb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--cyan)}
+.where .hd{font-size:17px;font-weight:700;margin:4px 0 10px}
+.where .pick{display:flex;gap:8px}
+.where select{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);
+  border-radius:3px;padding:9px 10px;font-size:15px;font-family:inherit}
+.where select#wD{flex:0 0 84px;font-family:'Chakra Petch'}
+.where select:disabled{opacity:.35}
+.where .res{display:flex;align-items:baseline;gap:6px;margin:12px 0 0}
+.where .res .k{font-size:14px;color:#c4cbdd}
+.where .res b{font-family:'Chakra Petch';font-size:46px;line-height:1;color:var(--text)}
+.where .res .u{font-family:'Chakra Petch';font-size:20px;color:var(--text)}
+.where .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.where .go{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.where .go a{display:block;text-align:center;text-decoration:none;font-size:13.5px;font-weight:700;
+  padding:11px 6px;border-radius:3px;border:1px solid var(--cyan);color:var(--cyan)}
+.where .go a.pri{background:var(--cyan);color:#06121a}
+.where .fine{font-size:11.5px;color:var(--muted);margin-top:10px}
+/* 推移の下の導線 */
+.cta2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.cta2 a{display:block;text-decoration:none;background:var(--panel);border:1px solid rgba(0,229,255,.45);
+  border-radius:4px;padding:12px 13px}
+.cta2 .k{font-family:'Chakra Petch';font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.cta2 .n{font-weight:700;color:var(--cyan);margin:3px 0;font-size:15px}
+.cta2 .s{font-size:12px;color:#c4cbdd;line-height:1.55}
+@media(max-width:420px){.cta2{grid-template-columns:1fr}}
+/* 過去の回（折りたたみ） */
+details.older{margin-top:4px}
+details.older summary{cursor:pointer;list-style:none;font-size:13px;color:var(--cyan);
+  border:1px dashed rgba(0,229,255,.4);border-radius:3px;padding:9px 12px;margin:4px 0 18px}
+details.older summary::-webkit-details-marker{display:none}
+details.older summary::before{content:"＋ "}
+details.older[open] summary::before{content:"－ "}
 </style>
 <link rel="icon" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -166,373 +201,125 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   <h1>山は毎週、<span class="accent">右へ動いている</span></h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
-    <span class="upd">最終更新: 2026-10-13</span>
+    <span class="upd">最終更新: 2026-10-14</span>
   </div>
 <nav class="sib"><a href="./meta.html">メタ</a><a class="on" href="./rank.html">ランク</a><a href="./weapons.html">武器</a></nav>
 </header>
 
+<section class="where" id="where">
+  <div class="lb">YOUR POSITION</div>
+  <div class="hd">自分のランクは、上位何%？</div>
+  <div class="pick">
+    <select id="wT" aria-label="ティア"></select>
+    <select id="wD" aria-label="ディビジョン"><option value="4">IV</option><option value="3">III</option><option value="2">II</option><option value="1">I</option></select>
+  </div>
+  <div class="res"><span class="k">上位</span><b id="wPct">--</b><span class="u">%</span></div>
+  <div class="sub" id="wNote"></div>
+  <div class="go">
+    <a id="wDev" class="pri" href="../../deviation.html?from=zukai" data-ev="zukai_to_dev" data-pos="top">偏差値で詳しく見る</a>
+    <a id="wTrk" href="../../tracker.html" data-ev="zukai_to_tracker" data-pos="top">このランクを記録する</a>
+  </div>
+  <p class="fine">ランクワークブックは、毎日のRPを入れるだけでティアと偏差値の推移をグラフにします。登録不要。</p>
+</section>
+
 <section>
   <h2>分布の推移</h2>
-  <p class="note" style="margin-top:0">毎週月曜に計測しています。スプリット1は9月16日2:00に終わり、9/21の回からはスプリット2です。各回のグラフは<b>26ディビジョンを同じ縦スケール</b>で並べたものです。数字より、山がいくつあってどこにあるかを見てください。そもそもリセットで自分がどこに落とされるのかは<a href="#reset">下の記事</a>で扱っています。</p>
+  <p class="note" style="margin-top:0">毎週月曜に計測し、新しい回から並べています。グラフは26ディビジョンを同じ縦スケールで描いています。</p>
   <div class="rail">
 
-    <div class="ent">
-      <div class="day">08 / 10 <i>開幕6日目</i></div>
-      <div class="t">リセット直後、山はゴールドに押し戻された</div>
-      <p>全員がリセットを受けた直後の分布。最多はゴールドIIIで10.4%、中央値はゴールドIV。
-      ダイヤ以上は6.5%しかなく、S29最終の38.2%と比べると6分の1以下まで縮んでいた。
-      マスター帯はまだ到達者ゼロ。</p>
-  <div class="shape">
-    <div class="bars">
-      <i style="--h:5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:4;--c:#9aa3b8"></i>
-      <i style="--h:36;--c:#c58b52"></i>
-      <i style="--h:27;--c:#c58b52"></i>
-      <i style="--h:34;--c:#c58b52"></i>
-      <i style="--h:40;--c:#c58b52"></i>
-      <i style="--h:65;--c:#b9c3d4"></i>
-      <i style="--h:74;--c:#b9c3d4"></i>
-      <i style="--h:73;--c:#b9c3d4"></i>
-      <i style="--h:71;--c:#b9c3d4"></i>
-      <i style="--h:87;--c:#ffcc4d"></i>
-      <i class="p1" style="--h:100;--c:#ffcc4d"></i>
-      <i style="--h:77;--c:#ffcc4d"></i>
-      <i style="--h:58;--c:#ffcc4d"></i>
-      <i style="--h:48;--c:#3fd3c8"></i>
-      <i style="--h:47;--c:#3fd3c8"></i>
-      <i style="--h:28;--c:#3fd3c8"></i>
-      <i style="--h:21;--c:#3fd3c8"></i>
-      <i style="--h:22;--c:#69b7ff"></i>
-      <i style="--h:23;--c:#69b7ff"></i>
-      <i style="--h:10;--c:#69b7ff"></i>
-      <i style="--h:7;--c:#69b7ff"></i>
-      <i style="--h:1.5;--c:#b06bff"></i>
-      <i style="--h:2;--c:#ff4d6d"></i>
-    </div>
-    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 山は<b class="g">ゴールドIII</b>のひとつだけ</div>
-  </div>
-      <div class="mv">
-        <span class="fl">最多<b>ゴールドIII 10.4%</b></span>
-        <span class="fl">中央値<b>ゴールドIV</b></span>
-        <span class="fl">ダイヤ以上<b>6.5%</b></span>
-        <span class="fl">マスター<b>0.00%</b></span>
-      </div>
-    </div>
+    <div class="splitmark">SPLIT 2<i>9/16 2:00 開始</i></div>
 
-    <div class="ent">
-      <div class="day">08 / 17 <i>開幕13日目</i></div>
-      <div class="t">中央値が一段上昇、プラチナIIIに二つ目の山</div>
-      <p>中央値がゴールドIVからゴールドIIIへ一段上がった。最多は変わらずゴールドIIIで10.4%。
-      注目はプラチナIIIで、ゴールドI 8.2% → プラチナIV 7.1% と一度凹んでから
-      プラチナIII 7.8% で盛り返す<b>二峰構造</b>が出ている。
-      これはS29最終（プラチナII 6.4% → プラチナIII 7.0%）と同じ形。</p>
-      <p>マスターが0.23%で立ち上がった一方、ダイヤ帯は6.46%→5.55%に減り、
-      ダイヤ以上の合計は6.5%→6.1%とわずかに縮んだ。
-      ダイヤからマスターへ抜けた分と、母集団の変動が混ざった結果と見られる。</p>
+    <div class="ent hi">
+      <div class="day">10 / 13 <i>スプリット2 28日目</i></div>
+      <div class="t">ダイヤ以上が3割を超えた。スプリット1の最終週を4週目で上回る</div>
+      <p>プラチナ帯とダイヤ帯がほぼ同じ大きさに。壁（ダイヤIII→II）の先も少しずつ厚くなっています。</p>
   <div class="shape">
     <div class="bars">
-      <i style="--h:7;--c:#9aa3b8"></i>
+      <i style="--h:7.7;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:4;--c:#9aa3b8"></i>
-      <i style="--h:25;--c:#c58b52"></i>
-      <i style="--h:23;--c:#c58b52"></i>
-      <i style="--h:27;--c:#c58b52"></i>
-      <i style="--h:30;--c:#c58b52"></i>
-      <i style="--h:43;--c:#b9c3d4"></i>
-      <i style="--h:55;--c:#b9c3d4"></i>
-      <i style="--h:59;--c:#b9c3d4"></i>
-      <i style="--h:60;--c:#b9c3d4"></i>
-      <i style="--h:77;--c:#ffcc4d"></i>
-      <i class="p1" style="--h:99;--c:#ffcc4d"></i>
-      <i style="--h:86;--c:#ffcc4d"></i>
-      <i style="--h:79;--c:#ffcc4d"></i>
-      <i style="--h:68;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:74;--c:#3fd3c8"></i>
-      <i style="--h:49;--c:#3fd3c8"></i>
-      <i style="--h:34;--c:#3fd3c8"></i>
-      <i style="--h:26;--c:#69b7ff"></i>
-      <i style="--h:18;--c:#69b7ff"></i>
-      <i style="--h:6;--c:#69b7ff"></i>
-      <i style="--h:3;--c:#69b7ff"></i>
-      <i style="--h:2;--c:#b06bff"></i>
-      <i style="--h:3;--c:#ff4d6d"></i>
-    </div>
-    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ <b class="g">ゴールドIII</b>のあと、<b class="p">プラチナIII</b>にもうひとつ</div>
-  </div>
-      <div class="mv">
-        <span class="up">中央値<b>ゴールドIV → III</b></span>
-        <span class="up">プラチナIII<b>7.76%</b></span>
-        <span class="up">マスター<b>0.00% → 0.23%</b></span>
-        <span class="dn">ダイヤ以上<b>6.5% → 6.1%</b></span>
-      </div>
-    </div>
-
-    <div class="ent">
-      <div class="day">08 / 24 <i>開幕20日目</i></div>
-      <div class="t">山がゴールドからプラチナへ移った</div>
-      <p>最多ディビジョンがゴールドIIIからプラチナIIIへ移り、開幕以来はじめて
-      山の位置がプラチナ帯に入った。中央値もゴールドIIIからゴールドIへ二段上がっている。</p>
-      <p>ダイヤ以上は6.1%から13.4%へ倍増。前週まで縮んでいた反動が一気に出た週で、
-      ダイヤIII 4.75%・ダイヤIV 5.63% とダイヤ帯の下半分が厚くなりはじめた。</p>
-  <div class="shape">
-    <div class="bars">
-      <i style="--h:9;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:4.4;--c:#9aa3b8"></i>
-      <i style="--h:23.9;--c:#c58b52"></i>
-      <i style="--h:22.3;--c:#c58b52"></i>
-      <i style="--h:25.2;--c:#c58b52"></i>
-      <i style="--h:28.3;--c:#c58b52"></i>
-      <i style="--h:39.8;--c:#b9c3d4"></i>
-      <i style="--h:50.2;--c:#b9c3d4"></i>
-      <i style="--h:52;--c:#b9c3d4"></i>
-      <i style="--h:51;--c:#b9c3d4"></i>
-      <i style="--h:69.2;--c:#ffcc4d"></i>
-      <i class="p1" style="--h:88.8;--c:#ffcc4d"></i>
-      <i style="--h:82.7;--c:#ffcc4d"></i>
-      <i style="--h:79;--c:#ffcc4d"></i>
-      <i style="--h:79.1;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
-      <i style="--h:82.8;--c:#3fd3c8"></i>
-      <i style="--h:63.8;--c:#3fd3c8"></i>
-      <i style="--h:61.9;--c:#69b7ff"></i>
-      <i style="--h:52.3;--c:#69b7ff"></i>
-      <i style="--h:15.5;--c:#69b7ff"></i>
-      <i style="--h:6.9;--c:#69b7ff"></i>
-      <i style="--h:6.2;--c:#b06bff"></i>
-      <i style="--h:4.3;--c:#ff4d6d"></i>
-    </div>
-    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 最多が<b class="p">プラチナIII</b>へ、<b class="g">ゴールドIII</b>は二番手に</div>
-  </div>
-      <div class="mv">
-        <span class="up">最多<b>ゴールドIII → プラチナIII</b></span>
-        <span class="up">中央値<b>ゴールドIII → I</b></span>
-        <span class="up">ダイヤ以上<b>6.1% → 13.4%</b></span>
-        <span class="up">マスター<b>0.23% → 0.56%</b></span>
-      </div>
-    </div>
-
-    <div class="ent">
-      <div class="day">08 / 31 <i>開幕27日目</i></div>
-      <div class="t">二つ目の山がダイヤIIIまで上がってきた</div>
-      <p>最多は2週連続でプラチナIII（9.05%）。変わったのは二つ目の山の位置で、
-      前週まではゴールドIIIだったものが<b>ダイヤIII 8.14%</b>へ移った。
-      2週間で山が二段ぶん右に動いたことになる。</p>
-      <p>そのダイヤIIIから先が急に細くなる。
-      ダイヤIII 8.14% → ダイヤII 2.78% と<b>三分の一まで落ちる</b>のが今週いちばん目立つ形で、
-      現時点の実質的な壁はここにある。中央値もゴールドIからプラチナIVへ入り、
-      プラチナ帯にいれば上位半分という状態になった。</p>
-  <div class="shape">
-    <div class="bars">
-      <i style="--h:8.6;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:3.9;--c:#9aa3b8"></i>
-      <i style="--h:21;--c:#c58b52"></i>
-      <i style="--h:20;--c:#c58b52"></i>
-      <i style="--h:22.7;--c:#c58b52"></i>
-      <i style="--h:25.9;--c:#c58b52"></i>
-      <i style="--h:35.1;--c:#b9c3d4"></i>
-      <i style="--h:42.1;--c:#b9c3d4"></i>
-      <i style="--h:41.2;--c:#b9c3d4"></i>
-      <i style="--h:40.2;--c:#b9c3d4"></i>
-      <i style="--h:58.1;--c:#ffcc4d"></i>
-      <i style="--h:72.5;--c:#ffcc4d"></i>
-      <i style="--h:71.4;--c:#ffcc4d"></i>
-      <i style="--h:68.1;--c:#ffcc4d"></i>
-      <i style="--h:73.4;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
-      <i style="--h:87.2;--c:#3fd3c8"></i>
-      <i style="--h:79.2;--c:#3fd3c8"></i>
-      <i style="--h:85.9;--c:#69b7ff"></i>
-      <i class="p3" style="--h:89.9;--c:#69b7ff"></i>
-      <i style="--h:30.7;--c:#69b7ff"></i>
-      <i style="--h:11.7;--c:#69b7ff"></i>
-      <i style="--h:10.3;--c:#b06bff"></i>
-      <i style="--h:4.6;--c:#ff4d6d"></i>
-    </div>
-    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ <b class="p">プラチナIII</b>のあと、<b class="d">ダイヤIII</b>にもうひとつ</div>
-  </div>
-      <div class="mv">
-        <span class="fl">最多<b>プラチナIII 9.05%</b></span>
-        <span class="up">中央値<b>ゴールドI → プラチナIV</b></span>
-        <span class="up">ダイヤ以上<b>13.4% → 21.1%</b></span>
-        <span class="dn">ダイヤIII→II<b>8.14% → 2.78%</b></span>
-      </div>
-    </div>
-
-    <div class="ent">
-      <div class="day">09 / 07 <i>開幕34日目</i></div>
-      <div class="t">山の頂点がダイヤIIIに移った</div>
-      <p>3週続けて最多だったプラチナIIIが8.31%に下がり、代わりに<b>ダイヤIII 9.88%</b>が
-      全26ディビジョンの最多になった。先週まで二つ目の山だった場所が、そのまま一番高い山になっている。
-      プラチナIIIとの差は1.57ポイント。</p>
-      <p>ダイヤ以上は21.1%→26.3%まで伸びた。ただし
-      <b>ダイヤIII 9.88% → ダイヤII 4.38%</b>と半分以下に落ちる形は先週と変わっていない。
-      積み上がっているのは壁の手前で、壁そのものは動いていない。
-      中央値もプラチナIVのまま据え置きで、今週動いたのは山の高さだけ。</p>
-  <div class="shape">
-    <div class="bars">
-      <i style="--h:8.2;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:3.4;--c:#9aa3b8"></i>
-      <i style="--h:19.4;--c:#c58b52"></i>
-      <i style="--h:18.1;--c:#c58b52"></i>
-      <i style="--h:21.3;--c:#c58b52"></i>
-      <i style="--h:25.3;--c:#c58b52"></i>
-      <i style="--h:32.3;--c:#b9c3d4"></i>
-      <i style="--h:38.2;--c:#b9c3d4"></i>
-      <i style="--h:36.5;--c:#b9c3d4"></i>
-      <i style="--h:34.8;--c:#b9c3d4"></i>
-      <i style="--h:49;--c:#ffcc4d"></i>
-      <i style="--h:59.7;--c:#ffcc4d"></i>
-      <i style="--h:52.7;--c:#ffcc4d"></i>
-      <i style="--h:51;--c:#ffcc4d"></i>
-      <i style="--h:58.6;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:84.1;--c:#3fd3c8"></i>
-      <i style="--h:78.2;--c:#3fd3c8"></i>
-      <i style="--h:74;--c:#3fd3c8"></i>
-      <i style="--h:85.9;--c:#69b7ff"></i>
+      <i style="--h:3.6;--c:#9aa3b8"></i>
+      <i style="--h:33;--c:#c58b52"></i>
+      <i style="--h:12.5;--c:#c58b52"></i>
+      <i style="--h:12.2;--c:#c58b52"></i>
+      <i style="--h:14.3;--c:#c58b52"></i>
+      <i style="--h:45.6;--c:#b9c3d4"></i>
+      <i style="--h:25.8;--c:#b9c3d4"></i>
+      <i style="--h:21.1;--c:#b9c3d4"></i>
+      <i style="--h:18;--c:#b9c3d4"></i>
+      <i class="p1" style="--h:52.8;--c:#ffcc4d"></i>
+      <i style="--h:39.4;--c:#ffcc4d"></i>
+      <i style="--h:31.8;--c:#ffcc4d"></i>
+      <i style="--h:28.6;--c:#ffcc4d"></i>
+      <i style="--h:48.9;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:68;--c:#3fd3c8"></i>
+      <i style="--h:61.2;--c:#3fd3c8"></i>
+      <i style="--h:59.1;--c:#3fd3c8"></i>
+      <i style="--h:76.9;--c:#69b7ff"></i>
       <i class="p3" style="--h:100;--c:#69b7ff"></i>
-      <i style="--h:44.3;--c:#69b7ff"></i>
-      <i style="--h:17.4;--c:#69b7ff"></i>
-      <i style="--h:13.8;--c:#b06bff"></i>
-      <i style="--h:4.4;--c:#ff4d6d"></i>
+      <i style="--h:44.2;--c:#69b7ff"></i>
+      <i style="--h:17.2;--c:#69b7ff"></i>
+      <i style="--h:14.2;--c:#b06bff"></i>
+      <i style="--h:4.8;--c:#ff4d6d"></i>
     </div>
     <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 頂点は<b class="d">ダイヤIII</b>、<b class="p">プラチナIII</b>は二番手に</div>
+    <div class="cap">26ディビジョン ／ 頂上は<b class="d">ダイヤIII</b>のまま、ダイヤ以上が3割に</div>
   </div>
       <div class="mv">
-        <span class="up">最多<b>プラチナIII → ダイヤIII 9.88%</b></span>
-        <span class="fl">中央値<b>プラチナIV（据え置き）</b></span>
-        <span class="up">ダイヤ以上<b>21.1% → 26.3%</b></span>
-        <span class="dn">ダイヤIII→II<b>9.88% → 4.38%</b></span>
+        <span class="fl">最多<b>ダイヤIII 11.87%（据え置き）</b></span>
+        <span class="fl">中央値<b>プラチナIII（据え置き）</b></span>
+        <span class="up">ダイヤ以上<b>26.9% → 30.5%</b></span>
+        <span class="dn">ダイヤIII→II<b>11.87% → 5.25%</b></span>
       </div>
     </div>
 
+
     <div class="ent">
-      <div class="day">09 / 14 <i>開幕41日目</i></div>
-      <div class="t">スプリット1最終週、中央値がプラチナIIIまで上がった</div>
-      <p>最多は先週に続いて<b>ダイヤIII 11.35%</b>。二番手はプラチナIIIではなく
-      <b>ダイヤIV 8.97%</b>で、上位2つがどちらもダイヤ帯になった。
-      先週まで山のてっぺんだけが動いていたが、今週は<b>中央値がプラチナIV → プラチナIII</b>と
-      2週ぶりに1つ上がっている。</p>
-      <p>ダイヤ以上は26.3%→<b>30.3%</b>で、今季初めて3割に乗った。
-      それでも<b>ダイヤIII 11.35% → ダイヤII 5.27%</b>と半分以下に落ちる形は6週間まったく変わらない。
-      積み上がっているのは相変わらず壁の手前で、マスターは1.36%→1.84%の微増にとどまる。
-      スプリット1はこの形のまま9月16日2:00に終わる。</p>
+      <div class="day">10 / 05 <i>スプリット2 20日目</i></div>
+      <div class="t">最多がダイヤIIIに。スプリット1で5週かかった形に3週で並んだ</div>
   <div class="shape">
     <div class="bars">
-      <i style="--h:7.1;--c:#9aa3b8"></i>
+      <i style="--h:10.6;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:3.3;--c:#9aa3b8"></i>
-      <i style="--h:17.4;--c:#c58b52"></i>
-      <i style="--h:17.3;--c:#c58b52"></i>
-      <i style="--h:19;--c:#c58b52"></i>
-      <i style="--h:22.4;--c:#c58b52"></i>
-      <i style="--h:27.3;--c:#b9c3d4"></i>
-      <i style="--h:33.6;--c:#b9c3d4"></i>
-      <i style="--h:32.2;--c:#b9c3d4"></i>
-      <i style="--h:29.9;--c:#b9c3d4"></i>
-      <i style="--h:40.4;--c:#ffcc4d"></i>
-      <i style="--h:49.5;--c:#ffcc4d"></i>
-      <i style="--h:45.6;--c:#ffcc4d"></i>
-      <i style="--h:42;--c:#ffcc4d"></i>
-      <i style="--h:48.1;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:64.1;--c:#3fd3c8"></i>
-      <i style="--h:57.6;--c:#3fd3c8"></i>
-      <i style="--h:56;--c:#3fd3c8"></i>
-      <i style="--h:79;--c:#69b7ff"></i>
+      <i style="--h:4.8;--c:#9aa3b8"></i>
+      <i style="--h:42.4;--c:#c58b52"></i>
+      <i style="--h:14.3;--c:#c58b52"></i>
+      <i style="--h:13.4;--c:#c58b52"></i>
+      <i style="--h:15.7;--c:#c58b52"></i>
+      <i style="--h:58.7;--c:#b9c3d4"></i>
+      <i style="--h:28.8;--c:#b9c3d4"></i>
+      <i style="--h:22.2;--c:#b9c3d4"></i>
+      <i style="--h:17.5;--c:#b9c3d4"></i>
+      <i class="p1" style="--h:68.1;--c:#ffcc4d"></i>
+      <i style="--h:43.3;--c:#ffcc4d"></i>
+      <i style="--h:34;--c:#ffcc4d"></i>
+      <i style="--h:26.1;--c:#ffcc4d"></i>
+      <i style="--h:60.7;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:85.6;--c:#3fd3c8"></i>
+      <i style="--h:78.7;--c:#3fd3c8"></i>
+      <i style="--h:75.9;--c:#3fd3c8"></i>
+      <i style="--h:86.8;--c:#69b7ff"></i>
       <i class="p3" style="--h:100;--c:#69b7ff"></i>
-      <i style="--h:46.4;--c:#69b7ff"></i>
-      <i style="--h:21.1;--c:#69b7ff"></i>
-      <i style="--h:16.2;--c:#b06bff"></i>
-      <i style="--h:3.9;--c:#ff4d6d"></i>
+      <i style="--h:37.3;--c:#69b7ff"></i>
+      <i style="--h:15.3;--c:#69b7ff"></i>
+      <i style="--h:13.3;--c:#b06bff"></i>
+      <i style="--h:6.3;--c:#ff4d6d"></i>
     </div>
     <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 上位2つが<b class="d">ダイヤIII</b>と<b class="d">ダイヤIV</b>に</div>
+    <div class="cap">26ディビジョン ／ 山の頂上が<b class="p">プラチナIII</b>から<b class="d">ダイヤIII</b>へ</div>
   </div>
       <div class="mv">
-        <span class="fl">最多<b>ダイヤIII 11.35%（据え置き）</b></span>
-        <span class="up">中央値<b>プラチナIV → プラチナIII</b></span>
-        <span class="up">ダイヤ以上<b>26.3% → 30.3%</b></span>
-        <span class="dn">ダイヤIII→II<b>11.35% → 5.27%</b></span>
-      </div>
-    </div>
-
-
-    <div class="splitmark">SPLIT 2<i>9/16 2:00 リセット</i></div>
-
-    <div class="ent">
-      <div class="day">09 / 21 <i>スプリット2 6日目</i></div>
-      <div class="t">スプリットリセット。山はプラチナIIIまで戻った</div>
-      <p>9月16日にスプリット2が始まり、分布はリセット後の形に戻った。最多は<b>プラチナIII 16.12%</b>で、
-      2位のプラチナII 10.67%を大きく離している。ダイヤ以上は30.3%→<b>11.7%</b>、
-      中央値はプラチナIII→プラチナIVに1つ下がった。</p>
-      <p>スプリット切り替えのソフトリセットは、実際には<b>いまいるティアのIVまで下がる</b>形だった。
-      例外はダイヤIV・IIIで、ここだけは<b>プラチナIII・II</b>に落ちている。
-      ブロンズIV 4.30%・シルバーIV 6.40%・ゴールドIV 9.42%が一つ上のIIIより大きく突き出ているのは、この着地点に人が溜まっているから。
-      プラチナIIIが突出しているのも、S1最終で最多だったダイヤIII・IV（合わせて20.3%）がまとめて降りてきたためと読める。
-      シーズン開幕のリセットとは仕組みが違うので、8/10の回とは並べていない。</p>
-  <div class="shape">
-    <div class="bars">
-      <i style="--h:5.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:2.5;--c:#9aa3b8"></i>
-      <i style="--h:26.7;--c:#c58b52"></i>
-      <i style="--h:9.4;--c:#c58b52"></i>
-      <i style="--h:8.6;--c:#c58b52"></i>
-      <i style="--h:8.9;--c:#c58b52"></i>
-      <i style="--h:39.7;--c:#b9c3d4"></i>
-      <i style="--h:20.5;--c:#b9c3d4"></i>
-      <i style="--h:14.2;--c:#b9c3d4"></i>
-      <i style="--h:10.7;--c:#b9c3d4"></i>
-      <i class="p1" style="--h:58.4;--c:#ffcc4d"></i>
-      <i style="--h:34.4;--c:#ffcc4d"></i>
-      <i style="--h:20.2;--c:#ffcc4d"></i>
-      <i style="--h:13.4;--c:#ffcc4d"></i>
-      <i style="--h:63.3;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
-      <i style="--h:66.2;--c:#3fd3c8"></i>
-      <i style="--h:44.3;--c:#3fd3c8"></i>
-      <i style="--h:32.3;--c:#69b7ff"></i>
-      <i style="--h:23.7;--c:#69b7ff"></i>
-      <i style="--h:8.4;--c:#69b7ff"></i>
-      <i style="--h:5.1;--c:#69b7ff"></i>
-      <i style="--h:1.5;--c:#b06bff"></i>
-      <i style="--h:1.9;--c:#ff4d6d"></i>
-    </div>
-    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 各ティアの<b class="g">IV</b>と、ダイヤの着地点<b class="p">プラチナIII</b>が突出</div>
-  </div>
-      <div class="mv">
-        <span class="dn">最多<b>ダイヤIII → プラチナIII 16.12%</b></span>
-        <span class="dn">中央値<b>プラチナIII → プラチナIV</b></span>
-        <span class="dn">ダイヤ以上<b>30.3% → 11.7%</b></span>
-        <span class="fl">ゴールドIV / III<b>9.42% / 5.55%</b></span>
+        <span class="up">最多<b>プラチナIII → ダイヤIII 10.39%</b></span>
+        <span class="fl">中央値<b>プラチナIII（据え置き）</b></span>
+        <span class="up">ダイヤ以上<b>19.4% → 26.9%</b></span>
+        <span class="dn">ダイヤIII→II<b>10.39% → 3.88%</b></span>
       </div>
     </div>
 
     <div class="ent">
       <div class="day">09 / 28 <i>スプリット2 13日目</i></div>
       <div class="t">1週間でダイヤ以上が2割に。壁はもうダイヤIIIの先にある</div>
-      <p>最多は引き続き<b>プラチナIII 11.87%</b>だが、16.12%から大きく減って山はなだらかになった。
-      代わりにプラチナI 7.14%→9.27%、ダイヤIV 5.21%→8.18%、ダイヤIII 3.82%→7.24%と右側が一気に厚くなり、
-      ダイヤ以上は11.7%→<b>19.4%</b>。中央値もプラチナIV→<b>プラチナIII</b>に戻った。</p>
-      <p>リセットで溜まっていた各ティアのIVは、ゴールドIV 9.42%→7.37%・プラチナIV 10.21%→7.42%と上へ抜け始めている。
-      一方で<b>ダイヤIII 7.24% → ダイヤII 2.21%</b>と3分の1以下に落ちる形は、スプリット1と同じ場所にもうできている。
-      マスターは0.15%→0.54%。</p>
   <div class="shape">
     <div class="bars">
       <i style="--h:6.6;--c:#9aa3b8"></i>
@@ -574,126 +361,332 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
     </div>
 
     <div class="ent">
-      <div class="day">10 / 05 <i>スプリット2 20日目</i></div>
-      <div class="t">最多がダイヤIIIに。スプリット1で5週かかった形に3週で並んだ</div>
-      <p>最多は<b>プラチナIII 11.87% → ダイヤIII 10.39%</b>に入れ替わった。2位もダイヤIV 9.02%で、山の頂上はダイヤ帯に移っている。
-      プラチナIIIは8.89%、プラチナII 10.57%→8.18%、プラチナI 9.27%→7.89%と、先週厚くなったプラチナ上位はそのまま上へ抜けた。
-      ダイヤ以上は19.4%→<b>26.9%</b>で、スプリット1でダイヤIIIが最多になった9/7（開幕34日目）の26.3%をもう超えている。中央値はプラチナIIIのまま。</p>
-      <p>壁の位置は変わらず、<b>ダイヤIII 10.39% → ダイヤII 3.88%</b>と4割以下に落ちる。
-      マスターは0.54%→1.38%と2.5倍。一方でブロンズIV 3.97%→4.41%・シルバーIV 5.60%→6.10%と各ティアのIVも少し増えていて、
-      スプリット2から遅れて始めた人がリセット後の着地点に入ってきていると読める。</p>
+      <div class="day">09 / 21 <i>スプリット2 6日目</i></div>
+      <div class="t">スプリットリセット。山はプラチナIIIまで戻った</div>
   <div class="shape">
     <div class="bars">
-      <i style="--h:10.6;--c:#9aa3b8"></i>
+      <i style="--h:5.5;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:4.8;--c:#9aa3b8"></i>
-      <i style="--h:42.4;--c:#c58b52"></i>
-      <i style="--h:14.3;--c:#c58b52"></i>
-      <i style="--h:13.4;--c:#c58b52"></i>
-      <i style="--h:15.7;--c:#c58b52"></i>
-      <i style="--h:58.7;--c:#b9c3d4"></i>
-      <i style="--h:28.8;--c:#b9c3d4"></i>
-      <i style="--h:22.2;--c:#b9c3d4"></i>
-      <i style="--h:17.5;--c:#b9c3d4"></i>
-      <i class="p1" style="--h:68.1;--c:#ffcc4d"></i>
-      <i style="--h:43.3;--c:#ffcc4d"></i>
-      <i style="--h:34;--c:#ffcc4d"></i>
-      <i style="--h:26.1;--c:#ffcc4d"></i>
-      <i style="--h:60.7;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:85.6;--c:#3fd3c8"></i>
-      <i style="--h:78.7;--c:#3fd3c8"></i>
-      <i style="--h:75.9;--c:#3fd3c8"></i>
-      <i style="--h:86.8;--c:#69b7ff"></i>
-      <i class="p3" style="--h:100;--c:#69b7ff"></i>
-      <i style="--h:37.3;--c:#69b7ff"></i>
-      <i style="--h:15.3;--c:#69b7ff"></i>
-      <i style="--h:13.3;--c:#b06bff"></i>
-      <i style="--h:6.3;--c:#ff4d6d"></i>
+      <i style="--h:2.5;--c:#9aa3b8"></i>
+      <i style="--h:26.7;--c:#c58b52"></i>
+      <i style="--h:9.4;--c:#c58b52"></i>
+      <i style="--h:8.6;--c:#c58b52"></i>
+      <i style="--h:8.9;--c:#c58b52"></i>
+      <i style="--h:39.7;--c:#b9c3d4"></i>
+      <i style="--h:20.5;--c:#b9c3d4"></i>
+      <i style="--h:14.2;--c:#b9c3d4"></i>
+      <i style="--h:10.7;--c:#b9c3d4"></i>
+      <i class="p1" style="--h:58.4;--c:#ffcc4d"></i>
+      <i style="--h:34.4;--c:#ffcc4d"></i>
+      <i style="--h:20.2;--c:#ffcc4d"></i>
+      <i style="--h:13.4;--c:#ffcc4d"></i>
+      <i style="--h:63.3;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
+      <i style="--h:66.2;--c:#3fd3c8"></i>
+      <i style="--h:44.3;--c:#3fd3c8"></i>
+      <i style="--h:32.3;--c:#69b7ff"></i>
+      <i style="--h:23.7;--c:#69b7ff"></i>
+      <i style="--h:8.4;--c:#69b7ff"></i>
+      <i style="--h:5.1;--c:#69b7ff"></i>
+      <i style="--h:1.5;--c:#b06bff"></i>
+      <i style="--h:1.9;--c:#ff4d6d"></i>
     </div>
     <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 山の頂上が<b class="p">プラチナIII</b>から<b class="d">ダイヤIII</b>へ</div>
+    <div class="cap">26ディビジョン ／ 各ティアの<b class="g">IV</b>と、ダイヤの着地点<b class="p">プラチナIII</b>が突出</div>
   </div>
       <div class="mv">
-        <span class="up">最多<b>プラチナIII → ダイヤIII 10.39%</b></span>
-        <span class="fl">中央値<b>プラチナIII（据え置き）</b></span>
-        <span class="up">ダイヤ以上<b>19.4% → 26.9%</b></span>
-        <span class="dn">ダイヤIII→II<b>10.39% → 3.88%</b></span>
+        <span class="dn">最多<b>ダイヤIII → プラチナIII 16.12%</b></span>
+        <span class="dn">中央値<b>プラチナIII → プラチナIV</b></span>
+        <span class="dn">ダイヤ以上<b>30.3% → 11.7%</b></span>
+        <span class="fl">ゴールドIV / III<b>9.42% / 5.55%</b></span>
       </div>
     </div>
 
-    <div class="ent hi">
-      <div class="day">10 / 13 <i>スプリット2 28日目</i></div>
-      <div class="t">ダイヤ以上が3割を超えた。スプリット1の最終週を4週目で上回る</div>
-      <p>最多は2週続けて<b>ダイヤIII</b>で、10.39%→<b>11.87%</b>。2位もダイヤIV 9.13%のまま。
-      ダイヤ以上は26.9%→<b>30.5%</b>で、スプリット1最終週（9/14）の30.3%をもう上回った。
-      プラチナ帯は31.27%→28.16%と減り、ダイヤ帯（28.29%）とほぼ同じ大きさになっている。中央値はプラチナIIIのまま。</p>
-      <p>壁は同じ<b>ダイヤIII 11.87% → ダイヤII 5.25%</b>の場所だが、ダイヤII 3.88%→5.25%・ダイヤI 1.59%→2.04%と、壁の先も少しずつ厚くなってきた。
-      マスターは1.38%→1.68%。先週増えた各ティアのIVは、ブロンズIV 4.41%→3.92%・シルバーIV 6.10%→5.41%・ゴールドIV 7.08%→6.27%と減り、
-      遅れて始めた人も上へ抜け始めている。</p>
+    <details class="older">
+      <summary>スプリット1の6週（8/10〜9/14）を見る</summary>
+      <div class="splitmark">SPLIT 1<i>8/5 開幕 〜 9/16 2:00</i></div>
+
+    <div class="ent">
+      <div class="day">09 / 14 <i>開幕41日目</i></div>
+      <div class="t">スプリット1最終週、中央値がプラチナIIIまで上がった</div>
   <div class="shape">
     <div class="bars">
-      <i style="--h:7.7;--c:#9aa3b8"></i>
+      <i style="--h:7.1;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
       <i style="--h:1.5;--c:#9aa3b8"></i>
-      <i style="--h:3.6;--c:#9aa3b8"></i>
-      <i style="--h:33;--c:#c58b52"></i>
-      <i style="--h:12.5;--c:#c58b52"></i>
-      <i style="--h:12.2;--c:#c58b52"></i>
-      <i style="--h:14.3;--c:#c58b52"></i>
-      <i style="--h:45.6;--c:#b9c3d4"></i>
-      <i style="--h:25.8;--c:#b9c3d4"></i>
-      <i style="--h:21.1;--c:#b9c3d4"></i>
-      <i style="--h:18;--c:#b9c3d4"></i>
-      <i class="p1" style="--h:52.8;--c:#ffcc4d"></i>
-      <i style="--h:39.4;--c:#ffcc4d"></i>
-      <i style="--h:31.8;--c:#ffcc4d"></i>
-      <i style="--h:28.6;--c:#ffcc4d"></i>
-      <i style="--h:48.9;--c:#3fd3c8"></i>
-      <i class="p2" style="--h:68;--c:#3fd3c8"></i>
-      <i style="--h:61.2;--c:#3fd3c8"></i>
-      <i style="--h:59.1;--c:#3fd3c8"></i>
-      <i style="--h:76.9;--c:#69b7ff"></i>
+      <i style="--h:3.3;--c:#9aa3b8"></i>
+      <i style="--h:17.4;--c:#c58b52"></i>
+      <i style="--h:17.3;--c:#c58b52"></i>
+      <i style="--h:19;--c:#c58b52"></i>
+      <i style="--h:22.4;--c:#c58b52"></i>
+      <i style="--h:27.3;--c:#b9c3d4"></i>
+      <i style="--h:33.6;--c:#b9c3d4"></i>
+      <i style="--h:32.2;--c:#b9c3d4"></i>
+      <i style="--h:29.9;--c:#b9c3d4"></i>
+      <i style="--h:40.4;--c:#ffcc4d"></i>
+      <i style="--h:49.5;--c:#ffcc4d"></i>
+      <i style="--h:45.6;--c:#ffcc4d"></i>
+      <i style="--h:42;--c:#ffcc4d"></i>
+      <i style="--h:48.1;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:64.1;--c:#3fd3c8"></i>
+      <i style="--h:57.6;--c:#3fd3c8"></i>
+      <i style="--h:56;--c:#3fd3c8"></i>
+      <i style="--h:79;--c:#69b7ff"></i>
       <i class="p3" style="--h:100;--c:#69b7ff"></i>
-      <i style="--h:44.2;--c:#69b7ff"></i>
-      <i style="--h:17.2;--c:#69b7ff"></i>
-      <i style="--h:14.2;--c:#b06bff"></i>
-      <i style="--h:4.8;--c:#ff4d6d"></i>
+      <i style="--h:46.4;--c:#69b7ff"></i>
+      <i style="--h:21.1;--c:#69b7ff"></i>
+      <i style="--h:16.2;--c:#b06bff"></i>
+      <i style="--h:3.9;--c:#ff4d6d"></i>
     </div>
     <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
-    <div class="cap">26ディビジョン ／ 頂上は<b class="d">ダイヤIII</b>のまま、ダイヤ以上が3割に</div>
+    <div class="cap">26ディビジョン ／ 上位2つが<b class="d">ダイヤIII</b>と<b class="d">ダイヤIV</b>に</div>
   </div>
       <div class="mv">
-        <span class="fl">最多<b>ダイヤIII 11.87%（据え置き）</b></span>
-        <span class="fl">中央値<b>プラチナIII（据え置き）</b></span>
-        <span class="up">ダイヤ以上<b>26.9% → 30.5%</b></span>
-        <span class="dn">ダイヤIII→II<b>11.87% → 5.25%</b></span>
+        <span class="fl">最多<b>ダイヤIII 11.35%（据え置き）</b></span>
+        <span class="up">中央値<b>プラチナIV → プラチナIII</b></span>
+        <span class="up">ダイヤ以上<b>26.3% → 30.3%</b></span>
+        <span class="dn">ダイヤIII→II<b>11.35% → 5.27%</b></span>
       </div>
     </div>
 
+    <div class="ent">
+      <div class="day">09 / 07 <i>開幕34日目</i></div>
+      <div class="t">山の頂点がダイヤIIIに移った</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:8.2;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:3.4;--c:#9aa3b8"></i>
+      <i style="--h:19.4;--c:#c58b52"></i>
+      <i style="--h:18.1;--c:#c58b52"></i>
+      <i style="--h:21.3;--c:#c58b52"></i>
+      <i style="--h:25.3;--c:#c58b52"></i>
+      <i style="--h:32.3;--c:#b9c3d4"></i>
+      <i style="--h:38.2;--c:#b9c3d4"></i>
+      <i style="--h:36.5;--c:#b9c3d4"></i>
+      <i style="--h:34.8;--c:#b9c3d4"></i>
+      <i style="--h:49;--c:#ffcc4d"></i>
+      <i style="--h:59.7;--c:#ffcc4d"></i>
+      <i style="--h:52.7;--c:#ffcc4d"></i>
+      <i style="--h:51;--c:#ffcc4d"></i>
+      <i style="--h:58.6;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:84.1;--c:#3fd3c8"></i>
+      <i style="--h:78.2;--c:#3fd3c8"></i>
+      <i style="--h:74;--c:#3fd3c8"></i>
+      <i style="--h:85.9;--c:#69b7ff"></i>
+      <i class="p3" style="--h:100;--c:#69b7ff"></i>
+      <i style="--h:44.3;--c:#69b7ff"></i>
+      <i style="--h:17.4;--c:#69b7ff"></i>
+      <i style="--h:13.8;--c:#b06bff"></i>
+      <i style="--h:4.4;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 頂点は<b class="d">ダイヤIII</b>、<b class="p">プラチナIII</b>は二番手に</div>
+  </div>
+      <div class="mv">
+        <span class="up">最多<b>プラチナIII → ダイヤIII 9.88%</b></span>
+        <span class="fl">中央値<b>プラチナIV（据え置き）</b></span>
+        <span class="up">ダイヤ以上<b>21.1% → 26.3%</b></span>
+        <span class="dn">ダイヤIII→II<b>9.88% → 4.38%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">08 / 31 <i>開幕27日目</i></div>
+      <div class="t">二つ目の山がダイヤIIIまで上がってきた</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:8.6;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:3.9;--c:#9aa3b8"></i>
+      <i style="--h:21;--c:#c58b52"></i>
+      <i style="--h:20;--c:#c58b52"></i>
+      <i style="--h:22.7;--c:#c58b52"></i>
+      <i style="--h:25.9;--c:#c58b52"></i>
+      <i style="--h:35.1;--c:#b9c3d4"></i>
+      <i style="--h:42.1;--c:#b9c3d4"></i>
+      <i style="--h:41.2;--c:#b9c3d4"></i>
+      <i style="--h:40.2;--c:#b9c3d4"></i>
+      <i style="--h:58.1;--c:#ffcc4d"></i>
+      <i style="--h:72.5;--c:#ffcc4d"></i>
+      <i style="--h:71.4;--c:#ffcc4d"></i>
+      <i style="--h:68.1;--c:#ffcc4d"></i>
+      <i style="--h:73.4;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
+      <i style="--h:87.2;--c:#3fd3c8"></i>
+      <i style="--h:79.2;--c:#3fd3c8"></i>
+      <i style="--h:85.9;--c:#69b7ff"></i>
+      <i class="p3" style="--h:89.9;--c:#69b7ff"></i>
+      <i style="--h:30.7;--c:#69b7ff"></i>
+      <i style="--h:11.7;--c:#69b7ff"></i>
+      <i style="--h:10.3;--c:#b06bff"></i>
+      <i style="--h:4.6;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ <b class="p">プラチナIII</b>のあと、<b class="d">ダイヤIII</b>にもうひとつ</div>
+  </div>
+      <div class="mv">
+        <span class="fl">最多<b>プラチナIII 9.05%</b></span>
+        <span class="up">中央値<b>ゴールドI → プラチナIV</b></span>
+        <span class="up">ダイヤ以上<b>13.4% → 21.1%</b></span>
+        <span class="dn">ダイヤIII→II<b>8.14% → 2.78%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">08 / 24 <i>開幕20日目</i></div>
+      <div class="t">山がゴールドからプラチナへ移った</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:9;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:4.4;--c:#9aa3b8"></i>
+      <i style="--h:23.9;--c:#c58b52"></i>
+      <i style="--h:22.3;--c:#c58b52"></i>
+      <i style="--h:25.2;--c:#c58b52"></i>
+      <i style="--h:28.3;--c:#c58b52"></i>
+      <i style="--h:39.8;--c:#b9c3d4"></i>
+      <i style="--h:50.2;--c:#b9c3d4"></i>
+      <i style="--h:52;--c:#b9c3d4"></i>
+      <i style="--h:51;--c:#b9c3d4"></i>
+      <i style="--h:69.2;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:88.8;--c:#ffcc4d"></i>
+      <i style="--h:82.7;--c:#ffcc4d"></i>
+      <i style="--h:79;--c:#ffcc4d"></i>
+      <i style="--h:79.1;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:100;--c:#3fd3c8"></i>
+      <i style="--h:82.8;--c:#3fd3c8"></i>
+      <i style="--h:63.8;--c:#3fd3c8"></i>
+      <i style="--h:61.9;--c:#69b7ff"></i>
+      <i style="--h:52.3;--c:#69b7ff"></i>
+      <i style="--h:15.5;--c:#69b7ff"></i>
+      <i style="--h:6.9;--c:#69b7ff"></i>
+      <i style="--h:6.2;--c:#b06bff"></i>
+      <i style="--h:4.3;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 最多が<b class="p">プラチナIII</b>へ、<b class="g">ゴールドIII</b>は二番手に</div>
+  </div>
+      <div class="mv">
+        <span class="up">最多<b>ゴールドIII → プラチナIII</b></span>
+        <span class="up">中央値<b>ゴールドIII → I</b></span>
+        <span class="up">ダイヤ以上<b>6.1% → 13.4%</b></span>
+        <span class="up">マスター<b>0.23% → 0.56%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">08 / 17 <i>開幕13日目</i></div>
+      <div class="t">中央値が一段上昇、プラチナIIIに二つ目の山</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:7;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:4;--c:#9aa3b8"></i>
+      <i style="--h:25;--c:#c58b52"></i>
+      <i style="--h:23;--c:#c58b52"></i>
+      <i style="--h:27;--c:#c58b52"></i>
+      <i style="--h:30;--c:#c58b52"></i>
+      <i style="--h:43;--c:#b9c3d4"></i>
+      <i style="--h:55;--c:#b9c3d4"></i>
+      <i style="--h:59;--c:#b9c3d4"></i>
+      <i style="--h:60;--c:#b9c3d4"></i>
+      <i style="--h:77;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:99;--c:#ffcc4d"></i>
+      <i style="--h:86;--c:#ffcc4d"></i>
+      <i style="--h:79;--c:#ffcc4d"></i>
+      <i style="--h:68;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:74;--c:#3fd3c8"></i>
+      <i style="--h:49;--c:#3fd3c8"></i>
+      <i style="--h:34;--c:#3fd3c8"></i>
+      <i style="--h:26;--c:#69b7ff"></i>
+      <i style="--h:18;--c:#69b7ff"></i>
+      <i style="--h:6;--c:#69b7ff"></i>
+      <i style="--h:3;--c:#69b7ff"></i>
+      <i style="--h:2;--c:#b06bff"></i>
+      <i style="--h:3;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ <b class="g">ゴールドIII</b>のあと、<b class="p">プラチナIII</b>にもうひとつ</div>
+  </div>
+      <div class="mv">
+        <span class="up">中央値<b>ゴールドIV → III</b></span>
+        <span class="up">プラチナIII<b>7.76%</b></span>
+        <span class="up">マスター<b>0.00% → 0.23%</b></span>
+        <span class="dn">ダイヤ以上<b>6.5% → 6.1%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">08 / 10 <i>開幕6日目</i></div>
+      <div class="t">リセット直後、山はゴールドに押し戻された</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:4;--c:#9aa3b8"></i>
+      <i style="--h:36;--c:#c58b52"></i>
+      <i style="--h:27;--c:#c58b52"></i>
+      <i style="--h:34;--c:#c58b52"></i>
+      <i style="--h:40;--c:#c58b52"></i>
+      <i style="--h:65;--c:#b9c3d4"></i>
+      <i style="--h:74;--c:#b9c3d4"></i>
+      <i style="--h:73;--c:#b9c3d4"></i>
+      <i style="--h:71;--c:#b9c3d4"></i>
+      <i style="--h:87;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:100;--c:#ffcc4d"></i>
+      <i style="--h:77;--c:#ffcc4d"></i>
+      <i style="--h:58;--c:#ffcc4d"></i>
+      <i style="--h:48;--c:#3fd3c8"></i>
+      <i style="--h:47;--c:#3fd3c8"></i>
+      <i style="--h:28;--c:#3fd3c8"></i>
+      <i style="--h:21;--c:#3fd3c8"></i>
+      <i style="--h:22;--c:#69b7ff"></i>
+      <i style="--h:23;--c:#69b7ff"></i>
+      <i style="--h:10;--c:#69b7ff"></i>
+      <i style="--h:7;--c:#69b7ff"></i>
+      <i style="--h:1.5;--c:#b06bff"></i>
+      <i style="--h:2;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 山は<b class="g">ゴールドIII</b>のひとつだけ</div>
+  </div>
+      <div class="mv">
+        <span class="fl">最多<b>ゴールドIII 10.4%</b></span>
+        <span class="fl">中央値<b>ゴールドIV</b></span>
+        <span class="fl">ダイヤ以上<b>6.5%</b></span>
+        <span class="fl">マスター<b>0.00%</b></span>
+      </div>
+    </div>
+    </details>
+
   </div>
 
-  <p class="note">スプリット1の5週間で、山は<b>ゴールドIII → プラチナIII → ダイヤIII</b>と移り、最終週は据え置きでした。
-  中央値はゴールドIVからプラチナIIIまで5ディビジョンぶん上がっています。
-  山の位置はもう動かず、代わりに全体がゆっくり後ろから押し上がる形に変わりました。</p>
-  <p class="note">S29最終のダイヤ以上は38.2%で、スプリット1の最終週は30.3%。残り8ポイントでした。
-  壁は6週間ずっと<b>ダイヤIIIからダイヤII</b>にあり、ここで人数が半分以下に落ちます。
-  <b>プラチナ帯で普通に戦えているならダイヤIIIまでは射程圏内、その先が本番</b>という構図は最後まで変わりませんでした。
-  ただしこれはS30もS29と同程度にランクが緩む前提の目安で、RP調整が入れば到達率は変わります。</p>
-  <p class="note">スプリット2はソフトリセット後の<b>プラチナIII中心</b>の形から始まりました。
-  2週目にはダイヤ以上が19.4%まで戻り、<b>ダイヤIII→IIの壁</b>もスプリット1と同じ位置に再びできています。
-  3週目には最多がダイヤIIIに移り、ダイヤ以上は26.9%。スプリット1で5週目（9/7）にたどり着いた形に、<b>3週目で並びました</b>。
-  4週目（10/13）にはダイヤ以上が<b>30.5%</b>となり、スプリット1最終週の30.3%を上回っています。
-  ここから山がどこまで右へ動くか、スプリット1と同じ形で毎週追っていきます。</p>
-  <p class="note">自分が上位何％にいるかは<a href="../../rank.html">ランク分布</a>と<a href="../../deviation.html">ランク偏差値</a>、日々の推移は<a href="../../tracker.html">ランクワークブック</a>で確認できます。</p>
+  <p class="note">山の頂上はスプリット1と同じ<b>ダイヤIII</b>まで来ました。その先のダイヤIIで人数が半分以下に減る壁も、同じ場所にあります。</p>
+  <div class="cta2">
+    <a href="../../deviation.html?from=zukai" data-ev="zukai_to_dev" data-pos="bottom">
+      <div class="k">Tool</div>
+      <div class="n">ランク偏差値</div>
+      <div class="s">今のRPが上位何%か、偏差値で。シェア画像も作れます。</div>
+    </a>
+    <a href="../../tracker.html" data-ev="zukai_to_tracker" data-pos="bottom">
+      <div class="k">Workbook</div>
+      <div class="n">ランクワークブック</div>
+      <div class="s">毎日のRPを記録して、この山の上を自分がどう動いたかをグラフに。</div>
+    </a>
+  </div>
   <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.10.13 取得</p>
 </section>
 
 <section>
-  <p class="lead">「同じダイヤなのに、フレンドと落ち幅が違う」。
-  シーズンが変わるたびに出てくる話ですが、これは推測ではなく<b>公式に書かれている仕様</b>です。
-  シーズン25以降、リセット後の開始位置は表示ランクではなく<b>隠しスキル値（MMR）</b>を基準に決まります。
-  だから到達ランクが同じでも、落ちる位置は人によって変わります。</p>
+  <p class="lead">「同じダイヤなのに、フレンドと落ち幅が違う」のは仕様です。
+  S25以降、リセット後の位置は表示ランクではなく<b>隠しスキル値（MMR）</b>で決まります。</p>
 </section>
 
 <section>
@@ -704,8 +697,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <div class="no">01</div>
       <div class="bd">
         <div class="ttl">開始ランクは隠しスキル値で決まる<span class="tag t-spec">公式仕様</span></div>
-        <div class="ds">表示ランクではなくMMR基準。S25から公式に明記されています。
-        リセットは「全員を一律で同じ位置に落とす」処理ではありません。</div>
+        <div class="ds">S25から公式に明記。全員を一律に落とす処理ではありません。</div>
       </div>
     </div>
 
@@ -713,8 +705,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <div class="no">02</div>
       <div class="bd">
         <div class="ttl">同じダイヤでも落ち幅が違う</div>
-        <div class="ds">フレンドとの差は不具合ではなく、設計どおりの挙動です。
-        01の帰結なので、待っていても揃うことはありません。</div>
+        <div class="ds">不具合ではなく、01からくる設計どおりの挙動です。</div>
       </div>
     </div>
 
@@ -722,8 +713,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <div class="no">03</div>
       <div class="bd">
         <div class="ttl">ランクとMMRは別物ではなく「別軸」</div>
-        <div class="ds">同じ試合から作られるので相関はあります。ただし一致はしません。
-        「ランクが高い＝MMRが高い」とは限らない、という程度の緩さです。</div>
+        <div class="ds">同じ試合から作られるので相関はありますが、一致はしません。</div>
       </div>
     </div>
 
@@ -731,8 +721,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <div class="no">04</div>
       <div class="bd">
         <div class="ttl">「KDが高いほど落ちる」は言い過ぎ<span class="tag t-mis">よくある誤解</span></div>
-        <div class="ds">MMRは順位・勝敗を含む複合値です。KD単体では決まりません。
-        キル数を抑えてもリセット位置を操作することはできません。</div>
+        <div class="ds">MMRは順位・勝敗を含む複合値で、KD単体では決まりません。</div>
       </div>
     </div>
 
@@ -740,8 +729,7 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
       <div class="no">05</div>
       <div class="bd">
         <div class="ttl">ランクを触っていなくても数値は付いている</div>
-        <div class="ds">ランクMMRが無い場合は、アンランクトリオの値が使われます。
-        今シーズン初めてランクに入る人にも、すでに内部値は存在しています。</div>
+        <div class="ds">ランクの値が無い人は、アンランクトリオの値が使われます。</div>
       </div>
     </div>
 
@@ -750,46 +738,78 @@ header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
   <div class="opin">
     <div class="lb">私見</div>
     <div class="hd">深く下げたのは、登らせるためでは</div>
-    <p>ダイヤ到達後のランクは消化試合になりやすい。深く下げるほど、登り直す過程が長く残ります。
-    体感としての「今回は深い」は、ここから来ているのだと考えています。
-    ここは仕様に書かれていない、当サイトの推測です。</p>
+    <p>ダイヤ到達後は消化試合になりやすいので、深く下げて登り直す過程を長く残している、というのが当サイトの推測です（仕様には書かれていません）。</p>
   </div>
 </section>
 
 <section>
   <h2>関連ページ</h2>
   <div class="rel">
-    <a href="../../rank.html">
-      <div class="k">Weekly</div>
-      <div class="n">ランク分布</div>
-      <div class="s">毎週月曜更新。S30の帯別人口と、各ティアの実際の割合。</div>
-    </a>
     <a href="../../deviation.html">
       <div class="k">Tool</div>
       <div class="n">ランク偏差値</div>
-      <div class="s">今のRPが上位何％にあたるか。このページの分布と合わせて読めます。</div>
+      <div class="s">今のRPが上位何%にあたるか。</div>
+    </a>
+    <a href="../../tracker.html">
+      <div class="k">Workbook</div>
+      <div class="n">ランクワークブック</div>
+      <div class="s">毎日のRPを記録して推移をグラフに。</div>
+    </a>
+    <a href="../../rank.html">
+      <div class="k">Weekly</div>
+      <div class="n">ランク分布</div>
+      <div class="s">最新の帯別人口と累積の上位%。</div>
     </a>
     <a href="./weapons.html">
       <div class="k">Zukai</div>
       <div class="n">S30 武器早見</div>
-      <div class="s">床落ち26挺のティア表と赤アタッチメントの装着先早見。</div>
-    </a>
-    <a href="./attachments.html">
-      <div class="k">Zukai</div>
-      <div class="n">破損アタッチメント実数値</div>
-      <div class="s">射撃訓練場で計測した5種の増減値。紫基準の差分で掲載。</div>
+      <div class="s">床落ち26挺のティア表と赤アタッチメント。</div>
     </a>
   </div>
 </section>
 
 <footer>
-  <p>01〜05は公開されている仕様と、その帰結を整理したものです。
-  「私見」と明記した箇所のみ、当サイトの推測です。</p>
-  <p style="margin-top:8px">分布の数値は取得時点のものです。シーズンの進行とともに変動します。</p>
+  <p>01〜05は公開仕様とその帰結。「私見」のみ当サイトの推測です。分布の数値は取得時点のものです。</p>
   <p style="margin-top:8px">誤りの指摘・掲載に関するご連絡: X @apexwidgets</p>
 </footer>
 
 </div>
+<script src="../../data.js"></script>
+<script>
+(function(){
+  if(!window.APEX_DATA) return;
+  var R=APEX_DATA.rank, T=document.getElementById('wT'), D=document.getElementById('wD');
+  var SHORT={'ダイヤモンド':'ダイヤ'}, ROM=['','I','II','III','IV'];
+  var TRK={'プレデター':'マスター','マスター':'マスター','ダイヤモンド':'ダイヤ','プラチナ':'プラチナ','ゴールド':'ゴールド','シルバー':'シルバー','ブロンズ':'ブロンズ','ルーキー':'ルーキー'};
+  R.tiers.slice().reverse().forEach(function(t){
+    var o=document.createElement('option'); o.value=t.n; o.textContent=SHORT[t.n]||t.n; T.appendChild(o);
+  });
+  T.value='プラチナ'; D.value='3';
+  function calc(){
+    var tn=T.value, d=+D.value, run=0, hit=false;
+    R.tiers.forEach(function(t){
+      if(hit) return;
+      if(t.n!==tn){ run+=t.pct; return; }
+      if(!t.div){ run+=t.pct; }
+      else { for(var i=0;i<d;i++) run+=t.div[i]; }   // div は [I,II,III,IV]
+      hit=true;
+    });
+    var t=R.tiers.filter(function(x){return x.n===tn;})[0];
+    D.disabled=!t.div;
+    document.getElementById('wPct').textContent=run.toFixed(1);
+    var md=R.updated.slice(5).replace('-','/').replace(/^0/,'');
+    document.getElementById('wNote').textContent=(SHORT[tn]||tn)+(t.div?ROM[d]:'')+'以上の割合（'+md+'時点・Apex Legends Status）';
+    var q='&t='+encodeURIComponent(TRK[tn])+(t.div?'&d='+d:'');
+    document.getElementById('wTrk').href='../../tracker.html?from=zukai'+q;
+    return tn;
+  }
+  T.onchange=D.onchange=function(){ var tn=calc(); if(window.gtag) gtag('event','zukai_pick',{tier:tn}); };
+  calc();
+  document.querySelectorAll('[data-ev]').forEach(function(a){
+    a.addEventListener('click',function(){ if(window.gtag) gtag('event',a.dataset.ev,{pos:a.dataset.pos||'',tier:T.value}); });
+  });
+})();
+</script>
 <script>
 (function(){
   var b=document.getElementById("burger"), d=document.getElementById("drawer");
