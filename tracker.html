@@ -735,7 +735,8 @@ function tabs(){
   w.classList.toggle("hide", list.length < 2);   // スプリット1のうちはタブ自体を出さない
   list.forEach(s=>{
     const b = document.createElement("button");
-    b.textContent = s.label.replace(/^S\d+ /,"");
+    // 前シーズンのタブがあるときは「S30 スプリット2」のようにシーズン番号も出す
+    b.textContent = RW_PREV ? s.label : s.label.replace(/^S\d+ /,"");
     b.className = s.id===viewSplit ? "on" : "";
     b.onclick = ()=>{ viewSplit = s.id; render(); };
     w.appendChild(b);

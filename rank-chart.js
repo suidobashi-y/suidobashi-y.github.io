@@ -34,12 +34,19 @@ const RW_SEASON = (typeof APEX_DATA !== "undefined" && APEX_DATA.currentSeason)
       splitStart:"2026-09-16T02:00:00+09:00", end:"2026-11-04T02:00:00+09:00",
       nextName:"TBA", estimated:true };
 
-const SPLITS = [
-  { id:`s${RW_SEASON.no}-1`, season:RW_SEASON.no, label:`S${RW_SEASON.no} スプリット1`,
-    start:RW_SEASON.start,      end:RW_SEASON.splitStart, confirmed:true },
-  { id:`s${RW_SEASON.no}-2`, season:RW_SEASON.no, label:`S${RW_SEASON.no} スプリット2`,
-    start:RW_SEASON.splitStart, end:RW_SEASON.end,        confirmed:!RW_SEASON.estimated }
-];
+/* 前シーズン（シーズンが切り替わった後だけ）。その記録もタブで見られるように残す */
+const RW_PREV = (typeof APEX_DATA !== "undefined" && APEX_DATA.prevSeason)
+  ? APEX_DATA.prevSeason() : null;
+
+function seasonSplits(S){
+  return [
+    { id:`s${S.no}-1`, season:S.no, label:`S${S.no} スプリット1`,
+      start:S.start,      end:S.splitStart, confirmed:true },
+    { id:`s${S.no}-2`, season:S.no, label:`S${S.no} スプリット2`,
+      start:S.splitStart, end:S.end,        confirmed:!S.estimated }
+  ];
+}
+const SPLITS = (RW_PREV ? seasonSplits(RW_PREV) : []).concat(seasonSplits(RW_SEASON));
 
 /* シーズン進捗の見出し（index.html のシーズンカードと同じ表示） */
 function seasonHead(ids){

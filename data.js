@@ -6,21 +6,21 @@ var APEX_DATA = {
   /* 現在のシーズン。nextSeason の start を過ぎると自動でそちらに切り替わります
      （切り替えは APEX_DATA.currentSeason() が判定。手動更新は不要） */
   season: {
-    no: 29, name: "OVERCLOCK",
-    start:      "2026-05-06T02:00:00+09:00",  // S29開幕（日本時間）
-    splitStart: "2026-06-24T02:00:00+09:00",  // スプリット2開始
-    end:        "2026-08-05T02:00:00+09:00",  // S30「MARKED」開幕
-    nextName:   "MARKED"
+    no: 30, name: "MARKED",
+    start:      "2026-08-05T02:00:00+09:00",  // S30開幕（公式）
+    splitStart: "2026-09-16T02:00:00+09:00",  // スプリット2開始
+    end:        "2026-11-04T03:00:00+09:00",  // S31「CIPHER」開幕（公式・冬時間で1時間遅れ）
+    nextName:   "CIPHER"
   },
 
   /* 次シーズン。start を過ぎた時点で自動的に現在のシーズンになります。
-     ★ splitStart は判明済み（S30のスプリット1は42日。S29の49日から短縮）。
-       end のみ S29 の期間から算出した予測値です。公式発表が出たら差し替えてください。 */
+     ★ start は公式（11/4 午前3:00）。splitStart・end は S30 の期間
+       （スプリット1は42日・シーズン91日）からの予測値です。公式発表が出たら差し替えてください。 */
   nextSeason: {
-    no: 30, name: "MARKED",
-    start:      "2026-08-05T02:00:00+09:00",  // S30開幕（公式）
-    splitStart: "2026-09-16T02:00:00+09:00",  // スプリット2開始（ゲーム内のランクリーグ残り日数から判明）
-    end:        "2026-11-04T02:00:00+09:00",  // S31開幕（予測）
+    no: 31, name: "CIPHER",
+    start:      "2026-11-04T03:00:00+09:00",  // S31開幕（公式）
+    splitStart: "2026-12-16T03:00:00+09:00",  // スプリット2開始（予測：S30と同じ42日）
+    end:        "2027-02-03T03:00:00+09:00",  // S32開幕（予測：S30と同じ91日）
     nextName:   "TBA",
     estimated:  true                          // 期間が予測値であることの目印
   },
@@ -28,26 +28,26 @@ var APEX_DATA = {
   /* ランク分布：上位ティアから順に記述
      div : ディビジョン別の内訳 [I, II, III, IV]（合計が pct になるように）
      出典: apexlegendsstatus.com（同サイトのDB登録プレイヤーが母集団。ゲーム全体の実数ではありません）
-     ★グラフからの読み取り値です。ダイヤIII(11.869) / プラチナIII(8.066) / マスター(1.684) / プレデター(0.565) は
+     ★グラフからの読み取り値です。ダイヤIII(14.372) / プラチナIII(6.233) / マスター(3.222) は
        ツールチップ実測値です。合計が100%になるよう正規化しています。
        ※正規化の端数はシルバーIVで吸収しています */
   rank: {
     seasonNo: 30,   // この分布データのシーズン。現在のシーズンと違うと注意書きが出ます
-    label:   "シーズン30 スプリット2 / ランクマッチ（スプリット2開始28日目）",
-    updated: "2026-10-13",
-    dayFromStart: 70,   // シーズン開幕からの日数（スプリット2は9/16開始で28日目）
+    label:   "シーズン30 スプリット2 / ランクマッチ（スプリット2開始48日目・最終週）",
+    updated: "2026-11-02",
+    dayFromStart: 90,   // シーズン開幕からの日数（スプリット2は9/16開始で48日目）
     source:  "apexlegendsstatus.com",
     divEstimated: false,
     inProgress: true,   // シーズン進行中のスナップショット（上位帯がまだ埋まっていない）
     tiers: [
-      {n:"プレデター",   s:"PRED", c:"pred",   pct: 0.57},
-      {n:"マスター",     s:"MAS",  c:"master", pct: 1.68},
-      {n:"ダイヤモンド", s:"DIA",  c:"dia",    pct:28.29, div:[2.04, 5.25, 11.87, 9.13]},
-      {n:"プラチナ",     s:"PLA",  c:"plat",   pct:28.16, div:[7.02, 7.26, 8.07, 5.81]},
-      {n:"ゴールド",     s:"GLD",  c:"gold",   pct:18.11, div:[3.39, 3.77, 4.68, 6.27]},
-      {n:"シルバー",     s:"SIL",  c:"silver", pct:13.12, div:[2.14, 2.51, 3.06, 5.41]},
-      {n:"ブロンズ",     s:"BRZ",  c:"bronze", pct: 8.55, div:[1.70, 1.45, 1.48, 3.92]},
-      {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 1.52, div:[0.43, 0.07, 0.11, 0.91]}
+      {n:"プレデター",   s:"PRED", c:"pred",   pct: 0.54},
+      {n:"マスター",     s:"MAS",  c:"master", pct: 3.22},
+      {n:"ダイヤモンド", s:"DIA",  c:"dia",    pct:38.43, div:[5.26, 8.26, 14.37, 10.54]},
+      {n:"プラチナ",     s:"PLA",  c:"plat",   pct:22.82, div:[6.01, 5.75, 6.23, 4.83]},
+      {n:"ゴールド",     s:"GLD",  c:"gold",   pct:15.49, div:[3.04, 3.43, 3.92, 5.10]},
+      {n:"シルバー",     s:"SIL",  c:"silver", pct:11.01, div:[1.84, 2.10, 2.53, 4.54]},
+      {n:"ブロンズ",     s:"BRZ",  c:"bronze", pct: 7.18, div:[1.64, 1.28, 1.24, 3.02]},
+      {n:"ルーキー",     s:"RKY",  c:"rookie", pct: 1.31, div:[0.37, 0.07, 0.08, 0.79]}
     ]
   },
 
@@ -76,6 +76,12 @@ APEX_DATA.currentSeason = function(){
   var n = this.nextSeason;
   if(n && n.start && Date.now() >= new Date(n.start).getTime()) return n;
   return this.season;
+};
+
+/* 前のシーズン（nextSeason に切り替わった後だけ season を返す。切り替え前は null）
+   tracker が前シーズンの記録もタブで見られるようにするため */
+APEX_DATA.prevSeason = function(){
+  return this.currentSeason() === this.nextSeason ? this.season : null;
 };
 
 /* 表示中のランク分布が現在のシーズンのものかどうか */
