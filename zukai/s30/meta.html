@@ -142,6 +142,24 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
 .post a:hover{color:var(--cyan);border-color:var(--cyan)}
 .post a::before{content:"𝕏  ";font-family:'Noto Sans JP'}
 
+/* 上位5体のバー（全回同一スケール） */
+.top{margin:11px 0 2px;border:1px solid var(--line);border-radius:3px;
+  padding:10px 12px 8px;background:rgba(255,255,255,.015)}
+.top ol{list-style:none}
+.top li{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12.5px}
+.top .r{flex:0 0 12px;font-family:'Chakra Petch';font-size:11px;color:var(--muted)}
+.top .n{flex:0 0 8.4em;font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dbe2f0}
+.top .b{flex:1;min-width:0;height:9px;background:rgba(255,255,255,.04);border-radius:1px}
+.top .b i{display:block;height:100%;width:calc(var(--w) * 1%);background:var(--c);
+  border-radius:1px;opacity:.88}
+.top li.f .b i{opacity:1;box-shadow:0 0 9px var(--c)}
+.top li.f .n{color:var(--text);font-weight:700}
+.top .v{flex:0 0 36px;text-align:right;font-family:'Chakra Petch';font-weight:700}
+.top .m{flex:0 0 26px;text-align:right;font-family:'Chakra Petch';font-size:10.5px;color:var(--muted)}
+.top .m.up{color:var(--green)}
+.top .m.dn{color:var(--pink)}
+.top .cap{margin-top:6px;font-size:11.5px;color:var(--muted)}
+
 /* 注記 */
 .warn{border:1px solid rgba(255,176,32,.4);background:rgba(255,176,32,.05);
   border-radius:4px;padding:13px 15px}
@@ -190,19 +208,30 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
   <h1>メタ<span class="accent">早見</span></h1>
   <div class="meta">
     <span>SEASON 30「マークド」</span><span>|</span>
-    <span class="upd">最終更新: 2026-11-02</span>
+    <span class="upd">最終更新: 2026-11-03</span>
   </div>
 <nav class="sib"><a class="on" href="./meta.html">メタ</a><a href="./rank.html">ランク</a><a href="./weapons.html">武器</a></nav>
 </header>
 
 <section>
   <h2>人気の推移（全体ピック率）</h2>
+  <p class="note" style="margin-top:0">計測した回ごとに、全体ピック率の上位5体を並べています。バーは全回同じ横スケール（13%）で描いているので、首位の伸びや上位の詰まり具合を回をまたいで比べられます。</p>
   <div class="rail">
 
     <div class="ent">
       <div class="day">08 / 07 <i>開幕3日目</i></div>
       <div class="t">ブラッドハウンドが単独1位で走り出す</div>
       <p>リワークを受けたブラッドハウンドが10.6%まで伸び、2位のローバに1.3ptの差をつける。開幕直後の「新しくなったキャラを触る」動きがそのまま数字に出た局面。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">ブラッドハウンド</span><span class="b"><i style="--w:81.5;--c:#e0453f"></i></span><span class="v">10.6%</span><span class="m"></span></li>
+          <li><span class="r">2</span><span class="n">アクセル</span><span class="b"><i style="--w:73.1;--c:#c44dff"></i></span><span class="v">9.5%</span><span class="m"></span></li>
+          <li><span class="r">3</span><span class="n">ローバ</span><span class="b"><i style="--w:71.5;--c:#d95ac2"></i></span><span class="v">9.3%</span><span class="m"></span></li>
+          <li><span class="r">4</span><span class="n">パスファインダー</span><span class="b"><i style="--w:63.1;--c:#6ec8ff"></i></span><span class="v">8.2%</span><span class="m"></span></li>
+          <li><span class="r">5</span><span class="n">マッドマギー</span><span class="b"><i style="--w:50.8;--c:#ff2d78"></i></span><span class="v">6.6%</span><span class="m"></span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">29.4%</b></div>
+      </div>
       <div class="mv">
         <span class="fl">ブラッドハウンド<b>10.6%</b></span>
         <span class="fl">ローバ<b>9.3%</b></span>
@@ -213,6 +242,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       <div class="day">08 / 08 <i>開幕4日目</i></div>
       <div class="t">1日でピークアウト、差が0.3ptまで詰まる</div>
       <p>ブラッドハウンドが1日で0.9pt下落。一方ローバは微増し、首位争いがほぼ横並びに。この時点で使用者層の差も出ていて、ブラッドハウンドは平均シルバー3、シアは平均ゴールド3だった。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">ブラッドハウンド</span><span class="b"><i style="--w:74.6;--c:#e0453f"></i></span><span class="v">9.7%</span><span class="m">―</span></li>
+          <li><span class="r">2</span><span class="n">ローバ</span><span class="b"><i style="--w:72.3;--c:#d95ac2"></i></span><span class="v">9.4%</span><span class="m up">▲1</span></li>
+          <li><span class="r">3</span><span class="n">アクセル</span><span class="b"><i style="--w:70.8;--c:#c44dff"></i></span><span class="v">9.2%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">4</span><span class="n">パスファインダー</span><span class="b"><i style="--w:64.6;--c:#6ec8ff"></i></span><span class="v">8.4%</span><span class="m">―</span></li>
+          <li><span class="r">5</span><span class="n">マッドマギー</span><span class="b"><i style="--w:51.5;--c:#ff2d78"></i></span><span class="v">6.7%</span><span class="m">―</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">28.3%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="dn">ブラッドハウンド<b>9.7% / −0.9pt</b></span>
         <span class="up">ローバ<b>9.4% / +0.1pt</b></span>
@@ -224,6 +263,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       <div class="day">08 / 13 <i>DAY 9</i></div>
       <div class="t">ローバが1位に浮上、ブラッドハウンドは6位へ</div>
       <p>ローバが10.3%で単独トップ。8/08計測から+0.9ptの上積み。ブラッドハウンドは9.7%→5.7%と急落し、開幕1位から6位まで後退した。9日間で−4.9pt。触ってみた人と使い続ける人の差が、ここで確定した。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">ローバ</span><span class="b"><i style="--w:79.2;--c:#d95ac2"></i></span><span class="v">10.3%</span><span class="m up">▲1</span></li>
+          <li><span class="r">2</span><span class="n">アクセル</span><span class="b"><i style="--w:73.8;--c:#c44dff"></i></span><span class="v">9.6%</span><span class="m up">▲1</span></li>
+          <li><span class="r">3</span><span class="n">パスファインダー</span><span class="b"><i style="--w:66.9;--c:#6ec8ff"></i></span><span class="v">8.7%</span><span class="m up">▲1</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:50.8;--c:#ff2d78"></i></span><span class="v">6.6%</span><span class="m up">▲1</span></li>
+          <li><span class="r">5</span><span class="n">オクタン</span><span class="b"><i style="--w:43.8;--c:#6fdd3a"></i></span><span class="v">5.7%</span><span class="m up">▲1</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">28.6%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">ローバ<b>10.3% / +0.9pt</b></span>
         <span class="dn">ブラッドハウンド<b>5.7% / −4.0pt</b></span>
@@ -241,6 +290,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       <p>入れ替わりに中位が持ち上がっている。ヒューズ5.6%、コースティック2.8%、
       スパロウ2.7%、シア3.2%がいずれも1週間で10%以上の増加。
       2体に吸われていたプレイ時間が全体に配り直されている。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">アクセル</span><span class="b"><i style="--w:82.3;--c:#c44dff"></i></span><span class="v">10.7%</span><span class="m up">▲1</span></li>
+          <li><span class="r">2</span><span class="n">ローバ</span><span class="b"><i style="--w:74.6;--c:#d95ac2"></i></span><span class="v">9.7%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">3</span><span class="n">パスファインダー</span><span class="b"><i style="--w:70.8;--c:#6ec8ff"></i></span><span class="v">9.2%</span><span class="m">―</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:50.8;--c:#ff2d78"></i></span><span class="v">6.6%</span><span class="m">―</span></li>
+          <li><span class="r">5</span><span class="n">ヒューズ</span><span class="b"><i style="--w:43.1;--c:#ff6a1f"></i></span><span class="v">5.6%</span><span class="m up">▲3</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">29.6%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">アクセル<b>10.7% / +1.1pt</b></span>
         <span class="dn">ローバ<b>9.7% / −0.6pt</b></span>
@@ -258,6 +317,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       <p>上位3体は9.9 / 9.5 / 9.1と0.8pt差まで収束し、4位マッドマギー7.3%との間には1.8ptの断層が残った。
       今週いちばん順位を上げたのはオルターで2.5%→3.2%（16位→9位）。
       ブラッドハウンドは3.4%→2.7%でさらに下げ、10位から16位まで後退している。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">パスファインダー</span><span class="b"><i style="--w:76.2;--c:#6ec8ff"></i></span><span class="v">9.9%</span><span class="m up">▲2</span></li>
+          <li><span class="r">2</span><span class="n">アクセル</span><span class="b"><i style="--w:73.1;--c:#c44dff"></i></span><span class="v">9.5%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">3</span><span class="n">ローバ</span><span class="b"><i style="--w:70.0;--c:#d95ac2"></i></span><span class="v">9.1%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:56.2;--c:#ff2d78"></i></span><span class="v">7.3%</span><span class="m">―</span></li>
+          <li><span class="r">5</span><span class="n">ヒューズ</span><span class="b"><i style="--w:45.4;--c:#ff6a1f"></i></span><span class="v">5.9%</span><span class="m">―</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">28.5%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">パスファインダー<b>9.9% / +0.7pt</b></span>
         <span class="dn">アクセル<b>9.5% / −1.2pt</b></span>
@@ -276,6 +345,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       先週は3位と4位の間に1.8ptの断層があったが、今週はアクセル8.1%とマッドマギー7.1%で1.0ptまで詰まった。
       伸びたのはオルター3.8%（+18.0%、9位）とヒューズ6.5%（+10.1%、5位）で、
       上位に寄っていた分が中位へ配り直されつつある。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">パスファインダー</span><span class="b"><i style="--w:78.5;--c:#6ec8ff"></i></span><span class="v">10.2%</span><span class="m">―</span></li>
+          <li><span class="r">2</span><span class="n">ローバ</span><span class="b"><i style="--w:64.6;--c:#d95ac2"></i></span><span class="v">8.4%</span><span class="m up">▲1</span></li>
+          <li><span class="r">3</span><span class="n">アクセル</span><span class="b"><i style="--w:62.3;--c:#c44dff"></i></span><span class="v">8.1%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:54.6;--c:#ff2d78"></i></span><span class="v">7.1%</span><span class="m">―</span></li>
+          <li><span class="r">5</span><span class="n">ヒューズ</span><span class="b"><i style="--w:50.0;--c:#ff6a1f"></i></span><span class="v">6.5%</span><span class="m">―</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">26.7%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">パスファインダー<b>10.2% / +0.3pt</b></span>
         <span class="dn">アクセル<b>8.1% / 2位 → 3位</b></span>
@@ -294,6 +373,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       コンジット（2.3%→4.2%、18位→9位）。ただしどちらも7日前比では
       カタリスト−22.4%、コンジット−21.4%と落ち始めていて、スプリット開始の伸びは一巡しつつある。
       ブラッドハウンドは2.0%で21位まで下げた。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">パスファインダー</span><span class="b"><i style="--w:83.8;--c:#6ec8ff"></i></span><span class="v">10.9%</span><span class="m">―</span></li>
+          <li><span class="r">2</span><span class="n">アクセル</span><span class="b"><i style="--w:81.5;--c:#c44dff"></i></span><span class="v">10.6%</span><span class="m up">▲1</span></li>
+          <li><span class="r">3</span><span class="n">ローバ</span><span class="b"><i style="--w:58.5;--c:#d95ac2"></i></span><span class="v">7.6%</span><span class="m dn">▼1</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:47.7;--c:#ff2d78"></i></span><span class="v">6.2%</span><span class="m">―</span></li>
+          <li><span class="r">5</span><span class="n">オクタン</span><span class="b"><i style="--w:46.2;--c:#6fdd3a"></i></span><span class="v">6.0%</span><span class="m up">▲1</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">29.1%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">アクセル<b>10.6% / 3位 → 2位</b></span>
         <span class="up">カタリスト<b>0.9% → 2.7% / 26位 → 13位</b></span>
@@ -311,6 +400,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       <p>アクセルが空けた分は中位に散っていて、レイス4.9%→5.9%（7位→5位）、ライフライン3.4%→4.3%（10位→9位）がそれぞれ1pt近く伸びた。
       ブラッドハウンドは2.0%→2.7%で21位から15位まで戻している。
       反対にスプリット2で伸びたカタリストは2.7%→2.0%（13位→23位）と、開始時の上積みをほぼ手放した。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">パスファインダー</span><span class="b"><i style="--w:85.4;--c:#6ec8ff"></i></span><span class="v">11.1%</span><span class="m">―</span></li>
+          <li><span class="r">2</span><span class="n">ローバ</span><span class="b"><i style="--w:56.2;--c:#d95ac2"></i></span><span class="v">7.3%</span><span class="m up">▲1</span></li>
+          <li><span class="r">3</span><span class="n">オクタン</span><span class="b"><i style="--w:54.6;--c:#6fdd3a"></i></span><span class="v">7.1%</span><span class="m up">▲2</span></li>
+          <li><span class="r">4</span><span class="n">アクセル</span><span class="b"><i style="--w:50.8;--c:#c44dff"></i></span><span class="v">6.6%</span><span class="m dn">▼2</span></li>
+          <li><span class="r">5</span><span class="n">レイス</span><span class="b"><i style="--w:45.4;--c:#8a5cff"></i></span><span class="v">5.9%</span><span class="m up">▲2</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">25.5%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="dn">アクセル<b>6.6% / 2位 → 4位</b></span>
         <span class="up">パスファインダー<b>11.1% / 2位と3.8pt差</b></span>
@@ -329,6 +428,16 @@ table.tiers{border-collapse:collapse;width:100%;min-width:430px;font-size:12.5px
       アクセルは6.6%→4.0%（4位→9位）とさらに下げ、9/25の10.6%から5週で半分以下になった。
       ブラッドハウンドも2.7%→1.8%（15位→22位）と戻した分を手放している。
       S31でリワークが予定されているクリプトは0.9%（7日前比+21.3%）と伸びているが、順位は27位のまま。</p>
+      <div class="top">
+        <ol>
+          <li class="f"><span class="r">1</span><span class="n">パスファインダー</span><span class="b"><i style="--w:97.7;--c:#6ec8ff"></i></span><span class="v">12.7%</span><span class="m">―</span></li>
+          <li><span class="r">2</span><span class="n">ローバ</span><span class="b"><i style="--w:64.6;--c:#d95ac2"></i></span><span class="v">8.4%</span><span class="m">―</span></li>
+          <li><span class="r">3</span><span class="n">オクタン</span><span class="b"><i style="--w:58.5;--c:#6fdd3a"></i></span><span class="v">7.6%</span><span class="m">―</span></li>
+          <li><span class="r">4</span><span class="n">マッドマギー</span><span class="b"><i style="--w:50.8;--c:#ff2d78"></i></span><span class="v">6.6%</span><span class="m up">▲2</span></li>
+          <li><span class="r">5</span><span class="n">レイス</span><span class="b"><i style="--w:44.6;--c:#8a5cff"></i></span><span class="v">5.8%</span><span class="m">―</span></li>
+        </ol>
+        <div class="cap">上位3体の合計 <b style="color:var(--text)">28.7%</b> ／ 矢印は前回比の順位</div>
+      </div>
       <div class="mv">
         <span class="up">パスファインダー<b>12.7% / +1.6pt</b></span>
         <span class="up">ヴァンテージ<b>4.1% / 14位 → 8位</b></span>
