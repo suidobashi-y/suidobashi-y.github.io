@@ -1857,7 +1857,11 @@ document.getElementById("saveBtn").onclick  = ()=>{
   if (r.dataset.need && r.value === ""){ toast("ディビジョン内のRPを入力してください", true); r.focus(); return; }
   r.dataset.need = "";
   document.getElementById("devHint").classList.add("hide");
-  record(absRP(), "manual");
+  // 自動取得した値のまま記録するときは「自動取得」として残す（手で値を変えたら手入力扱い）
+  const v = absRP();
+  const src = (lastFetch && lastFetch.rp === v) ? "api" : "manual";
+  record(v, src);
+  lastFetch = null;             // 次の記録に古い取得結果を持ち越さない
 };
 document.getElementById("fetchBtn").onclick = autoFetch;
 (function bindManualTog(){
