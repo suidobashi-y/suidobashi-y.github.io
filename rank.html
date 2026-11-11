@@ -29,7 +29,7 @@
 <meta name="description" content="Apex Legends のランク分布をチャートで表示。各ランク帯の人口比と累積上位%を確認できます。">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./shared.css">
-<script src="./data.js?v=20260810"></script>
+<script src="./data.js?v=20261111"></script>
 <style>
 /* ===== チャート ===== */
 .chart{padding:18px 14px 8px}
@@ -133,7 +133,7 @@
 <div class="vtabs">
   <button id="v-tier" onclick="setView('tier')">ティア別</button>
   <button id="v-div" class="on" onclick="setView('div')">ディビジョン別</button>
-  <button id="v-ghost" onclick="toggleGhost()" style="margin-left:auto">S29最終を重ねる</button>
+  <button id="v-ghost" onclick="toggleGhost()" style="margin-left:auto">前シーズン最終を重ねる</button>
 </div>
 
 <div class="panel" style="margin-top:10px;padding:0">
@@ -154,7 +154,7 @@
 <p class="note" id="vnote" style="color:var(--amber)"></p>
 <p class="note">※出典サイトのデータベースに登録されたプレイヤーに対する比率で、ゲーム全体の実数ではありません。
 アクティブなプレイヤーほど登録されやすいため、上位帯の比率は実際より高めに出る傾向があります。
-点線は比較用に重ねたシーズン29スプリット2の最終分布です。</p>
+点線は比較用に重ねた<span id="prev-label">前シーズン最終</span>の分布です。</p>
 
 <a class="cta" href="./deviation.html">
   <div class="t">自分の偏差値を計算する →</div>
@@ -203,8 +203,11 @@
 <script>
 var DATA = APEX_DATA.rank;        /* データは data.js で一元管理 */
 var PREV = APEX_DATA.rankPrev || APEX_DATA.rank;   /* 比較用（ゴースト）。古いdata.jsでも落ちないように */
+var PREV_TAG = "S" + PREV.seasonNo + "最終";       /* 比較元の呼び名。data.js の rankPrev を差し替えれば表示も追従します */
 var VIEW = "div";
 var GHOST = false;
+document.getElementById("v-ghost").textContent = PREV_TAG + "を重ねる";
+document.getElementById("prev-label").textContent = PREV.label;
 
 function toggleGhost(){
   GHOST = !GHOST;
@@ -273,7 +276,7 @@ function render(){
   function setCum(elNow, elPrev, name){
     var i=idxOf(name);
     document.getElementById(elNow).textContent  = i<0? "—" : "上位 "+cum[i].toFixed(1)+"%";
-    document.getElementById(elPrev).textContent = i<0? ""  : "S29最終: 上位 "+cumP[i].toFixed(1)+"%";
+    document.getElementById(elPrev).textContent = i<0? ""  : PREV_TAG+": 上位 "+cumP[i].toFixed(1)+"%";
   }
   setCum("s-dia",  "p-dia",  "ダイヤモンド");
   setCum("s-plat", "p-plat", "プラチナ");
@@ -285,7 +288,7 @@ function render(){
     return "—";
   }
   document.getElementById("s-med").textContent = medianOf(DATA);
-  document.getElementById("p-med").textContent = "S29最終: "+medianOf(PREV);
+  document.getElementById("p-med").textContent = PREV_TAG+": "+medianOf(PREV);
 
   document.getElementById("src").textContent =
     DATA.label + "（データ取得: " + DATA.updated + " / 出典: " + DATA.source + "）";
@@ -296,7 +299,7 @@ function render(){
   }
   if(DATA.inProgress){
     notes.push("※シーズン進行中のスナップショットです。全員がリセット直後のため上位帯はまだ埋まっておらず、"
-      + "この分布は今後数週間かけて点線（S29最終）の形に近づいていきます。");
+      + "この分布は今後数週間かけて点線（" + PREV_TAG + "）の形に近づいていきます。");
   }
   if(VIEW==="div" && DATA.divEstimated){
     notes.push("※ディビジョン別の内訳は推計値です。ティア全体の比率は実データに基づいています。");
