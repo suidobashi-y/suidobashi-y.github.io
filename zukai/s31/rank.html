@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JT68JRBHLK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  (function(){var q=new URLSearchParams(location.search).get('internal');
+  if(q==='1'){document.cookie='own_access=1;max-age=63072000;path=/';}
+  if(q==='0'){document.cookie='own_access=;max-age=0;path=/';}
+  var own=document.cookie.indexOf('own_access=1')>-1;
+  gtag('config', 'G-JT68JRBHLK', own?{traffic_type:'internal'}:{});})();
+</script>
+<title>S31ランク分布の推移｜毎週の山の動き | APEX WORKBOOK</title>
+<meta name="description" content="Apex Legends シーズン31のランク分布を毎週月曜に計測し、26ディビジョンの形の変化を時系列で並べています。自分のランクが上位何%かもその場で確認できます。">
+<link rel="canonical" href="https://apex-workbook.com/zukai/s31/rank.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="APEX WORKBOOK">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="S31 ランク分布の推移 | APEX WORKBOOK">
+<meta property="og:description" content="シーズン31のランク分布を毎週計測。山の位置と、自分のランクが上位何%かを確認できます。">
+<meta property="og:url" content="https://apex-workbook.com/zukai/s31/rank.html">
+<meta property="og:image" content="https://apex-workbook.com/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@apexwidgets">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared.css">
+<style>
+header{padding:24px 0 8px;border-bottom:1px solid var(--line)}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px;
+  color:var(--muted);font-family:'Chakra Petch'}
+.meta .upd{color:var(--green)}
+.crumb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.12em;
+  color:var(--muted);padding:16px 0 0}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--cyan)}
+
+.sib{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.sib a,.sib span{font-family:'Chakra Petch';font-size:12px;text-decoration:none;
+  color:var(--muted);border:1px solid var(--line);padding:5px 12px;border-radius:2px;
+  letter-spacing:.08em}
+.sib a:hover{color:var(--cyan);border-color:var(--cyan)}
+.sib span{opacity:.45}
+.sib a.on{color:var(--cyan);border-color:var(--cyan)}
+
+.lead{font-size:15px;color:#dbe2f0;margin:18px 0 4px;line-height:1.85}
+.lead b{color:var(--text)}
+
+.steps{margin-top:6px}
+.step{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:none}
+.step .no{flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Chakra Petch';font-size:13px;font-weight:700;
+  border:1px solid var(--line);color:var(--muted);margin-top:2px}
+.step.key .no{background:var(--pink);border-color:var(--pink);color:#fff}
+.step .bd{flex:1;min-width:0}
+.step .ttl{font-size:16.5px;font-weight:700;line-height:1.5}
+.step .ds{font-size:13.5px;color:#c4cbdd;margin-top:5px}
+.tag{display:inline-block;font-size:10.5px;font-family:'Chakra Petch';letter-spacing:.06em;
+  padding:2px 8px;border-radius:2px;margin-left:8px;vertical-align:2px;white-space:nowrap}
+.t-spec{background:var(--pink);color:#fff}
+.t-mis{border:1px solid var(--amber);color:var(--amber)}
+
+.opin{background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.35);
+  border-radius:4px;padding:16px 18px;margin-top:18px}
+.opin .lb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--cyan)}
+.opin .hd{font-size:17px;font-weight:700;margin:6px 0 8px;line-height:1.5}
+.opin p{font-size:13.5px;color:#c4cbdd}
+
+.note{font-size:13px;color:#c4cbdd;margin-top:10px}
+.note b{color:var(--text)}
+@media(max-width:520px){
+  .step .ttl{font-size:15.5px}
+}
+
+/* 分布の推移タイムライン */
+.rail{position:relative;padding-left:20px;margin-top:14px}
+.rail::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(180deg,rgba(0,229,255,.45),rgba(255,45,120,.45))}
+.ent{position:relative;margin-bottom:20px}
+.ent:last-child{margin-bottom:0}
+.ent::before{content:"";position:absolute;left:-20px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--bg);border:2px solid var(--cyan)}
+.ent.hi::before{border-color:var(--pink);box-shadow:0 0 10px rgba(255,45,120,.6)}
+.ent .day{font-family:'Chakra Petch';font-size:12px;letter-spacing:.12em;color:var(--cyan)}
+.ent.hi .day{color:var(--pink)}
+.ent .day i{font-style:normal;color:var(--muted);margin-left:9px;letter-spacing:.06em}
+.ent .t{font-size:15.5px;font-weight:700;line-height:1.4;margin:3px 0 7px}
+.ent p{font-size:13px;color:#c4cbdd}
+.mv{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 4px}
+.mv span{font-size:12.5px;border:1px solid var(--line);border-radius:2px;padding:4px 9px;
+  white-space:nowrap;color:#dbe2f0}
+.mv span b{font-family:'Chakra Petch';font-weight:700;margin-left:6px}
+.mv span.up{border-color:rgba(45,255,168,.35)}
+.mv span.up b{color:var(--green)}
+.mv span.dn{border-color:rgba(255,45,120,.4)}
+.mv span.dn b{color:var(--pink)}
+.mv span.fl{border-color:rgba(138,147,173,.35)}
+.mv span.fl b{color:var(--muted)}
+
+/* ヒエラルキーの形（26ディビジョン・同一スケール） */
+.shape{margin:11px 0 2px;border:1px solid var(--line);border-radius:3px;
+  padding:11px 12px 8px;background:rgba(255,255,255,.015)}
+.shape .bars{display:flex;align-items:flex-end;gap:2px;height:78px}
+.shape .bars i{flex:1;background:var(--c);height:calc(var(--h) * 1%);
+  border-radius:1px 1px 0 0;opacity:.88}
+.shape .bars i.p1{opacity:1;box-shadow:0 0 9px rgba(255,204,77,.75)}
+.shape .bars i.p2{opacity:1;box-shadow:0 0 9px rgba(63,211,200,.75)}
+.shape .bars i.p3{opacity:1;box-shadow:0 0 9px rgba(105,183,255,.75)}
+.shape .ax{display:flex;gap:2px;margin-top:6px;font-family:'Chakra Petch';
+  font-size:10.5px;letter-spacing:.08em;color:var(--muted)}
+.shape .ax span{flex:4;text-align:center}
+.shape .ax span:nth-child(7),.shape .ax span:nth-child(8){flex:1}
+.shape .cap{margin-top:7px;font-size:11.5px;color:var(--muted)}
+.shape .cap b{font-weight:700}
+.shape .cap b.g{color:#ffcc4d}
+.shape .cap b.p{color:#3fd3c8}
+.shape .cap b.d{color:#69b7ff}
+.splitmark{position:relative;margin:4px 0 16px;font-family:'Chakra Petch';font-size:11px;
+  letter-spacing:.18em;color:var(--amber)}
+.splitmark::before{content:"";position:absolute;left:-21px;top:4px;width:11px;height:11px;
+  background:var(--amber);transform:rotate(45deg)}
+.splitmark i{font-style:normal;color:var(--muted);letter-spacing:.06em;margin-left:9px}
+/* 自分の位置ウィジェット */
+.where{margin-top:18px;border:1px solid rgba(0,229,255,.4);border-radius:4px;padding:16px 16px 14px;
+  background:linear-gradient(180deg,rgba(0,229,255,.07),rgba(0,229,255,.02))}
+.where .lb{font-family:'Chakra Petch';font-size:11px;letter-spacing:.2em;color:var(--cyan)}
+.where .hd{font-size:17px;font-weight:700;margin:4px 0 10px}
+.where .pick{display:flex;gap:8px}
+.where select{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);
+  border-radius:3px;padding:9px 10px;font-size:15px;font-family:inherit}
+.where select#wD{flex:0 0 84px;font-family:'Chakra Petch'}
+.where select:disabled{opacity:.35}
+.where .res{display:flex;align-items:baseline;gap:6px;margin:12px 0 0}
+.where .res .k{font-size:14px;color:#c4cbdd}
+.where .res b{font-family:'Chakra Petch';font-size:46px;line-height:1;color:var(--text)}
+.where .res .u{font-family:'Chakra Petch';font-size:20px;color:var(--text)}
+.where .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.where .go{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.where .go a{display:block;text-align:center;text-decoration:none;font-size:13.5px;font-weight:700;
+  padding:11px 6px;border-radius:3px;border:1px solid var(--cyan);color:var(--cyan)}
+.where .go a.pri{background:var(--cyan);color:#06121a}
+.where .fine{font-size:11.5px;color:var(--muted);margin-top:10px}
+/* 推移の下の導線 */
+.cta2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.cta2 a{display:block;text-decoration:none;background:var(--panel);border:1px solid rgba(0,229,255,.45);
+  border-radius:4px;padding:12px 13px}
+.cta2 .k{font-family:'Chakra Petch';font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.cta2 .n{font-weight:700;color:var(--cyan);margin:3px 0;font-size:15px}
+.cta2 .s{font-size:12px;color:#c4cbdd;line-height:1.55}
+@media(max-width:420px){.cta2{grid-template-columns:1fr}}
+/* 過去の回（折りたたみ） */
+details.older{margin-top:4px}
+details.older summary{cursor:pointer;list-style:none;font-size:13px;color:var(--cyan);
+  border:1px dashed rgba(0,229,255,.4);border-radius:3px;padding:9px 12px;margin:4px 0 18px}
+details.older summary::-webkit-details-marker{display:none}
+details.older summary::before{content:"＋ "}
+details.older[open] summary::before{content:"－ "}
+</style>
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+<nav class="gnav"><div class="inner">
+  <a class="brand" href="../../index.html">APEX<span>WORKBOOK</span></a>
+  <button class="burger" id="burger" aria-label="メニュー" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</div></nav>
+<div class="drawer" id="drawer"><div class="panelmenu">
+    <a href="../../index.html">HOME</a>
+    <a href="../../deviation.html">ランク偏差値</a>
+    <a href="../../rank.html">ランク分布</a>
+    <a href="../../tracker.html">ランクワークブック</a>
+    <a href="../../pickrate.html">ピック率</a>
+    <a href="../../streamers.html">ライブ配信</a>
+    <a href="../../assist.html">エイムアシスト</a>
+    <a href="../../players.html">プレイ人口</a>
+    <div class="grp">APEX大会</div>
+    <div class="grpbox">
+    <a href="../../crcup11.html">CRカップ #11（10/4）</a>
+    </div>
+    <a href="../../roadmap.html">ロードマップ</a>
+    <div class="grp">図解 / ZUKAI</div>
+    <div class="grpbox">
+    <a href="../../zukai/s31/rank.html" class="on">ランク（S31）</a>
+    <a href="../../zukai/s30/meta.html">メタ（S30）</a>
+    <a href="../../zukai/s30/weapons.html">武器（S30）</a>
+    </div>
+</div></div>
+
+<div class="wrap">
+<div class="crumb"><a href="../index.html">図解</a> / SEASON 31 / ランク</div>
+<header>
+  <div class="eyebrow">Zukai // Season 31</div>
+  <h1>山は毎週、<span class="accent">右へ動いていく</span></h1>
+  <div class="meta">
+    <span>SEASON 31「サイファー」</span><span>|</span>
+    <span class="upd">最終更新: 2026-11-16</span>
+  </div>
+<nav class="sib"><a class="on" href="./rank.html">S31ランク</a><a href="../s30/rank.html">S30ランク</a><a href="../s30/meta.html">S30メタ</a><a href="../s30/weapons.html">S30武器</a></nav>
+</header>
+
+<section class="where" id="where">
+  <div class="lb">YOUR POSITION</div>
+  <div class="hd">自分のランクは、上位何%？</div>
+  <div class="pick">
+    <select id="wT" aria-label="ティア"></select>
+    <select id="wD" aria-label="ディビジョン"><option value="4">IV</option><option value="3">III</option><option value="2">II</option><option value="1">I</option></select>
+  </div>
+  <div class="res"><span class="k">上位</span><b id="wPct">--</b><span class="u">%</span></div>
+  <div class="sub" id="wNote"></div>
+  <div class="go">
+    <a id="wDev" class="pri" href="../../deviation.html?from=zukai" data-ev="zukai_to_dev" data-pos="top">偏差値で詳しく見る</a>
+    <a id="wTrk" href="../../tracker.html" data-ev="zukai_to_tracker" data-pos="top">このランクを記録する</a>
+  </div>
+  <p class="fine">ランクワークブックは、毎日のRPを入れるだけでティアと偏差値の推移をグラフにします。登録不要。</p>
+</section>
+
+<section>
+  <h2>分布の推移</h2>
+  <p class="note" style="margin-top:0">毎週月曜に計測し、新しい回から並べています。グラフは26ディビジョンを同じ縦スケールで描いています。</p>
+  <div class="rail">
+
+    <div class="splitmark">SPLIT 1<i>11/4 3:00 開幕</i></div>
+
+    <div class="ent hi">
+      <div class="day">11 / 16 <i>開幕13日目</i></div>
+      <div class="t">プラチナIIIに二つ目の山</div>
+      <p>最多はゴールドIII（9.48%）のまま。その先のプラチナIIIが7.90%まで増え、山がふたつになりました。S30の同じ開幕13日目もプラチナIII（7.76%）に二つ目の山ができていて、同じ形をたどっています。</p>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:7.7;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:3.5;--c:#9aa3b8"></i>
+      <i style="--h:29.6;--c:#c58b52"></i>
+      <i style="--h:25.5;--c:#c58b52"></i>
+      <i style="--h:30.2;--c:#c58b52"></i>
+      <i style="--h:53.6;--c:#c58b52"></i>
+      <i style="--h:48.8;--c:#b9c3d4"></i>
+      <i style="--h:61.9;--c:#b9c3d4"></i>
+      <i style="--h:63.6;--c:#b9c3d4"></i>
+      <i style="--h:62.3;--c:#b9c3d4"></i>
+      <i style="--h:79.6;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:100;--c:#ffcc4d"></i>
+      <i style="--h:87.9;--c:#ffcc4d"></i>
+      <i style="--h:78;--c:#ffcc4d"></i>
+      <i style="--h:73.1;--c:#3fd3c8"></i>
+      <i class="p2" style="--h:83.3;--c:#3fd3c8"></i>
+      <i style="--h:56.8;--c:#3fd3c8"></i>
+      <i style="--h:38.9;--c:#3fd3c8"></i>
+      <i style="--h:30.9;--c:#69b7ff"></i>
+      <i style="--h:20.7;--c:#69b7ff"></i>
+      <i style="--h:7.4;--c:#69b7ff"></i>
+      <i style="--h:4.2;--c:#69b7ff"></i>
+      <i style="--h:2;--c:#b06bff"></i>
+      <i style="--h:3.8;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ <b class="g">ゴールドIII</b>のあと、<b class="p">プラチナIII</b>にもうひとつ</div>
+  </div>
+      <div class="mv">
+        <span class="up">プラチナIII<b>5.46% → 7.90%</b></span>
+        <span class="up">中央値<b>ゴールドIV → III</b></span>
+        <span class="up">ダイヤ以上<b>3.7% → 6.5%</b></span>
+        <span class="up">マスター<b>0.00% → 0.19%</b></span>
+      </div>
+    </div>
+
+    <div class="ent">
+      <div class="day">11 / 11 <i>開幕8日目</i></div>
+      <div class="t">シーズン開幕のリセットで、山はゴールドIIIへ</div>
+  <div class="shape">
+    <div class="bars">
+      <i style="--h:8.3;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:1.5;--c:#9aa3b8"></i>
+      <i style="--h:3.4;--c:#9aa3b8"></i>
+      <i style="--h:36.2;--c:#c58b52"></i>
+      <i style="--h:28.2;--c:#c58b52"></i>
+      <i style="--h:34.5;--c:#c58b52"></i>
+      <i style="--h:59.2;--c:#c58b52"></i>
+      <i style="--h:60.2;--c:#b9c3d4"></i>
+      <i style="--h:73.2;--c:#b9c3d4"></i>
+      <i style="--h:71.8;--c:#b9c3d4"></i>
+      <i style="--h:69;--c:#b9c3d4"></i>
+      <i style="--h:83;--c:#ffcc4d"></i>
+      <i class="p1" style="--h:100;--c:#ffcc4d"></i>
+      <i style="--h:83.1;--c:#ffcc4d"></i>
+      <i style="--h:61.5;--c:#ffcc4d"></i>
+      <i style="--h:50.8;--c:#3fd3c8"></i>
+      <i style="--h:52.4;--c:#3fd3c8"></i>
+      <i style="--h:31.4;--c:#3fd3c8"></i>
+      <i style="--h:17.7;--c:#3fd3c8"></i>
+      <i style="--h:13.5;--c:#69b7ff"></i>
+      <i style="--h:12.4;--c:#69b7ff"></i>
+      <i style="--h:4.7;--c:#69b7ff"></i>
+      <i style="--h:2.8;--c:#69b7ff"></i>
+      <i style="--h:1.5;--c:#b06bff"></i>
+      <i style="--h:2.2;--c:#ff4d6d"></i>
+    </div>
+    <div class="ax"><span>RKY</span><span>BRZ</span><span>SIL</span><span>GLD</span><span>PLA</span><span>DIA</span><span>M</span><span>P</span></div>
+    <div class="cap">26ディビジョン ／ 山は<b class="g">ゴールドIII</b>のひとつだけ</div>
+  </div>
+      <div class="mv">
+        <span class="fl">最多<b>ゴールドIII 10.41%</b></span>
+        <span class="fl">中央値<b>ゴールドIV</b></span>
+        <span class="fl">ダイヤ以上<b>3.7%</b></span>
+        <span class="fl">マスター<b>0.00%</b></span>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="note">S31はゴールドIIIを頂上にスタートしました。S30はスプリット1・2ともダイヤIIIが頂上のまま終わっています（最終週のダイヤ以上は42.2%）。今シーズンの山がどこまで右へ動くかを毎週追います。</p>
+  <div class="cta2">
+    <a href="../../deviation.html?from=zukai" data-ev="zukai_to_dev" data-pos="bottom">
+      <div class="k">Tool</div>
+      <div class="n">ランク偏差値</div>
+      <div class="s">今のRPが上位何%か、偏差値で。シェア画像も作れます。</div>
+    </a>
+    <a href="../../tracker.html" data-ev="zukai_to_tracker" data-pos="bottom">
+      <div class="k">Workbook</div>
+      <div class="n">ランクワークブック</div>
+      <div class="s">毎日のRPを記録して、この山の上を自分がどう動いたかをグラフに。</div>
+    </a>
+  </div>
+  <p class="note" style="font-size:12px">出典: apexlegendsstatus.com ／ 2026.11.16 取得</p>
+</section>
+
+<section>
+  <h2 id="reset">リセットの仕組み</h2>
+  <p class="note" style="margin-top:0">シーズン開幕時のリセットで、どこまで下がるかは表示ランクではなく隠しスキル値（MMR）で決まります（S25からの公式仕様）。くわしくは<a href="../s30/rank.html#reset">S30のランク図解</a>にまとめています。S30の毎週の分布の推移もそちらで見られます。</p>
+</section>
+
+<section>
+  <h2>関連ページ</h2>
+  <div class="rel">
+    <a href="../../deviation.html">
+      <div class="k">Tool</div>
+      <div class="n">ランク偏差値</div>
+      <div class="s">今のRPが上位何%にあたるか。</div>
+    </a>
+    <a href="../../tracker.html">
+      <div class="k">Workbook</div>
+      <div class="n">ランクワークブック</div>
+      <div class="s">毎日のRPを記録して推移をグラフに。</div>
+    </a>
+    <a href="../../rank.html">
+      <div class="k">Weekly</div>
+      <div class="n">ランク分布</div>
+      <div class="s">最新の帯別人口と累積の上位%。</div>
+    </a>
+    <a href="../s30/rank.html">
+      <div class="k">Zukai</div>
+      <div class="n">S30 ランク図解</div>
+      <div class="s">リセットの仕組みと、S30の毎週の分布。</div>
+    </a>
+    <a href="../s30/weapons.html">
+      <div class="k">Zukai</div>
+      <div class="n">S30 武器早見</div>
+      <div class="s">床落ち26挺のティア表と赤アタッチメント。</div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>分布の数値は取得時点のものです。出典はApex Legends Status（同サイトのDB登録プレイヤーが母集団）。</p>
+  <p style="margin-top:8px">誤りの指摘・掲載に関するご連絡: X @apexwidgets</p>
+</footer>
+
+</div>
+<script src="../../data.js"></script>
+<script>
+(function(){
+  if(!window.APEX_DATA) return;
+  var R=APEX_DATA.rank, T=document.getElementById('wT'), D=document.getElementById('wD');
+  var SHORT={'ダイヤモンド':'ダイヤ'}, ROM=['','I','II','III','IV'];
+  var TRK={'プレデター':'マスター','マスター':'マスター','ダイヤモンド':'ダイヤ','プラチナ':'プラチナ','ゴールド':'ゴールド','シルバー':'シルバー','ブロンズ':'ブロンズ','ルーキー':'ルーキー'};
+  R.tiers.slice().reverse().forEach(function(t){
+    var o=document.createElement('option'); o.value=t.n; o.textContent=SHORT[t.n]||t.n; T.appendChild(o);
+  });
+  T.value='プラチナ'; D.value='3';
+  function calc(){
+    var tn=T.value, d=+D.value, run=0, hit=false;
+    R.tiers.forEach(function(t){
+      if(hit) return;
+      if(t.n!==tn){ run+=t.pct; return; }
+      if(!t.div){ run+=t.pct; }
+      else { for(var i=0;i<d;i++) run+=t.div[i]; }   // div は [I,II,III,IV]
+      hit=true;
+    });
+    var t=R.tiers.filter(function(x){return x.n===tn;})[0];
+    D.disabled=!t.div;
+    document.getElementById('wPct').textContent=run.toFixed(1);
+    var md=R.updated.slice(5).replace('-','/').replace(/^0/,'');
+    document.getElementById('wNote').textContent=(SHORT[tn]||tn)+(t.div?ROM[d]:'')+'以上の割合（'+md+'時点・Apex Legends Status）';
+    var q='&t='+encodeURIComponent(TRK[tn])+(t.div?'&d='+d:'');
+    document.getElementById('wTrk').href='../../tracker.html?from=zukai'+q;
+    return tn;
+  }
+  T.onchange=D.onchange=function(){ var tn=calc(); if(window.gtag) gtag('event','zukai_pick',{tier:tn}); };
+  calc();
+  document.querySelectorAll('[data-ev]').forEach(function(a){
+    a.addEventListener('click',function(){ if(window.gtag) gtag('event',a.dataset.ev,{pos:a.dataset.pos||'',tier:T.value}); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var b=document.getElementById("burger"), d=document.getElementById("drawer");
+  function set(o){ d.classList.toggle("open",o); b.setAttribute("aria-expanded",o); }
+  b.onclick=function(){ set(!d.classList.contains("open")); };
+  d.onclick=function(e){ if(e.target===d) set(false); };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") set(false); });
+})();
+</script>
+</body>
+</html>
